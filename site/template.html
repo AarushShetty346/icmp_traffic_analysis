@@ -1,273 +1,471 @@
-<title>ICMP Timing Channel Lab</title>
+<title>Ping Gap Detector</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: an instrument bench. Controls rail on the left, scope readouts on the right, study results below as a lab notebook. */
+/* Layout: a signal bench. Asymmetric hero with a live packet wire, a full-width encoding strip,
+   a control rail beside scope readouts, staggered findings, a pipeline track, then team and code. */
 :root {
-  --bg: #eef1f3;
-  --panel: #fbfcfc;
-  --ink: #17222b;
-  --muted: #5b6b77;
-  --rule: #d3dade;
-  --normal: #2363a8;
-  --channel: #c2660f;
-  --accent: #0d7a6f;
+  --bg: #edf0f2;          /* cool lab grey */
+  --surface: #f8f9fa;
+  --sunk: #e3e7ea;
+  --ink: #131a21;
+  --ink-2: #4a5763;
+  --line: #cfd6dc;
+  --signal: #cf4a1c;      /* the one accent: the covert channel */
+  --signal-soft: rgba(207, 74, 28, 0.12);
+  --normal: #2f5a80;      /* data colour for normal traffic */
+  --ok: #217a45;
   --bad: #b3261e;
-  --good: #1f7a3a;
-  --grid: #e1e6ea;
-  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
-  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 3px;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11181d; --panel: #18222a; --ink: #e3eaee; --muted: #93a3ae; --rule: #2b3842;
-    --normal: #6ea8e8; --channel: #f0a050; --accent: #4cc2b3; --bad: #f2867c; --good: #6fcf8a; --grid: #23303a;
+    --bg: #0f1418; --surface: #161d23; --sunk: #1d262d; --ink: #e6ecef; --ink-2: #98a6b1; --line: #2a353e;
+    --signal: #ff7b47; --signal-soft: rgba(255, 123, 71, 0.14); --normal: #7fb0dc; --ok: #6bcf8f; --bad: #f2867c;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11181d; --panel: #18222a; --ink: #e3eaee; --muted: #93a3ae; --rule: #2b3842;
-  --normal: #6ea8e8; --channel: #f0a050; --accent: #4cc2b3; --bad: #f2867c; --good: #6fcf8a; --grid: #23303a;
+  --bg: #0f1418; --surface: #161d23; --sunk: #1d262d; --ink: #e6ecef; --ink-2: #98a6b1; --line: #2a353e;
+  --signal: #ff7b47; --signal-soft: rgba(255, 123, 71, 0.14); --normal: #7fb0dc; --ok: #6bcf8f; --bad: #f2867c;
   color-scheme: dark;
 }
+
 * { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
-.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
-h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
-h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.01em; line-height: 1.1; }
-h2 { font-size: 1.35rem; font-weight: 700; }
-h3 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-p { margin: 0; max-width: 68ch; }
-.mono, code { font-family: var(--mono); font-size: 0.88em; }
-.muted { color: var(--muted); }
-header { display: grid; gap: 10px; }
-.eyebrow { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); letter-spacing: 0.04em; }
-.formula { font-family: var(--mono); color: var(--accent); }
-.badge { display: inline-block; font-family: var(--mono); font-size: 0.72rem; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--channel); color: var(--channel); letter-spacing: 0.04em; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(1.75rem, 3.6vw, 2.6rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; }
+h3 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.005em; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+.shell { max-width: 1240px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 600px) { .shell { padding-inline: 16px; } }
+section { padding-block: clamp(56px, 8vw, 104px); }
+.lede { color: var(--ink-2); max-width: 60ch; font-size: 1.05rem; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
 
-.bench { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
-@media (max-width: 860px) { .bench { grid-template-columns: minmax(0, 1fr); } }
-.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
-.controls { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
-@media (max-width: 860px) { .controls { position: static; } }
-.field { display: grid; gap: 6px; }
-.field label { font-size: 0.82rem; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
-.field label output { font-family: var(--mono); font-weight: 400; color: var(--accent); }
-input[type="range"] { width: 100%; accent-color: var(--accent); }
-input[type="text"], select { width: 100%; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
-.seg button { font: 500 0.8rem var(--body); padding: 7px 4px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
-.seg button + button { border-left: 1px solid var(--rule); }
-.seg button[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.btn { font: 600 0.85rem var(--body); padding: 8px 12px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
-.btn:hover { background: var(--accent); color: var(--panel); }
-.hint { font-size: 0.78rem; color: var(--muted); }
+/* nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.nav .shell { height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { font: 800 1.02rem var(--display); letter-spacing: -0.01em; text-decoration: none; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.brand-mark { width: 26px; height: 14px; display: inline-grid; grid-template-columns: 2px 1fr 2px 1.6fr 2px; gap: 0; align-items: stretch; }
+.brand-mark i { background: var(--ink); }
+.brand-mark i:last-child { background: var(--signal); }
+.brand-mark b { display: block; }
+.nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: 0.9rem; }
+.nav ul a { text-decoration: none; color: var(--ink-2); }
+.nav ul a:hover { color: var(--ink); }
+@media (max-width: 760px) { .nav ul li:not(:last-child) { display: none; } }
 
-.readouts { display: grid; gap: 20px; min-width: 0; }
-.verdicts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
-@media (max-width: 640px) { .verdicts { grid-template-columns: minmax(0, 1fr); } }
-.verdict { border-top: 3px solid var(--rule); padding-top: 10px; display: grid; gap: 4px; }
-.verdict .name { font-size: 0.8rem; font-weight: 600; }
-.verdict .nums { font-family: var(--mono); font-size: 0.86rem; display: grid; grid-template-columns: auto auto; justify-content: start; column-gap: 12px; font-variant-numeric: tabular-nums; }
-.verdict .nums b { font-weight: 500; }
-.verdict[data-state="good"] { border-top-color: var(--good); }
-.verdict[data-state="warn"] { border-top-color: var(--channel); }
-.verdict[data-state="bad"] { border-top-color: var(--bad); }
-.verdict .state { font-size: 0.75rem; font-family: var(--mono); }
-.verdict[data-state="good"] .state { color: var(--good); }
-.verdict[data-state="warn"] .state { color: var(--channel); }
+/* buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 600 0.95rem var(--body); padding: 11px 18px; border-radius: var(--r); text-decoration: none; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: transform 0.15s ease, background 0.2s ease; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--ink); color: var(--bg); }
+.btn-primary:hover { background: var(--signal); color: #fff; }
+.btn-ghost { border-color: var(--line); color: var(--ink); background: transparent; }
+.btn-ghost:hover { border-color: var(--ink); }
+
+/* hero */
+.hero { padding-block: clamp(40px, 6vw, 80px) clamp(48px, 6vw, 88px); }
+.hero .shell { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
+@media (max-width: 920px) { .hero .shell { grid-template-columns: minmax(0, 1fr); } }
+.kicker { font: 500 0.78rem var(--mono); color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; }
+.hero h1 { font-size: clamp(2.4rem, 5.4vw, 4.1rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; margin-top: 14px; }
+.hero h1 em { font-style: normal; color: var(--signal); }
+.hero .lede { margin-top: 18px; max-width: 42ch; font-size: 1.12rem; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-copy > * { animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-copy > :nth-child(2) { animation-delay: 0.06s; }
+.hero-copy > :nth-child(3) { animation-delay: 0.12s; }
+.hero-copy > :nth-child(4) { animation-delay: 0.18s; }
+@keyframes rise { from { transform: translateY(14px); } to { transform: none; } }
+
+.wire { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; min-width: 0; box-shadow: 0 24px 60px -32px color-mix(in srgb, var(--normal) 45%, transparent); }
+.wire-head { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); font: 0.76rem var(--mono); color: var(--ink-2); }
+.wire canvas { width: 100%; height: 230px; display: block; }
+.wire-read { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); border-top: 1px solid var(--line); }
+.wire-read > div { padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.wire-read > div + div { border-left: 1px solid var(--line); }
+.label { font: 500 0.7rem var(--mono); color: var(--ink-2); letter-spacing: 0.05em; text-transform: uppercase; }
+.decoded { font: 500 1.5rem var(--mono); letter-spacing: 0.12em; color: var(--signal); min-height: 1.6em; white-space: nowrap; overflow: hidden; }
+.decoded .cursor { display: inline-block; width: 0.55em; height: 1em; vertical-align: -0.12em; background: var(--signal); opacity: 0.35; }
+.bitstream { font: 0.78rem var(--mono); color: var(--ink-2); white-space: nowrap; overflow: hidden; direction: rtl; text-align: left; }
+.meter { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font: 0.8rem var(--mono); font-variant-numeric: tabular-nums; align-items: baseline; }
+.meter b { font-weight: 500; }
+.flag { font: 600 0.72rem var(--mono); letter-spacing: 0.04em; }
+.flag.sus { color: var(--signal); }
+.flag.ok { color: var(--ok); }
+@media (max-width: 520px) { .wire-read { grid-template-columns: minmax(0, 1fr); } .wire-read > div + div { border-left: 0; border-top: 1px solid var(--line); } .wire canvas { height: 200px; } }
+
+/* encoding strip */
+.encode { background: var(--surface); border-block: 1px solid var(--line); }
+.encode .shell { display: grid; gap: 28px; }
+.encode-intro { display: grid; gap: 12px; max-width: 760px; }
+.strip { overflow-x: auto; padding-bottom: 6px; }
+.strip svg { display: block; min-width: 760px; width: 100%; height: auto; }
+.strip text { font-family: var(--mono); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.rules div { padding: 16px 20px 0 0; display: grid; gap: 4px; }
+.rules strong { font: 700 1.6rem var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.rules span { color: var(--ink-2); font-size: 0.92rem; max-width: 34ch; }
+
+/* bench */
+.bench-head { display: grid; gap: 12px; margin-bottom: 32px; max-width: 760px; }
+.bench { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 74px); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 18px; }
+@media (max-width: 900px) { .rail { position: static; } }
+.group { display: grid; gap: 14px; }
+.group + .group { border-top: 1px solid var(--line); padding-top: 18px; }
+.field { display: grid; gap: 7px; }
+.field label, .field .flabel { font-size: 0.86rem; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.field output { font: 500 0.82rem var(--mono); color: var(--signal); }
+input[type="range"] { width: 100%; accent-color: var(--signal); }
+input[type="text"], select { width: 100%; font: 0.95rem var(--mono); padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); color: var(--ink); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.seg button { font: 500 0.8rem var(--mono); padding: 8px 2px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.hint { font-size: 0.8rem; color: var(--ink-2); }
+
+.scope { display: grid; gap: 24px; min-width: 0; }
+.verdicts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+@media (max-width: 680px) { .verdicts { grid-template-columns: minmax(0, 1fr); } }
+.verdict { padding: 16px 18px; display: grid; gap: 6px; position: relative; }
+.verdict + .verdict { border-left: 1px solid var(--line); }
+@media (max-width: 680px) { .verdict + .verdict { border-left: 0; border-top: 1px solid var(--line); } }
+.verdict::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 3px; background: var(--line); }
+.verdict[data-state="good"]::before { background: var(--ok); }
+.verdict[data-state="warn"]::before { background: var(--signal); }
+.verdict[data-state="bad"]::before { background: var(--bad); }
+.verdict .rule { font: 0.74rem var(--mono); color: var(--ink-2); }
+.verdict .pair { display: flex; gap: 22px; margin-top: 4px; }
+.verdict .pair div { display: grid; }
+.verdict .big { font: 700 1.9rem var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.verdict .small { font-size: 0.75rem; color: var(--ink-2); }
+.verdict .state { font: 600 0.75rem var(--mono); }
+.verdict[data-state="good"] .state { color: var(--ok); }
+.verdict[data-state="warn"] .state { color: var(--signal); }
 .verdict[data-state="bad"] .state { color: var(--bad); }
 
-.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.charts .wide { grid-column: 1 / -1; }
-@media (max-width: 760px) { .charts { grid-template-columns: minmax(0, 1fr); } }
-.chart { display: grid; gap: 6px; min-width: 0; }
-.chart svg { width: 100%; height: auto; display: block; }
-.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; color: var(--muted); }
-.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 2px; background: var(--c); }
-.legend .line::before { height: 0; border-top: 2px dashed var(--c); border-radius: 0; background: none; vertical-align: 3px; }
-svg text { fill: var(--muted); font: 10px var(--mono); }
-svg .axis { stroke: var(--rule); }
-svg .gridline { stroke: var(--grid); }
+.plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.plots > .plot { padding: 18px; display: grid; gap: 8px; min-width: 0; }
+.plots > .wide { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
+.plots > .plot:nth-child(3) { border-left: 1px solid var(--line); }
+@media (max-width: 760px) { .plots { grid-template-columns: minmax(0, 1fr); } .plots > .plot:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); } }
+.plot svg { width: 100%; height: auto; display: block; }
+.plot-title { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.76rem; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.legend .dash::before { height: 0; border-top: 2px dashed var(--c); background: none; vertical-align: 3px; width: 14px; }
+svg text { fill: var(--ink-2); font: 10px var(--mono); }
+svg .axis { stroke: var(--line); }
+svg .grid { stroke: var(--line); stroke-opacity: 0.6; }
 
-.decode { font-family: var(--mono); font-size: 0.85rem; display: grid; gap: 6px; min-width: 0; }
-.bits { overflow-x: auto; white-space: nowrap; padding-bottom: 4px; letter-spacing: 0.06em; }
-.bits .err { color: var(--bad); text-decoration: underline; }
-.bits .miss { color: var(--muted); }
+.decode-out { padding: 18px; border-top: 1px solid var(--line); grid-column: 1 / -1; display: grid; gap: 8px; min-width: 0; }
+.bits { font: 0.86rem var(--mono); overflow-x: auto; white-space: nowrap; letter-spacing: 0.08em; padding-bottom: 4px; }
+.bits .err { color: var(--bad); font-weight: 600; text-decoration: underline; }
+.bits .miss { color: var(--ink-2); opacity: 0.6; }
+.decode-msg { font-size: 0.9rem; color: var(--ink-2); }
+.decode-msg b { font-family: var(--mono); color: var(--signal); font-weight: 500; }
 
-.notebook { display: grid; gap: 18px; }
-.table-scroll { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
-th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
-th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-td.num { font-family: var(--mono); text-align: right; }
+/* findings */
+.findings { background: var(--surface); border-block: 1px solid var(--line); }
+.findings-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: start; margin-top: 36px; }
+@media (max-width: 900px) { .findings-grid { grid-template-columns: minmax(0, 1fr); } }
+.claims { display: grid; gap: 30px; }
+.claim { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 20px; align-items: baseline; }
+.claim:nth-child(2) { margin-left: clamp(0px, 4vw, 56px); }
+.claim:nth-child(3) { margin-left: clamp(0px, 8vw, 112px); }
+@media (max-width: 560px) { .claim { grid-template-columns: minmax(0, 1fr); gap: 4px; } .claim:nth-child(n) { margin-left: 0; } }
+.claim .num { font: 800 clamp(2.6rem, 5vw, 3.6rem) var(--display); letter-spacing: -0.04em; line-height: 0.95; color: var(--signal); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.claim p { font-size: 1.02rem; max-width: 46ch; }
+.claim p span { display: block; color: var(--ink-2); font-size: 0.9rem; margin-top: 4px; }
+.study { display: grid; gap: 16px; min-width: 0; }
+.tabs { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; justify-self: start; max-width: 100%; }
+.tabs button { font: 500 0.82rem var(--mono); padding: 8px 12px; border: 0; background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap; }
+.tabs button + button { border-left: 1px solid var(--line); }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.study .plot { display: grid; gap: 6px; min-width: 0; }
+details { border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 600; font-size: 0.92rem; }
+.table-scroll { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; white-space: nowrap; }
+thead th { font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(odd) { background: var(--sunk); }
+td.num { font-family: var(--mono); }
+td.ok { color: var(--ok); }
 td.hi { color: var(--bad); }
-td.ok { color: var(--good); }
-.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
-.tabs button { font: 500 0.82rem var(--body); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; }
-.tabs button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+.caveat { font-size: 0.88rem; color: var(--ink-2); max-width: 70ch; margin-top: 40px; padding-left: 14px; border-left: 2px solid var(--signal); }
 
-.pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; counter-reset: step; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); }
-.pipeline li { list-style: none; padding: 14px 16px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); display: grid; gap: 4px; counter-increment: step; }
-.pipeline li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); color: var(--accent); font-size: 0.75rem; }
-.pipeline li strong { font-size: 0.9rem; }
-.pipeline li span { font-size: 0.8rem; color: var(--muted); }
-pre { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; overflow-x: auto; font: 0.8rem/1.6 var(--mono); margin: 0; }
-.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
-.two > div { align-content: start; }
-@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
-footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; display: grid; gap: 4px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+/* pipeline */
+.track { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); position: relative; }
+.track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: linear-gradient(90deg, var(--normal), var(--signal)); }
+.track li { position: relative; padding: 30px 14px 0 0; display: grid; gap: 6px; align-content: start; }
+.track li::before { content: ""; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink); }
+.track li:last-child::before { background: var(--signal); border-color: var(--signal); }
+.track strong { font: 700 1rem var(--display); }
+.track span { font-size: 0.86rem; color: var(--ink-2); }
+.track code { color: var(--ink); }
+@media (max-width: 900px) {
+  .track { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-left: 30px; }
+  .track::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; background: linear-gradient(180deg, var(--normal), var(--signal)); }
+  .track li { padding: 0; }
+  .track li::before { left: -30px; top: 3px; }
+}
+
+/* team + code */
+.closing .shell { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); }
+@media (max-width: 900px) { .closing .shell { grid-template-columns: minmax(0, 1fr); } }
+.team { display: grid; gap: 22px; align-content: start; }
+.people { display: grid; gap: 0; margin-top: 8px; }
+.person { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); align-items: start; }
+.mono-avatar { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--sunk); font: 700 0.9rem var(--display); }
+.person:last-child .mono-avatar { background: var(--signal-soft); color: var(--signal); }
+.person b { font-weight: 600; display: block; }
+.person span { font-size: 0.88rem; color: var(--ink-2); }
+.code-col { display: grid; gap: 14px; min-width: 0; align-content: start; }
+pre { margin: 0; background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 18px 20px; overflow-x: auto; font: 0.8rem/1.7 var(--mono); }
+pre .c { opacity: 0.55; }
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font-size: 0.84rem; color: var(--ink-2); }
+footer .shell { display: grid; gap: 8px; }
+footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-copy > * { animation: none; }
+  .btn { transition: none; }
+}
 </style>
 
-<div class="wrap">
-  <header>
-    <div class="eyebrow">BCSE308P Computer Networks · VIT Vellore · Fall 2026–27</div>
-    <h1>Detecting ICMP covert timing channels from inter-packet delays</h1>
-    <p>A sender can hide bits in the gaps between ping packets: a short gap for 0, a long gap for 1. This bench simulates normal and timing-encoded ICMP Echo Requests as the receiver sees them, computes <span class="formula">Δtᵢ = tᵢ − tᵢ₋₁</span>, and runs the project's two detectors on fixed windows. Change the network conditions and watch where each detector holds up or starts raising false alarms.</p>
-    <p class="muted">Harsh Jha · Anuj Deshpande · Aarush Shetty &nbsp; <span class="badge">SIMULATED TRAFFIC</span></p>
-  </header>
+<nav class="nav" aria-label="Sections">
+  <div class="shell">
+    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>Ping Gap Detector</a>
+    <ul>
+      <li><a href="#encoding">How it hides</a></li>
+      <li><a href="#bench">Detector</a></li>
+      <li><a href="#findings">Findings</a></li>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">Source</a></li>
+    </ul>
+  </div>
+</nav>
 
-  <section class="bench" aria-label="Interactive detector">
-    <form class="panel controls" id="controls" autocomplete="off">
-      <h3>Channel</h3>
-      <div class="field">
-        <label for="msg">Hidden test message <output id="msgBits"></output></label>
-        <input type="text" id="msg" value="VIT" maxlength="24">
+<header class="hero" id="top">
+  <div class="shell">
+    <div class="hero-copy">
+      <div class="kicker">BCSE308P Computer Networks, VIT Vellore</div>
+      <h1>Finding hidden bits in the <em>gaps between pings</em></h1>
+      <p class="lede">We hide a message in ICMP inter-packet delays on a closed lab network, then test whether simple statistics can catch it.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#bench">Try the detector</a>
+        <a class="btn btn-ghost" href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">View source</a>
       </div>
-      <div class="field">
-        <span class="hint">Gap for bit 0 / bit 1</span>
-        <div class="seg" role="group" aria-label="Timing classes">
-          <button type="button" id="preset-planned" data-g0="0.75" data-g1="1.25" aria-pressed="true">0.75 / 1.25</button>
-          <button type="button" id="preset-mid" data-g0="0.9" data-g1="1.1" aria-pressed="false">0.90 / 1.10</button>
-          <button type="button" id="preset-subtle" data-g0="0.95" data-g1="1.05" aria-pressed="false">0.95 / 1.05</button>
-        </div>
-      </div>
-      <h3>Network between sender and receiver</h3>
-      <div class="field">
-        <label for="jitter">Added jitter (netem σ) <output id="jitterOut"></output></label>
-        <input type="range" id="jitter" min="0" max="200" step="5" value="0">
-      </div>
-      <div class="field">
-        <label for="loss">Packet loss <output id="lossOut"></output></label>
-        <input type="range" id="loss" min="0" max="10" step="1" value="0">
-      </div>
-      <h3>Detector</h3>
-      <div class="field">
-        <label for="win">Observation window</label>
-        <select id="win">
-          <option value="8">8 requests</option>
-          <option value="16">16 requests</option>
-          <option value="32" selected>32 requests</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="stdtol">Fixed rule: std tolerance <output id="stdtolOut"></output></label>
-        <input type="range" id="stdtol" min="10" max="200" step="5" value="100">
-      </div>
-      <button type="button" class="btn" id="rerun">Run again with new random traffic</button>
-      <p class="hint">Each run: 10 clean normal runs build the baseline, then 10 normal and 10 channel runs of 64 Echo Requests are tested under the chosen conditions.</p>
-    </form>
+    </div>
 
-    <div class="readouts">
-      <div class="panel">
-        <h3>Detector verdicts on this run</h3>
-        <div class="verdicts" id="verdicts"></div>
+    <figure class="wire" style="margin:0" aria-label="Live simulation of normal and covert ping streams">
+      <div class="wire-head"><span>sender</span><span>simulated Echo Requests, 1 s nominal</span><span>receiver</span></div>
+      <canvas id="wire" aria-hidden="true"></canvas>
+      <div class="wire-read">
+        <div>
+          <span class="label">Receiver decodes</span>
+          <div class="decoded" id="wireText"><span class="cursor"></span></div>
+          <div class="bitstream" id="wireBits">&nbsp;</div>
+        </div>
+        <div>
+          <span class="label">Std of last 16 gaps</span>
+          <div class="meter">
+            <span>normal</span><b id="mNorm">0.000 s</b>
+            <span>covert</span><b id="mCov">0.000 s</b>
+          </div>
+          <span class="flag sus" id="mFlag">covert stream flagged</span>
+        </div>
       </div>
-      <div class="panel charts">
-        <div class="chart wide">
-          <h3>Inter-packet delay at the receiver</h3>
-          <div id="seqChart"></div>
-          <div class="legend"><span style="--c: var(--normal)">normal ping</span><span style="--c: var(--channel)">timing channel</span><span class="line" style="--c: var(--muted)">decode threshold 1.0 s</span></div>
+    </figure>
+  </div>
+</header>
+
+<section class="encode" id="encoding" aria-labelledby="enc-h">
+  <div class="shell">
+    <div class="encode-intro">
+      <h2 id="enc-h">One letter, eight gaps</h2>
+      <p class="lede">The sender keeps every packet identical and only changes when it sends. A short gap means 0, a long gap means 1. Here is the letter <b class="mono" id="encLetter">V</b> leaving the sender.</p>
+    </div>
+    <div class="strip" id="encStrip"></div>
+    <div class="rules">
+      <div><strong>0.75 s</strong><span>Gap for a 0 bit, a quarter second early</span></div>
+      <div><strong>1.25 s</strong><span>Gap for a 1 bit, a quarter second late</span></div>
+      <div><strong>1.00 s</strong><span>Mean stays at the normal ping interval, so averages alone miss it</span></div>
+      <div><strong>~0.25 s</strong><span>Spread of the gaps, against a few milliseconds for real ping. This is what gives it away.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="bench" aria-labelledby="bench-h">
+  <div class="shell">
+    <div class="bench-head">
+      <h2 id="bench-h">Run the detector</h2>
+      <p class="lede">Every change reruns the experiment: 10 clean runs build the baseline, then 10 normal and 10 covert runs of 64 requests are judged window by window.</p>
+    </div>
+    <div class="bench">
+      <form class="rail" id="controls" autocomplete="off">
+        <div class="group">
+          <h3>Covert sender</h3>
+          <div class="field">
+            <label for="msg">Hidden message <output id="msgBits"></output></label>
+            <input type="text" id="msg" value="VIT" maxlength="24">
+          </div>
+          <div class="field">
+            <span class="flabel">Gaps for 0 / 1 (s)</span>
+            <div class="seg" role="group" aria-label="Timing classes">
+              <button type="button" data-g0="0.75" data-g1="1.25" aria-pressed="true">.75/1.25</button>
+              <button type="button" data-g0="0.9" data-g1="1.1" aria-pressed="false">.90/1.10</button>
+              <button type="button" data-g0="0.95" data-g1="1.05" aria-pressed="false">.95/1.05</button>
+            </div>
+          </div>
         </div>
-        <div class="chart">
-          <h3>Δt distribution</h3>
-          <div id="histChart"></div>
-          <div class="legend"><span style="--c: var(--normal)">normal</span><span style="--c: var(--channel)">channel</span></div>
+        <div class="group">
+          <h3>Network</h3>
+          <div class="field">
+            <label for="jitter">Added jitter (netem) <output id="jitterOut"></output></label>
+            <input type="range" id="jitter" min="0" max="200" step="5" value="0">
+          </div>
+          <div class="field">
+            <label for="loss">Packet loss <output id="lossOut"></output></label>
+            <input type="range" id="loss" min="0" max="10" step="1" value="0">
+          </div>
         </div>
-        <div class="chart">
-          <h3>Window std vs thresholds</h3>
-          <div id="stdChart"></div>
-          <div class="legend"><span class="line" style="--c: var(--ink)">fixed</span><span class="line" style="--c: var(--accent)">baseline (clean)</span><span class="line" style="--c: var(--bad)">baseline (matched)</span></div>
+        <div class="group">
+          <h3>Detector</h3>
+          <div class="field">
+            <label for="win">Window size</label>
+            <select id="win">
+              <option value="8">8 requests</option>
+              <option value="16">16 requests</option>
+              <option value="32" selected>32 requests</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="stdtol">Fixed std tolerance <output id="stdtolOut"></output></label>
+            <input type="range" id="stdtol" min="10" max="200" step="5" value="100">
+          </div>
+          <button type="button" class="btn btn-ghost" id="rerun">New random traffic</button>
         </div>
-        <div class="decode wide">
-          <h3>Receiver decoding (gap ≥ 1.0 s → 1)</h3>
-          <div class="bits" id="bitsOut"></div>
-          <div id="decodeOut"></div>
+      </form>
+
+      <div class="scope">
+        <div class="verdicts" id="verdicts" aria-live="polite"></div>
+        <div class="plots">
+          <div class="plot wide">
+            <div class="plot-title"><h3>Gaps seen by the receiver</h3><div class="legend"><span style="--c: var(--normal)">normal</span><span style="--c: var(--signal)">covert</span><span class="dash" style="--c: var(--ink-2)">1.0 s decode line</span></div></div>
+            <div id="seqChart"></div>
+          </div>
+          <div class="plot">
+            <div class="plot-title"><h3>Gap distribution</h3></div>
+            <div id="histChart"></div>
+          </div>
+          <div class="plot">
+            <div class="plot-title"><h3>Window spread vs thresholds</h3></div>
+            <div id="stdChart"></div>
+            <div class="legend"><span class="dash" style="--c: var(--ink)">fixed</span><span class="dash" style="--c: var(--ok)">clean baseline</span><span class="dash" style="--c: var(--bad)">matched baseline</span></div>
+          </div>
+          <div class="decode-out">
+            <h3>Receiver decoding</h3>
+            <div class="bits" id="bitsOut"></div>
+            <p class="decode-msg" id="decodeOut"></p>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section class="notebook" aria-labelledby="study-h">
-    <div style="display:grid;gap:8px">
-      <h2 id="study-h">Study results from the Python pipeline</h2>
-      <p class="muted" id="studyMeta"></p>
-    </div>
-    <div class="tabs" id="studyTabs" role="group" aria-label="Channel"></div>
-    <div class="panel charts">
-      <div class="chart"><h3>Detection rate vs added jitter</h3><div id="drChart"></div></div>
-      <div class="chart"><h3>False-positive rate vs added jitter</h3><div id="fprChart"></div></div>
-      <div class="legend wide"><span style="--c: var(--ink)">fixed</span><span style="--c: var(--accent)">baseline (clean)</span><span style="--c: var(--bad)">baseline (matched)</span></div>
-    </div>
-    <div class="panel table-scroll"><table id="studyTable"></table></div>
-    <div class="two">
-      <div style="display:grid;gap:8px">
-        <h3>What the numbers say</h3>
-        <p>The planned 0.75 / 1.25 s channel is easy to catch: its gaps spread about 0.25 s around the mean, while ordinary ping spreads a few milliseconds. Both detectors find every channel window.</p>
-        <p>The trouble is false alarms. A baseline measured on a clean LAN flags all normal traffic once 20 ms of jitter appears. A baseline measured under the same conditions fixes that. The fixed 0.1 s rule stays quiet until jitter reaches about 100 ms and then fails.</p>
-        <p>The subtle 0.95 / 1.05 s channel slips under the fixed rule completely and hides inside 100 ms of jitter even for the matched baseline. Network noise and the channel's own spread overlap.</p>
+<section class="findings" id="findings" aria-labelledby="find-h">
+  <div class="shell">
+    <h2 id="find-h">What the study shows</h2>
+    <div class="findings-grid">
+      <div class="claims" id="claims">
+        <div class="claim"><div class="num" id="c1">100%</div><p>of covert windows caught by both detectors with the planned 0.75 / 1.25 s gaps.<span>The spread of the gaps is about 80 times wider than normal ping.</span></p></div>
+        <div class="claim"><div class="num" id="c2">20 ms</div><p>of added jitter makes a baseline built on a clean LAN flag every normal window.<span>A baseline built under the same conditions keeps false alarms low.</span></p></div>
+        <div class="claim"><div class="num" id="c3">0%</div><p>of the subtler 0.95 / 1.05 s channel is caught by the fixed 0.1 s rule.<span>Its spread sits under the tolerance, and inside 100 ms of jitter.</span></p></div>
       </div>
-      <div style="display:grid;gap:8px">
-        <h3>Limits of these numbers</h3>
-        <p>They come from the simulator, not the lab testbed, so they show how the pipeline behaves and which effects to look for. Real captures replace them for Review 2 and 3.</p>
-        <p>Loss is handled with ICMP sequence numbers: a gap across a missing request is skipped, so one lost packet does not look like a deliberate 2 s gap.</p>
+      <div class="study">
+        <div class="tabs" id="studyTabs" role="group" aria-label="Channel"></div>
+        <div class="plot"><div class="plot-title"><h3>Detection rate</h3></div><div id="drChart"></div></div>
+        <div class="plot"><div class="plot-title"><h3>False-positive rate</h3><div class="legend"><span style="--c: var(--ink)">fixed</span><span style="--c: var(--ok)">clean baseline</span><span style="--c: var(--bad)">matched baseline</span></div></div><div id="fprChart"></div></div>
+        <details>
+          <summary>Full results table</summary>
+          <div class="table-scroll"><table id="studyTable"></table></div>
+        </details>
       </div>
     </div>
-  </section>
+    <p class="caveat" id="studyMeta">These numbers come from the simulator, not from lab captures. They show how the pipeline behaves; real captures replace them for the later reviews.</p>
+  </div>
+</section>
 
-  <section class="notebook" aria-labelledby="how-h">
-    <h2 id="how-h">Pipeline</h2>
-    <ol class="pipeline" style="padding:0;margin:0">
-      <li><strong>Capture</strong><span>Receiver-side tshark capture of Echo Requests</span></li>
-      <li><strong>Filter flow</strong><span>Source, destination and ICMP identifier</span></li>
-      <li><strong>Inter-packet delay</strong><span>Δtᵢ = tᵢ − tᵢ₋₁, skipping gaps across lost requests</span></li>
-      <li><strong>Windows</strong><span>Fixed windows of 8, 16 or 32 requests</span></li>
-      <li><strong>Features</strong><span>Mean, variance, std, CV, IQR, entropy, off-nominal share</span></li>
-      <li><strong>Decide</strong><span>Fixed rule vs p95 of the normal baseline</span></li>
-      <li><strong>Score</strong><span>Detection rate, false-positive rate, decoding accuracy</span></li>
+<section id="pipeline" aria-labelledby="pipe-h">
+  <div class="shell">
+    <h2 id="pipe-h">From capture to verdict</h2>
+    <ol class="track">
+      <li><strong>Capture</strong><span>tshark on the receiver records Echo Requests</span></li>
+      <li><strong>Filter</strong><span>Keep one flow by source, destination and ICMP id</span></li>
+      <li><strong>Delays</strong><span><code>Δt = t(i) - t(i-1)</code>, skipping gaps across lost packets</span></li>
+      <li><strong>Window</strong><span>Split into 8, 16 or 32 request windows</span></li>
+      <li><strong>Features</strong><span>Mean, std, CV, IQR, entropy per window</span></li>
+      <li><strong>Decide</strong><span>Fixed tolerance or p95 of normal windows</span></li>
+      <li><strong>Score</strong><span>Detection rate, false positives, bits decoded</span></li>
     </ol>
-    <div class="two">
-      <div style="display:grid;gap:8px">
-        <h3>Run on lab captures</h3>
-<pre>tshark -r normal1.pcap -Y "icmp.type == 8" -T fields \
-  -e frame.time_epoch -e ip.src -e ip.dst \
-  -e icmp.ident -e icmp.seq -E header=y -E separator=, \
-  &gt; normal1.csv
+  </div>
+</section>
 
+<section class="closing" aria-labelledby="team-h" style="padding-top:0">
+  <div class="shell">
+    <div class="team">
+      <h2 id="team-h">Team</h2>
+      <div class="people">
+        <div class="person"><span class="mono-avatar">HJ</span><div><b>Harsh Jha</b><span>Literature survey, timing generator, comparison design</span></div></div>
+        <div class="person"><span class="mono-avatar">AD</span><div><b>Anuj Deshpande</b><span>Normal traffic, capture and filtering, delay extraction, network tests</span></div></div>
+        <div class="person"><span class="mono-avatar">AS</span><div><b>Aarush Shetty</b><span>Features, baseline, detection engine, metrics and plots</span></div></div>
+      </div>
+    </div>
+    <div class="code-col">
+      <h2>Run it on lab captures</h2>
+<pre><span class="c"># export Echo Request timestamps from a capture</span>
+tshark -r normal1.pcap -Y "icmp.type == 8" -T fields \
+  -e frame.time_epoch -e ip.src -e ip.dst \
+  -e icmp.ident -e icmp.seq -E header=y -E separator=, &gt; normal1.csv
+
+<span class="c"># baseline from normal runs, then judge and score test runs</span>
 python -m icmp_detector baseline normal*.csv --window 32 --out baseline.json
 python -m icmp_detector detect test.csv --baseline baseline.json
 python -m icmp_detector evaluate --baseline baseline.json \
-  --normal test_normal*.csv --channel test_channel*.csv --bits 010101...</pre>
-      </div>
-      <div style="display:grid;gap:8px">
-        <h3>Reproduce the study</h3>
-<pre>pip install -r requirements.txt
-python -m icmp_detector study --out results
-python -m unittest</pre>
-        <p class="hint">Writes <code>results/results.json</code>, <code>RESULTS.md</code> and the plots. The same detector logic runs in this page.</p>
-      </div>
-    </div>
-  </section>
+  --normal test_normal*.csv --channel test_channel*.csv --bits 0101...
 
-  <footer>
-    <span>Defensive research in a closed lab testbed only. The simulator models arrival timestamps; it sends no packets.</span>
-    <span>Refs: Cabuk, Brodley &amp; Shields (CCS 2004) · Gianvecchio &amp; Wang (CCS 2007) · Iglesias Vázquez et al. (2017) · Ondov &amp; Helebrandt (ICETA 2022)</span>
-  </footer>
-</div>
+<span class="c"># reproduce the simulated study and this page</span>
+python -m icmp_detector study --out results
+python scripts/build_site.py</pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="shell">
+    <span>Defensive research on machines the team controls. The simulator models arrival timestamps and sends no packets.</span>
+    <ol>
+      <li>Cabuk, Brodley and Shields. IP Covert Timing Channels: Design and Detection. ACM CCS 2004.</li>
+      <li>Gianvecchio and Wang. Detecting Covert Timing Channels: An Entropy-Based Approach. ACM CCS 2007.</li>
+      <li>Iglesias Vázquez, Annessi and Zseby. Analytic Study of Features for the Detection of Covert Timing Channels. JCSM 2017.</li>
+      <li>Ondov and Helebrandt. Covert Channel Detection Methods. ICETA 2022.</li>
+    </ol>
+  </div>
+</footer>
 
 <script id="study" type="application/json">__STUDY_JSON__</script>
 <script>
@@ -275,6 +473,8 @@ python -m unittest</pre>
   "use strict";
   const $ = (id) => document.getElementById(id);
   const NS = "http://www.w3.org/2000/svg";
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
   // ---------- seeded random numbers ----------
   function rngFrom(seed) {
@@ -283,6 +483,8 @@ python -m unittest</pre>
     const normal = (sd) => { const u = Math.max(uni(), 1e-12), v = uni(); return sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
     return { uni, normal };
   }
+  const textToBits = (s) => [...new TextEncoder().encode(s || "?")].flatMap((b) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (b >> k) & 1));
+  const bitsToText = (bits) => { let s = ""; for (let i = 0; i + 8 <= bits.length; i += 8) { const b = bits.slice(i, i + 8); if (b.includes(null)) { s += "?"; continue; } const c = b.reduce((x, y) => x * 2 + y, 0); s += c >= 32 && c < 127 ? String.fromCharCode(c) : "?"; } return s; };
 
   // ---------- simulator (mirrors icmp_detector/simulate.py) ----------
   const SENDER = { nominal: 1.0, sendJitter: 0.002, spikeProb: 0.02, spikeMax: 0.03 };
@@ -297,16 +499,13 @@ python -m unittest</pre>
     return gaps;
   }
   function throughNetwork(gaps, jitter, loss, r) {
-    const pk = [];
-    let t = 0;
+    const pk = []; let t = 0;
     for (let i = 0; i <= gaps.length; i++) {
       const delay = 0.001 + (jitter ? Math.abs(r.normal(jitter)) : 0);
-      const lost = r.uni() < loss;
-      if (!lost) pk.push({ t: t + delay, seq: i });
+      if (r.uni() >= loss) pk.push({ t: t + delay, seq: i });
       if (i < gaps.length) t += gaps[i];
     }
-    pk.sort((a, b) => a.t - b.t);
-    return pk;
+    return pk.sort((a, b) => a.t - b.t);
   }
   const run = (n, bits, g0, g1, jitter, loss, r) => throughNetwork(sendGaps(n - 1, bits, g0, g1, r), jitter, loss, r);
 
@@ -322,24 +521,107 @@ python -m unittest</pre>
   }
   const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
   const std = (a) => { const m = mean(a); return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1)); };
-  function percentile(a, p) {
-    const s = [...a].sort((x, y) => x - y); const k = (s.length - 1) * p / 100; const f = Math.floor(k), c = Math.ceil(k);
-    return f === c ? s[f] : s[f] + (s[c] - s[f]) * (k - f);
-  }
+  function percentile(a, p) { const s = [...a].sort((x, y) => x - y); const k = (s.length - 1) * p / 100; const f = Math.floor(k), c = Math.ceil(k); return f === c ? s[f] : s[f] + (s[c] - s[f]) * (k - f); }
   const baselineStd = (flows, size) => percentile(flows.flatMap((f) => windows(f, size)).map(std), 95);
+  const fmt = (v, d = 2) => Number(v).toFixed(d);
+
+  // ---------- hero: live wire ----------
+  (function wire() {
+    const canvas = $("wire"), ctx = canvas.getContext("2d");
+    const MSG = "VIT ", bits = textToBits(MSG);
+    const r = rngFrom(42);
+    const lanes = [{ name: "normal ping", key: "normal", pk: [], next: 0, gaps: [] }, { name: "covert", key: "signal", pk: [], next: 0, gaps: [], bit: 0 }];
+    const SPEED = 1.6; // simulated seconds per real second
+    let simT = 0, last = performance.now(), W = 0, H = 0, colors = {};
+    const decoded = [];
+    function readColors() { colors = { ink: css("--ink"), ink2: css("--ink-2"), line: css("--line"), normal: css("--normal"), signal: css("--signal"), surface: css("--surface") }; }
+    function size() { const dpr = window.devicePixelRatio || 1; W = canvas.clientWidth; H = canvas.clientHeight; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    function schedule(lane, upto) {
+      while (lane.next < upto) {
+        const prev = lane.pk[lane.pk.length - 1];
+        let gap;
+        if (lane.key === "normal") gap = 1 + r.normal(0.004);
+        else if (prev) { const b = bits[lane.bit % bits.length]; lane.bit++; gap = (b ? 1.25 : 0.75) + r.normal(0.004); }
+        else gap = 1;
+        const t = prev ? prev.t + gap : 0.5;
+        lane.pk.push({ t, gap: prev ? gap : null, bit: lane.key === "signal" && prev ? (gap >= 1 ? 1 : 0) : null, seen: false });
+        lane.next = t;
+      }
+    }
+    function arrive(lane, p) {
+      if (p.gap == null) return;
+      lane.gaps.push(p.gap); if (lane.gaps.length > 16) lane.gaps.shift();
+      if (lane.key === "signal") {
+        decoded.push(p.bit);
+        const txt = bitsToText(decoded.slice(0, Math.floor(decoded.length / 8) * 8));
+        $("wireText").innerHTML = (txt.slice(-14) || "") + '<span class="cursor"></span>';
+        $("wireBits").textContent = decoded.slice(-48).join("");
+      }
+      const sd = (l) => (l.gaps.length > 2 ? std(l.gaps) : 0);
+      $("mNorm").textContent = `${fmt(sd(lanes[0]), 3)} s`;
+      $("mCov").textContent = `${fmt(sd(lanes[1]), 3)} s`;
+      const flagged = sd(lanes[1]) > 0.1;
+      $("mFlag").textContent = flagged ? "covert stream flagged" : "collecting gaps";
+      $("mFlag").className = "flag " + (flagged ? "sus" : "ok");
+    }
+    function draw() {
+      const rx = W * 0.84, pps = Math.max(70, W / 6.2), laneY = [H * 0.33, H * 0.73];
+      ctx.clearRect(0, 0, W, H);
+      ctx.font = "500 10px 'JetBrains Mono', monospace";
+      // receiver line
+      ctx.strokeStyle = colors.ink2; ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(rx, 10); ctx.lineTo(rx, H - 10); ctx.stroke(); ctx.setLineDash([]);
+      lanes.forEach((lane, li) => {
+        const y = laneY[li], col = colors[lane.key];
+        ctx.strokeStyle = colors.line; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+        ctx.fillStyle = colors.ink2; ctx.textAlign = "left"; ctx.fillText(lane.name.toUpperCase(), 88, y - 34);
+        for (let i = 0; i < lane.pk.length; i++) {
+          const p = lane.pk[i], x = rx - (p.t - simT) * pps;
+          if (x < -40 || x > W + 40) continue;
+          const arrived = p.t <= simT;
+          ctx.globalAlpha = arrived ? Math.max(0.12, 1 - (simT - p.t) * 0.9) : 1;
+          // gap annotation
+          const prev = lane.pk[i - 1];
+          if (prev && p.gap != null) {
+            const px = rx - (prev.t - simT) * pps, mid = (x + px) / 2;
+            ctx.strokeStyle = col; ctx.globalAlpha *= 0.55; ctx.beginPath(); ctx.moveTo(px + 5, y + 18); ctx.lineTo(x - 5, y + 18); ctx.stroke(); ctx.globalAlpha /= 0.55;
+            ctx.fillStyle = colors.ink2; ctx.textAlign = "center"; ctx.fillText(`${fmt(p.gap, 2)}s`, mid, y + 32);
+            if (p.bit != null) { ctx.fillStyle = col; ctx.font = "700 15px 'JetBrains Mono', monospace"; ctx.fillText(String(p.bit), mid, y - 12); ctx.font = "500 10px 'JetBrains Mono', monospace"; }
+          }
+          ctx.fillStyle = col; ctx.fillRect(x - 3, y - 9, 6, 18);
+          ctx.globalAlpha = 1;
+        }
+      });
+      // fade at the sender edge
+      const g = ctx.createLinearGradient(0, 0, 80, 0); g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalCompositeOperation = "destination-out"; ctx.fillStyle = g; ctx.fillRect(0, 0, 80, H); ctx.globalCompositeOperation = "source-over";
+    }
+    function step(now) {
+      const dt = Math.min(0.1, (now - last) / 1000); last = now; simT += dt * SPEED;
+      tick(); draw(); requestAnimationFrame(step);
+    }
+    function tick() {
+      lanes.forEach((lane) => {
+        schedule(lane, simT + 8);
+        lane.pk.forEach((p) => { if (!p.seen && p.t <= simT) { p.seen = true; arrive(lane, p); } });
+        while (lane.pk.length > 30 && lane.pk[0].t < simT - 4) lane.pk.shift();
+      });
+    }
+    readColors(); size();
+    new ResizeObserver(() => { size(); draw(); }).observe(canvas);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); draw(); });
+    new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    if (reduceMotion) { simT = 26; tick(); draw(); }
+    else { simT = 6; tick(); requestAnimationFrame((t) => { last = t; step(t); }); }
+  })();
 
   // ---------- SVG helpers ----------
   function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
   function frame(W, H, m) { const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }); return { svg, x0: m.l, x1: W - m.r, y0: H - m.b, y1: m.t }; }
-  const fmt = (v, d = 2) => Number(v).toFixed(d);
-
   function yAxis(f, ticks, sy, label, digits) {
-    for (const t of ticks) {
-      const y = sy(t);
-      el("line", { x1: f.x0, x2: f.x1, y1: y, y2: y, class: "gridline" }, f.svg);
-      el("text", { x: f.x0 - 6, y: y + 3, "text-anchor": "end" }, f.svg).textContent = typeof digits === "function" ? digits(t) : fmt(t, digits);
-    }
-    if (label) el("text", { x: f.x0, y: f.y1 - 8, "text-anchor": "start" }, f.svg).textContent = label;
+    for (const t of ticks) { const y = sy(t); el("line", { x1: f.x0, x2: f.x1, y1: y, y2: y, class: "grid" }, f.svg); el("text", { x: f.x0 - 6, y: y + 3, "text-anchor": "end" }, f.svg).textContent = typeof digits === "function" ? digits(t) : fmt(t, digits); }
+    if (label) el("text", { x: f.x0, y: f.y1 - 8 }, f.svg).textContent = label;
   }
   function xAxis(f, ticks, sx, label, digits = 0) {
     el("line", { x1: f.x0, x2: f.x1, y1: f.y0, y2: f.y0, class: "axis" }, f.svg);
@@ -347,86 +629,102 @@ python -m unittest</pre>
     if (label) el("text", { x: f.x1, y: f.y0 + 28, "text-anchor": "end" }, f.svg).textContent = label;
   }
 
+  // ---------- encoding strip ----------
+  (function encodingStrip() {
+    const letter = "V", bits = textToBits(letter);
+    const W = 1080, H = 190, x0 = 30, pps = 112, yT = 100;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `The letter ${letter} as eight gaps: ${bits.join(" ")}` });
+    el("text", { x: x0, y: 22, fill: "var(--ink-2)", "font-size": 11 }, svg).textContent = `"${letter}" = 0x${letter.charCodeAt(0).toString(16).toUpperCase()} = ${bits.join("")}`;
+    el("line", { x1: 0, x2: W, y1: yT, y2: yT, stroke: "var(--line)", "stroke-width": 1 }, svg);
+    let x = x0;
+    const xs = [x];
+    bits.forEach((b) => { x += (b ? 1.25 : 0.75) * pps; xs.push(x); });
+    // nominal 1 s grid
+    for (let i = 0; i <= 8; i++) {
+      const gx = x0 + i * pps;
+      el("line", { x1: gx, x2: gx, y1: yT + 26, y2: yT + 34, stroke: "var(--ink-2)", "stroke-width": 1 }, svg);
+      el("text", { x: gx, y: yT + 48, "text-anchor": "middle", "font-size": 10, fill: "var(--ink-2)" }, svg).textContent = `${i} s`;
+    }
+    el("text", { x: x0 + 8 * pps + 16, y: yT + 34, "font-size": 10, fill: "var(--ink-2)" }, svg).textContent = "regular ping";
+    bits.forEach((b, i) => {
+      const a = xs[i], c = xs[i + 1], mid = (a + c) / 2;
+      el("rect", { x: a + 4, y: yT - 52, width: c - a - 8, height: 34, fill: b ? "var(--signal-soft)" : "transparent", stroke: b ? "var(--signal)" : "var(--line)", "stroke-width": 1, rx: 2 }, svg);
+      el("text", { x: mid, y: yT - 29, "text-anchor": "middle", "font-size": 17, "font-weight": 700, fill: b ? "var(--signal)" : "var(--ink)" }, svg).textContent = b;
+      el("text", { x: mid, y: yT - 60, "text-anchor": "middle", "font-size": 10, fill: "var(--ink-2)" }, svg).textContent = `${b ? "1.25" : "0.75"} s`;
+    });
+    xs.forEach((px) => el("rect", { x: px - 3, y: yT - 11, width: 6, height: 22, fill: "var(--ink)" }, svg));
+    $("encStrip").appendChild(svg);
+    $("encLetter").textContent = letter;
+  })();
+
+  // ---------- bench charts ----------
   function seqChart(normal, channel) {
-    const f = frame(760, 240, { l: 44, r: 10, t: 22, b: 34 });
+    const f = frame(820, 230, { l: 44, r: 12, t: 22, b: 34 });
     const all = normal.concat(channel);
-    let lo = Math.min(...all, 0.9), hi = Math.max(...all, 1.1);
-    const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    let lo = Math.min(...all, 0.9), hi = Math.max(...all, 1.1); const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
     const n = Math.max(normal.length, channel.length);
     const sx = (i) => f.x0 + (f.x1 - f.x0) * i / Math.max(n - 1, 1);
     const sy = (v) => f.y0 - (f.y0 - f.y1) * (v - lo) / (hi - lo);
     const step = (hi - lo) > 1 ? 0.5 : (hi - lo) > 0.5 ? 0.25 : 0.1;
     const ticks = []; for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) ticks.push(+t.toFixed(3));
-    yAxis(f, ticks, sy, "Δt (s)", 2);
-    xAxis(f, [0, 15, 31, 47, n - 1].filter((t) => t < n), sx, "gap index");
-    el("line", { x1: f.x0, x2: f.x1, y1: sy(1), y2: sy(1), stroke: "var(--muted)", "stroke-dasharray": "4 4", fill: "none" }, f.svg);
-    for (const [data, color] of [[normal, "var(--normal)"], [channel, "var(--channel)"]]) {
-      el("polyline", { points: data.map((v, i) => `${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: color, "stroke-width": 1.6, "stroke-linejoin": "round" }, f.svg);
-      data.forEach((v, i) => el("circle", { cx: sx(i), cy: sy(v), r: 1.8, fill: color }, f.svg));
+    yAxis(f, ticks, sy, "gap (s)", 2);
+    xAxis(f, [0, 15, 31, 47, n - 1].filter((t) => t < n), sx, "gap number");
+    el("line", { x1: f.x0, x2: f.x1, y1: sy(1), y2: sy(1), stroke: "var(--ink-2)", "stroke-dasharray": "4 4", fill: "none" }, f.svg);
+    for (const [data, color] of [[normal, "var(--normal)"], [channel, "var(--signal)"]]) {
+      el("polyline", { points: data.map((v, i) => `${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: color, "stroke-width": 1.5, "stroke-linejoin": "round" }, f.svg);
+      data.forEach((v, i) => el("circle", { cx: sx(i), cy: sy(v), r: 2, fill: color }, f.svg));
     }
     return f.svg;
   }
-
   function histChart(normal, channel) {
-    const f = frame(380, 220, { l: 34, r: 16, t: 22, b: 34 });
+    const f = frame(400, 230, { l: 34, r: 16, t: 22, b: 34 });
     const lo = 0.5, hi = 1.5, bw = 0.02, nb = Math.round((hi - lo) / bw);
     const count = (a) => { const c = new Array(nb).fill(0); a.forEach((v) => c[Math.min(nb - 1, Math.max(0, Math.floor((v - lo) / bw)))]++); return c; };
-    const cn = count(normal), cc = count(channel);
-    const top = Math.max(4, ...cn, ...cc);
-    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - lo) / (hi - lo);
-    const sy = (v) => f.y0 - (f.y0 - f.y1) * v / top;
-    const yt = [0, Math.round(top / 2), top];
-    yAxis(f, yt, sy, "count", 0);
-    xAxis(f, [0.5, 0.75, 1, 1.25, 1.5], sx, "Δt (s)", 2);
+    const cn = count(normal), cc = count(channel), top = Math.max(4, ...cn, ...cc);
+    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - lo) / (hi - lo), sy = (v) => f.y0 - (f.y0 - f.y1) * v / top;
+    yAxis(f, [0, Math.round(top / 2), top], sy, "count", 0);
+    xAxis(f, [0.5, 0.75, 1, 1.25, 1.5], sx, "gap (s)", 2);
     const bar = (c, color, op) => c.forEach((v, i) => { if (v) el("rect", { x: sx(lo + i * bw) + 0.5, width: Math.max(1, sx(bw) - sx(0) - 1), y: sy(v), height: f.y0 - sy(v), fill: color, "fill-opacity": op }, f.svg); });
-    bar(cn, "var(--normal)", 0.85); bar(cc, "var(--channel)", 0.7);
+    bar(cn, "var(--normal)", 0.9); bar(cc, "var(--signal)", 0.75);
     return f.svg;
   }
-
   function stdChart(nStd, cStd, lines) {
-    const f = frame(380, 220, { l: 44, r: 8, t: 22, b: 34 });
+    const f = frame(400, 230, { l: 46, r: 12, t: 22, b: 34 });
     const all = nStd.concat(cStd, lines.map((l) => l.v)).filter((v) => v > 0);
     const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...all)))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...all))));
     const sy = (v) => f.y0 - (f.y0 - f.y1) * (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo));
     const ticks = []; for (let t = lo; t <= hi * 1.001; t *= 10) ticks.push(t);
-    yAxis(f, ticks, sy, "std Δt (s, log)", (t) => (t >= 1 ? t.toFixed(0) : t.toString()));
+    yAxis(f, ticks, sy, "std of gaps (s, log)", (t) => (t >= 1 ? t.toFixed(0) : String(+t.toPrecision(1))));
     el("line", { x1: f.x0, x2: f.x1, y1: f.y0, y2: f.y0, class: "axis" }, f.svg);
-    const cols = [["normal windows", nStd, "var(--normal)", 0.3], ["channel windows", cStd, "var(--channel)", 0.7]];
-    for (const [label, vals, color, pos] of cols) {
+    for (const l of lines) el("line", { x1: f.x0, x2: f.x1, y1: sy(l.v), y2: sy(l.v), stroke: l.c, "stroke-dasharray": "5 4", "stroke-width": 1.4, fill: "none" }, f.svg);
+    [["normal windows", nStd, "var(--normal)", 0.3], ["covert windows", cStd, "var(--signal)", 0.72]].forEach(([label, vals, color, pos]) => {
       const cx = f.x0 + (f.x1 - f.x0) * pos;
       el("text", { x: cx, y: f.y0 + 14, "text-anchor": "middle" }, f.svg).textContent = label;
-      vals.forEach((v, i) => el("circle", { cx: cx + ((i * 37) % 60) - 30, cy: sy(v), r: 2.6, fill: color, "fill-opacity": 0.8 }, f.svg));
-    }
-    for (const l of lines) el("line", { x1: f.x0, x2: f.x1, y1: sy(l.v), y2: sy(l.v), stroke: l.c, "stroke-dasharray": "5 4", "stroke-width": 1.4, fill: "none" }, f.svg);
+      vals.forEach((v, i) => el("circle", { cx: cx + ((i * 37) % 64) - 32, cy: sy(v), r: 3, fill: color, "fill-opacity": 0.85 }, f.svg));
+    });
     return f.svg;
   }
-
   function rateChart(series, xs, xLabel) {
-    const f = frame(380, 210, { l: 34, r: 12, t: 22, b: 34 });
-    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - xs[0]) / (xs[xs.length - 1] - xs[0]);
-    const sy = (v) => f.y0 - (f.y0 - f.y1) * v;
-    yAxis(f, [0, 0.25, 0.5, 0.75, 1], sy, "rate", 2);
+    const f = frame(440, 190, { l: 36, r: 14, t: 16, b: 34 });
+    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - xs[0]) / (xs[xs.length - 1] - xs[0]), sy = (v) => f.y0 - (f.y0 - f.y1) * v;
+    yAxis(f, [0, 0.5, 1], sy, "", (t) => `${Math.round(t * 100)}%`);
     xAxis(f, xs, sx, xLabel);
-    for (const s of series) {
-      el("polyline", { points: s.vals.map((v, i) => `${sx(xs[i])},${sy(v)}`).join(" "), fill: "none", stroke: s.c, "stroke-width": 1.8, "stroke-dasharray": s.dash || "" }, f.svg);
-      s.vals.forEach((v, i) => el("circle", { cx: sx(xs[i]), cy: sy(v), r: 3, fill: s.c }, f.svg));
-    }
+    series.forEach((s, k) => {
+      const off = (k - 1) * 1.5; // keep overlapping lines visible
+      el("polyline", { points: s.vals.map((v, i) => `${sx(xs[i])},${sy(v) + off}`).join(" "), fill: "none", stroke: s.c, "stroke-width": 2, "stroke-dasharray": s.dash || "" }, f.svg);
+      s.vals.forEach((v, i) => el("circle", { cx: sx(xs[i]), cy: sy(v) + off, r: 3.2, fill: s.c }, f.svg));
+    });
     return f.svg;
   }
 
-  // ---------- live bench ----------
+  // ---------- bench ----------
   const state = { g0: 0.75, g1: 1.25, seed: 20261009 };
-  const textToBits = (s) => [...new TextEncoder().encode(s || "?")].flatMap((b) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (b >> k) & 1));
-  const bitsToText = (bits) => { let s = ""; for (let i = 0; i + 8 <= bits.length; i += 8) { const b = bits.slice(i, i + 8); if (b.includes(null)) { s += "·"; continue; } const c = b.reduce((a, x) => a * 2 + x, 0); s += c >= 32 && c < 127 ? String.fromCharCode(c) : "·"; } return s; };
-
-  function verdictCard(name, rule, dr, fpr) {
-    const st = dr >= 0.9 && fpr <= 0.1 ? ["good", "separates the classes"] : dr >= 0.9 ? ["warn", "too many false alarms"] : fpr <= 0.1 ? ["bad", "misses the channel"] : ["bad", "unreliable"];
-    const d = document.createElement("div");
-    d.className = "verdict"; d.dataset.state = st[0];
-    d.innerHTML = `<span class="name">${name}</span><span class="hint">${rule}</span><div class="nums"><span>detection</span><b>${(dr * 100).toFixed(0)}%</b><span>false positives</span><b>${(fpr * 100).toFixed(0)}%</b></div><span class="state">${st[1]}</span>`;
+  function verdict(name, rule, dr, fpr) {
+    const st = dr >= 0.9 && fpr <= 0.1 ? ["good", "Separates the two"] : dr >= 0.9 ? ["warn", "Too many false alarms"] : fpr <= 0.1 ? ["bad", "Misses the channel"] : ["bad", "Unreliable"];
+    const d = document.createElement("div"); d.className = "verdict"; d.dataset.state = st[0];
+    d.innerHTML = `<h3>${name}</h3><span class="rule">${rule}</span><div class="pair"><div><span class="big">${Math.round(dr * 100)}%</span><span class="small">caught</span></div><div><span class="big">${Math.round(fpr * 100)}%</span><span class="small">false alarms</span></div></div><span class="state">${st[1]}</span>`;
     return d;
   }
-
   function update() {
     const jitter = +$("jitter").value / 1000, loss = +$("loss").value / 100, size = +$("win").value, stdTol = +$("stdtol").value / 1000;
     $("jitterOut").textContent = `${$("jitter").value} ms`;
@@ -434,74 +732,74 @@ python -m unittest</pre>
     $("stdtolOut").textContent = `${fmt(stdTol, 3)} s`;
     const bits = textToBits($("msg").value);
     $("msgBits").textContent = `${bits.length} bits`;
-    const r = rngFrom(state.seed);
-    const N = 64, RUNS = 10;
+    const r = rngFrom(state.seed), N = 64, RUNS = 10;
     const cleanBase = Array.from({ length: RUNS }, () => run(N, null, 0, 0, 0, 0, r));
     const matched = Array.from({ length: RUNS }, () => run(N, null, 0, 0, jitter, loss, r));
     const testN = Array.from({ length: RUNS }, () => run(N, null, 0, 0, jitter, loss, r));
     const testC = Array.from({ length: RUNS }, () => run(N, bits, state.g0, state.g1, jitter, loss, r));
     const thrClean = baselineStd(cleanBase, size), thrMatched = baselineStd(matched, size);
     const nW = testN.flatMap((f) => windows(f, size)), cW = testC.flatMap((f) => windows(f, size));
-    const nS = nW.map(std), cS = cW.map(std);
     const fixed = (w) => std(w) > stdTol || Math.abs(mean(w) - 1) > 0.1;
     const rate = (ws, fn) => (ws.length ? ws.filter(fn).length / ws.length : 0);
-    const v = $("verdicts"); v.replaceChildren(
-      verdictCard("Fixed rule", `std > ${fmt(stdTol, 3)} s or |mean − 1| > 0.1 s`, rate(cW, fixed), rate(nW, fixed)),
-      verdictCard("Baseline (clean LAN)", `std > p95 = ${fmt(thrClean, 4)} s`, rate(cW, (w) => std(w) > thrClean), rate(nW, (w) => std(w) > thrClean)),
-      verdictCard("Baseline (same conditions)", `std > p95 = ${fmt(thrMatched, 4)} s`, rate(cW, (w) => std(w) > thrMatched), rate(nW, (w) => std(w) > thrMatched)),
+    $("verdicts").replaceChildren(
+      verdict("Fixed rule", `std > ${fmt(stdTol, 3)} s or mean off by 0.1 s`, rate(cW, fixed), rate(nW, fixed)),
+      verdict("Clean baseline", `std > p95 of clean LAN = ${fmt(thrClean, 4)} s`, rate(cW, (w) => std(w) > thrClean), rate(nW, (w) => std(w) > thrClean)),
+      verdict("Matched baseline", `std > p95 under same network = ${fmt(thrMatched, 4)} s`, rate(cW, (w) => std(w) > thrMatched), rate(nW, (w) => std(w) > thrMatched)),
     );
     const ipd = (pk) => pk.slice(1).map((p, i) => p.t - pk[i].t);
     $("seqChart").replaceChildren(seqChart(ipd(testN[0]), ipd(testC[0])));
     $("histChart").replaceChildren(histChart(testN.flatMap(ipd), testC.flatMap(ipd)));
-    $("stdChart").replaceChildren(stdChart(nS, cS, [{ v: stdTol, c: "var(--ink)" }, { v: thrClean, c: "var(--accent)" }, { v: thrMatched, c: "var(--bad)" }]));
-
-    // decode the first channel run, using sequence numbers to place each bit
+    $("stdChart").replaceChildren(stdChart(nW.map(std), cW.map(std), [{ v: stdTol, c: "var(--ink)" }, { v: thrClean, c: "var(--ok)" }, { v: thrMatched, c: "var(--bad)" }]));
     const pk = testC[0], sent = Array.from({ length: N - 1 }, (_, i) => bits[i % bits.length]);
     const got = new Array(N - 1).fill(null);
     for (let i = 1; i < pk.length; i++) if (pk[i].seq - pk[i - 1].seq === 1) got[pk[i - 1].seq] = pk[i].t - pk[i - 1].t >= 1 ? 1 : 0;
     const correct = got.filter((b, i) => b === sent[i]).length;
     $("bitsOut").innerHTML = got.map((b, i) => (b === null ? '<span class="miss">?</span>' : b === sent[i] ? b : `<span class="err">${b}</span>`)).join("");
-    $("decodeOut").textContent = `Recovered "${bitsToText(got.slice(0, Math.floor((N - 1) / 8) * 8))}" · ${correct}/${N - 1} bits correct (${((correct / (N - 1)) * 100).toFixed(1)}%) · red = flipped by jitter, ? = lost packet`;
+    const text = bitsToText(got.slice(0, Math.floor((N - 1) / 8) * 8)).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    $("decodeOut").innerHTML = `Recovered <b>${text}</b> with ${correct} of ${N - 1} bits right (${fmt((correct / (N - 1)) * 100, 1)}%). Red bits were flipped by jitter; ? marks a lost packet.`;
   }
-
   document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
-    document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     state.g0 = +b.dataset.g0; state.g1 = +b.dataset.g1; update();
   }));
   ["jitter", "loss", "win", "stdtol", "msg"].forEach((id) => $(id).addEventListener("input", update));
-  $("rerun").addEventListener("click", () => { state.seed = (state.seed * 1103515245 + 12345) >>> 0; update(); });
+  $("rerun").addEventListener("click", () => { state.seed = (Math.imul(state.seed, 1103515245) + 12345) >>> 0; update(); });
   $("controls").addEventListener("submit", (e) => e.preventDefault());
   update();
 
   // ---------- study results ----------
   let study = null;
   try { study = JSON.parse($("study").textContent); } catch (e) { study = null; }
-  if (!study) { $("studyMeta").textContent = "Run python -m icmp_detector study and scripts/build_site.py to embed results here."; return; }
-  const cfg = study.config;
-  $("studyMeta").textContent = `Simulated: ${cfg.runs_per_set} runs × ${cfg.requests_per_run} Echo Requests per labelled set, ${study.baseline.window_size}-request windows, baseline p${cfg.percentile} from clean normal runs (${study.baseline.n_windows} windows). Seed ${cfg.seed}.`;
-  const DETS = [["fixed", "var(--ink)", ""], ["baseline (clean)", "var(--accent)", "6 4"], ["baseline (matched)", "var(--bad)", "2 3"]];
+  if (!study) { $("studyMeta").textContent = "Run python -m icmp_detector study and scripts/build_site.py to embed the study here."; return; }
+  const cfg = study.config, W = study.baseline.window_size;
+  $("studyMeta").textContent = `These numbers come from the simulator, not from lab captures: ${cfg.runs_per_set} runs of ${cfg.requests_per_run} Echo Requests per set, ${W}-request windows, baseline p${cfg.percentile} from clean normal runs, seed ${cfg.seed}. Real captures replace them for the later reviews.`;
+  const DETS = [["fixed", "var(--ink)", ""], ["baseline (clean)", "var(--ok)", "6 4"], ["baseline (matched)", "var(--bad)", "2 3"]];
   const channels = Object.keys(cfg.channels);
-  let current = channels[0];
-  const W = study.baseline.window_size;
+  const row = (ch, cond, det) => study.results.find((r) => r.channel === ch && r.window === W && r.condition === cond && r.detector === det);
+  // claims from the data
+  const planned = channels[0], subtle = channels[channels.length - 1];
+  const minDR = Math.min(...["fixed", "baseline (clean)"].map((d) => row(planned, "clean", d).detection_rate));
+  $("c1").textContent = `${Math.round(minDR * 100)}%`;
+  const firstAll = cfg.conditions.filter((c) => c.loss === 0 && c.net_jitter > 0).find((c) => row(planned, c.name, "baseline (clean)").false_positive_rate >= 0.99);
+  if (firstAll) $("c2").textContent = `${Math.round(firstAll.net_jitter * 1000)} ms`;
+  $("c3").textContent = `${Math.round(row(subtle, "clean", "fixed").detection_rate * 100)}%`;
+  let current = planned;
   function showStudy() {
-    document.querySelectorAll("#studyTabs button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.ch === current));
-    const conds = cfg.conditions.filter((c) => c.loss === 0);
-    const xs = conds.map((c) => Math.round(c.net_jitter * 1000));
-    const row = (cond, det) => study.results.find((r) => r.channel === current && r.window === W && r.condition === cond && r.detector === det);
-    const series = (key) => DETS.map(([d, c, dash]) => ({ c, dash, vals: conds.map((k) => row(k.name, d)[key]) }));
+    document.querySelectorAll("#studyTabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ch === current)));
+    const conds = cfg.conditions.filter((c) => c.loss === 0), xs = conds.map((c) => Math.round(c.net_jitter * 1000));
+    const series = (key) => DETS.map(([d, c, dash]) => ({ c, dash, vals: conds.map((k) => row(current, k.name, d)[key]) }));
     $("drChart").replaceChildren(rateChart(series("detection_rate"), xs, "added jitter (ms)"));
     $("fprChart").replaceChildren(rateChart(series("false_positive_rate"), xs, "added jitter (ms)"));
-    const t = $("studyTable");
-    let html = `<thead><tr><th>Condition</th>${DETS.map(([d]) => `<th>${d}<br>DR / FPR</th>`).join("")}<th>Decoding</th></tr></thead><tbody>`;
+    let html = `<thead><tr><th>Condition</th>${DETS.map(([d]) => `<th>${d}<br>caught / false alarms</th>`).join("")}<th>Bits decoded</th></tr></thead><tbody>`;
     for (const c of cfg.conditions) {
       html += `<tr><td>${c.name}</td>`;
-      for (const [d] of DETS) { const r = row(c.name, d); html += `<td class="num ${r.detection_rate >= 0.9 && r.false_positive_rate <= 0.1 ? "ok" : "hi"}">${fmt(r.detection_rate)} / ${fmt(r.false_positive_rate)}</td>`; }
-      html += `<td class="num">${(study.decoding_accuracy[current][c.name] * 100).toFixed(1)}%</td></tr>`;
+      for (const [d] of DETS) { const r = row(current, c.name, d); html += `<td class="num ${r.detection_rate >= 0.9 && r.false_positive_rate <= 0.1 ? "ok" : "hi"}">${Math.round(r.detection_rate * 100)}% / ${Math.round(r.false_positive_rate * 100)}%</td>`; }
+      html += `<td class="num">${fmt(study.decoding_accuracy[current][c.name] * 100, 1)}%</td></tr>`;
     }
-    t.innerHTML = html + "</tbody>";
+    $("studyTable").innerHTML = html + "</tbody>";
   }
   for (const ch of channels) {
-    const b = document.createElement("button"); b.type = "button"; b.dataset.ch = ch; b.textContent = `Channel ${ch}`;
+    const b = document.createElement("button"); b.type = "button"; b.dataset.ch = ch; b.textContent = ch.replace(" (subtle)", " subtle");
     b.addEventListener("click", () => { current = ch; showStudy(); });
     $("studyTabs").appendChild(b);
   }

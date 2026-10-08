@@ -1,0 +1,1472 @@
+<title>Ping Gap Detector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a signal bench. Asymmetric hero with a live packet wire, a full-width encoding strip,
+   a control rail beside scope readouts, staggered findings, a pipeline track, then team and code. */
+/* Deliberately single-theme: a dark signal room, so it reads the same on any viewer setting. */
+:root {
+  --bg: #0c0e0f;          /* deep charcoal, not pure black */
+  --surface: #131617;
+  --sunk: #191d1e;
+  --glass: rgba(200, 210, 200, 0.045);
+  --ink: #f1f0ea;
+  --ink-2: #9ba29e;
+  --line: rgba(210, 215, 200, 0.12);
+  --signal: #f2b544;      /* the one accent: the covert channel */
+  --signal-rgb: 242, 181, 68;
+  --signal-hi: #ffdc95;
+  --signal-a: #ffd27a;
+  --signal-b: #e8903a;
+  --normal-rgb: 63, 193, 176;
+  --signal-soft: rgba(var(--signal-rgb), 0.14);
+  --normal: #3fc1b0;      /* data colour for normal traffic */
+  --ok: #4fd18b;
+  --bad: #ff6f6f;
+  --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
+  --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 4px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--body); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(1.75rem, 3.6vw, 2.6rem); font-weight: 700; line-height: 1.08; letter-spacing: -0.02em; }
+h3 { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.005em; }
+p { margin: 0; }
+code, .mono { font-family: var(--mono); font-size: 0.86em; }
+.shell { max-width: 1240px; margin: 0 auto; padding-inline: 24px; }
+@media (max-width: 600px) { .shell { padding-inline: 16px; } }
+section { padding-block: clamp(56px, 8vw, 104px); }
+.lede { color: var(--ink-2); max-width: 60ch; font-size: 1.05rem; }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; }
+
+/* nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.nav .shell { height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.brand { font: 800 1.02rem var(--display); letter-spacing: -0.01em; text-decoration: none; display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.brand-mark { width: 26px; height: 14px; display: inline-grid; grid-template-columns: 2px 1fr 2px 1.6fr 2px; gap: 0; align-items: stretch; }
+.brand-mark i { background: var(--ink); }
+.brand-mark i:last-child { background: var(--signal); }
+.brand-mark b { display: block; }
+.nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: 0.9rem; }
+.nav ul a { text-decoration: none; color: var(--ink-2); }
+.nav ul a:hover { color: var(--ink); }
+@media (max-width: 760px) { .nav ul li:not(:last-child) { display: none; } }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 600 0.95rem var(--body); padding: 11px 18px; border-radius: var(--r); text-decoration: none; cursor: pointer; border: 1px solid transparent; white-space: nowrap; transition: transform 0.15s ease, background 0.2s ease; }
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--ink); color: var(--bg); }
+.btn-primary:hover { background: var(--signal); color: #fff; }
+.btn-ghost { border-color: var(--line); color: var(--ink); background: transparent; }
+.btn-ghost:hover { border-color: var(--ink); }
+
+/* hero */
+.hero { padding-block: clamp(40px, 6vw, 80px) clamp(48px, 6vw, 88px); }
+.hero .shell { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); gap: clamp(28px, 4vw, 56px); align-items: center; }
+@media (max-width: 920px) { .hero .shell { grid-template-columns: minmax(0, 1fr); } }
+.kicker { font: 500 0.78rem var(--mono); color: var(--ink-2); letter-spacing: 0.06em; text-transform: uppercase; }
+.hero h1 { font-size: clamp(2.4rem, 5.4vw, 4.1rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; margin-top: 14px; }
+.hero h1 em { font-style: normal; color: var(--signal); }
+.hero .lede { margin-top: 18px; max-width: 42ch; font-size: 1.12rem; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.hero-copy > * { animation: rise 0.7s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-copy > :nth-child(2) { animation-delay: 0.06s; }
+.hero-copy > :nth-child(3) { animation-delay: 0.12s; }
+.hero-copy > :nth-child(4) { animation-delay: 0.18s; }
+@keyframes rise { from { transform: translateY(14px); } to { transform: none; } }
+
+.wire { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; min-width: 0; box-shadow: 0 24px 60px -32px color-mix(in srgb, var(--normal) 45%, transparent); }
+.wire-head { display: flex; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); font: 0.76rem var(--mono); color: var(--ink-2); }
+.wire canvas { width: 100%; height: 230px; display: block; }
+.wire-read { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); border-top: 1px solid var(--line); }
+.wire-read > div { padding: 14px 16px; display: grid; gap: 4px; min-width: 0; }
+.wire-read > div + div { border-left: 1px solid var(--line); }
+.label { font: 500 0.7rem var(--mono); color: var(--ink-2); letter-spacing: 0.05em; text-transform: uppercase; }
+.decoded { font: 500 1.5rem var(--mono); letter-spacing: 0.12em; color: var(--signal); min-height: 1.6em; white-space: nowrap; overflow: hidden; }
+.decoded .cursor { display: inline-block; width: 0.55em; height: 1em; vertical-align: -0.12em; background: var(--signal); opacity: 0.35; }
+.bitstream { font: 0.78rem var(--mono); color: var(--ink-2); white-space: nowrap; overflow: hidden; direction: rtl; text-align: left; }
+.meter { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font: 0.8rem var(--mono); font-variant-numeric: tabular-nums; align-items: baseline; }
+.meter b { font-weight: 500; }
+.flag { font: 600 0.72rem var(--mono); letter-spacing: 0.04em; }
+.flag.sus { color: var(--signal); }
+.flag.ok { color: var(--ok); }
+@media (max-width: 520px) { .wire-read { grid-template-columns: minmax(0, 1fr); } .wire-read > div + div { border-left: 0; border-top: 1px solid var(--line); } .wire canvas { height: 200px; } }
+
+/* encoding strip */
+.encode { background: var(--surface); border-block: 1px solid var(--line); }
+.encode .shell { display: grid; gap: 28px; }
+.encode-intro { display: grid; gap: 12px; max-width: 760px; }
+.strip { overflow-x: auto; padding-bottom: 6px; }
+.strip svg { display: block; min-width: 760px; width: 100%; height: auto; }
+.strip text { font-family: var(--mono); }
+.rules { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.rules div { padding: 16px 20px 0 0; display: grid; gap: 4px; }
+.rules strong { font: 700 1.6rem var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.rules span { color: var(--ink-2); font-size: 0.92rem; max-width: 34ch; }
+
+/* bench */
+.bench-head { display: grid; gap: 12px; margin-bottom: 32px; max-width: 760px; }
+.bench { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; align-items: start; }
+@media (max-width: 900px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.rail { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 74px); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; gap: 18px; }
+@media (max-width: 900px) { .rail { position: static; } }
+.group { display: grid; gap: 14px; }
+.group + .group { border-top: 1px solid var(--line); padding-top: 18px; }
+.field { display: grid; gap: 7px; }
+.field label, .field .flabel { font-size: 0.86rem; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.field output { font: 500 0.82rem var(--mono); color: var(--signal); }
+input[type="range"] { width: 100%; accent-color: var(--signal); }
+input[type="text"], select { width: 100%; font: 0.95rem var(--mono); padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); color: var(--ink); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.seg button { font: 500 0.8rem var(--mono); padding: 8px 2px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.hint { font-size: 0.8rem; color: var(--ink-2); }
+
+.scope { display: grid; gap: 24px; min-width: 0; }
+.verdicts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+@media (max-width: 680px) { .verdicts { grid-template-columns: minmax(0, 1fr); } }
+.verdict { padding: 16px 18px; display: grid; gap: 6px; position: relative; }
+.verdict + .verdict { border-left: 1px solid var(--line); }
+@media (max-width: 680px) { .verdict + .verdict { border-left: 0; border-top: 1px solid var(--line); } }
+.verdict::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 3px; background: var(--line); }
+.verdict[data-state="good"]::before { background: var(--ok); }
+.verdict[data-state="warn"]::before { background: var(--signal); }
+.verdict[data-state="bad"]::before { background: var(--bad); }
+.verdict .rule { font: 0.74rem var(--mono); color: var(--ink-2); }
+.verdict .pair { display: flex; gap: 22px; margin-top: 4px; }
+.verdict .pair div { display: grid; }
+.verdict .big { font: 700 1.9rem var(--display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.verdict .small { font-size: 0.75rem; color: var(--ink-2); }
+.verdict .state { font: 600 0.75rem var(--mono); }
+.verdict[data-state="good"] .state { color: var(--ok); }
+.verdict[data-state="warn"] .state { color: var(--signal); }
+.verdict[data-state="bad"] .state { color: var(--bad); }
+
+.plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.plots > .plot { padding: 18px; display: grid; gap: 8px; min-width: 0; }
+.plots > .wide { grid-column: 1 / -1; border-bottom: 1px solid var(--line); }
+.plots > .plot:nth-child(3) { border-left: 1px solid var(--line); }
+@media (max-width: 760px) { .plots { grid-template-columns: minmax(0, 1fr); } .plots > .plot:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); } }
+.plot svg { width: 100%; height: auto; display: block; }
+.plot-title { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.76rem; color: var(--ink-2); }
+.legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 5px; vertical-align: -1px; background: var(--c); }
+.legend .dash::before { height: 0; border-top: 2px dashed var(--c); background: none; vertical-align: 3px; width: 14px; }
+svg text { fill: var(--ink-2); font: 10px var(--mono); }
+svg .axis { stroke: var(--line); }
+svg .grid { stroke: var(--line); stroke-opacity: 0.6; }
+
+.decode-out { padding: 18px; border-top: 1px solid var(--line); grid-column: 1 / -1; display: grid; gap: 8px; min-width: 0; }
+.bits { font: 0.86rem var(--mono); overflow-x: auto; white-space: nowrap; letter-spacing: 0.08em; padding-bottom: 4px; }
+.bits .err { color: var(--bad); font-weight: 600; text-decoration: underline; }
+.bits .miss { color: var(--ink-2); opacity: 0.6; }
+.decode-msg { font-size: 0.9rem; color: var(--ink-2); }
+.decode-msg b { font-family: var(--mono); color: var(--signal); font-weight: 500; }
+
+/* findings */
+.findings { background: var(--surface); border-block: 1px solid var(--line); }
+.findings-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: start; margin-top: 36px; }
+@media (max-width: 900px) { .findings-grid { grid-template-columns: minmax(0, 1fr); } }
+.claims { display: grid; gap: 30px; }
+.claim { display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 20px; align-items: baseline; }
+.claim:nth-child(2) { margin-left: clamp(0px, 4vw, 56px); }
+.claim:nth-child(3) { margin-left: clamp(0px, 8vw, 112px); }
+@media (max-width: 560px) { .claim { grid-template-columns: minmax(0, 1fr); gap: 4px; } .claim:nth-child(n) { margin-left: 0; } }
+.claim .num { font: 800 clamp(2.6rem, 5vw, 3.6rem) var(--display); letter-spacing: -0.04em; line-height: 0.95; color: var(--signal); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.claim p { font-size: 1.02rem; max-width: 46ch; }
+.claim p span { display: block; color: var(--ink-2); font-size: 0.9rem; margin-top: 4px; }
+.study { display: grid; gap: 16px; min-width: 0; }
+.tabs { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; justify-self: start; max-width: 100%; }
+.tabs button { font: 500 0.82rem var(--mono); padding: 8px 12px; border: 0; background: transparent; color: var(--ink); cursor: pointer; white-space: nowrap; }
+.tabs button + button { border-left: 1px solid var(--line); }
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.study .plot { display: grid; gap: 6px; min-width: 0; }
+details { border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 600; font-size: 0.92rem; }
+.table-scroll { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; white-space: nowrap; }
+thead th { font: 500 0.7rem var(--mono); text-transform: uppercase; letter-spacing: 0.04em; color: var(--ink-2); border-bottom: 1px solid var(--line); }
+tbody tr:nth-child(odd) { background: var(--sunk); }
+td.num { font-family: var(--mono); }
+td.ok { color: var(--ok); }
+td.hi { color: var(--bad); }
+.caveat { font-size: 0.88rem; color: var(--ink-2); max-width: 70ch; margin-top: 40px; padding-left: 14px; border-left: 2px solid var(--signal); }
+
+/* pipeline */
+.track { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); position: relative; }
+.track { --fill: 1; }
+.track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: linear-gradient(90deg, var(--normal), var(--signal)); transform: scaleX(var(--fill)); transform-origin: left center; }
+.track li { position: relative; padding: 30px 14px 0 0; display: grid; gap: 6px; align-content: start; }
+.track li::before { content: ""; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink); }
+.track li:last-child::before { background: var(--signal); border-color: var(--signal); }
+.track strong { font: 700 1rem var(--display); }
+.track span { font-size: 0.86rem; color: var(--ink-2); }
+.track code { color: var(--ink); }
+@media (max-width: 900px) {
+  .track { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-left: 30px; }
+  .track::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; background: linear-gradient(180deg, var(--normal), var(--signal)); transform: none; }
+  .track li { padding: 0; }
+  .track li::before { left: -30px; top: 3px; }
+}
+
+/* team + code */
+.closing .shell { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: clamp(28px, 5vw, 64px); }
+@media (max-width: 900px) { .closing .shell { grid-template-columns: minmax(0, 1fr); } }
+.team { display: grid; gap: 22px; align-content: start; }
+.people { display: grid; gap: 0; margin-top: 8px; }
+.person { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 14px 0; border-top: 1px solid var(--line); align-items: start; }
+.mono-avatar { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; background: var(--sunk); font: 700 0.9rem var(--display); }
+.person:last-child .mono-avatar { background: var(--signal-soft); color: var(--signal); }
+.person b { font-weight: 600; display: block; }
+.person span { font-size: 0.88rem; color: var(--ink-2); }
+.code-col { display: grid; gap: 14px; min-width: 0; align-content: start; }
+pre { margin: 0; background: var(--ink); color: var(--bg); border-radius: var(--r); padding: 18px 20px; overflow-x: auto; font: 0.8rem/1.7 var(--mono); }
+pre .c { opacity: 0.55; }
+footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font-size: 0.84rem; color: var(--ink-2); }
+footer .shell { display: grid; gap: 8px; }
+footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+
+
+/* background */
+.bg-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+@media (max-width: 900px) { .bg-grid { grid-template-columns: minmax(0, 1fr); } }
+.problem { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 80px); }
+@media (max-width: 900px) { .problem { position: static; } }
+.question { font: 600 1.15rem/1.45 var(--body); padding: 16px 18px; background: var(--signal-soft); border-radius: var(--r); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.timeline li:last-child { border-bottom: 1px solid var(--line); }
+.timeline .yr { font: 500 0.95rem var(--mono); color: var(--ink-2); padding-top: 2px; }
+.timeline b { font-weight: 600; display: block; }
+.timeline span { color: var(--ink-2); font-size: 0.92rem; }
+.timeline li.near .yr { color: var(--signal); }
+
+/* testbed */
+.testbed .shell { display: grid; gap: 32px; }
+.topo { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(12px, 3vw, 28px); overflow-x: auto; }
+.topo svg { display: block; width: 100%; min-width: 680px; height: auto; }
+.topo text { font-family: var(--mono); }
+.specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 4vw, 48px); }
+@media (max-width: 760px) { .specs { grid-template-columns: minmax(0, 1fr); } }
+.specs dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; align-content: start; font-size: 0.92rem; }
+.specs h3 { grid-column: 1 / -1; margin-bottom: 4px; }
+.specs dt { font: 500 0.92rem var(--mono); font-variant-numeric: tabular-nums; }
+.specs dd { margin: 0; color: var(--ink-2); }
+
+/* conclusions */
+.conclude { background: var(--surface); border-block: 1px solid var(--line); }
+.conclude .shell { display: grid; gap: 36px; }
+.verdict-line { font: 700 clamp(1.4rem, 3vw, 2.1rem)/1.2 var(--display); letter-spacing: -0.02em; max-width: 30ch; }
+.verdict-line em { font-style: normal; color: var(--signal); }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 64px); }
+@media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.cols ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 10px; color: var(--ink-2); }
+.cols li::marker { color: var(--signal); }
+
+/* ---------- cinematic layer ---------- */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vw 50vh at 85% 8%, rgba(var(--signal-rgb), 0.10), transparent 60%),
+    radial-gradient(55vw 60vh at 5% 40%, rgba(var(--normal-rgb), 0.08), transparent 65%),
+    radial-gradient(50vw 50vh at 70% 95%, rgba(var(--signal-rgb), 0.06), transparent 60%); }
+html, body { overflow-x: clip; }
+section { overflow-x: clip; }
+body { background: var(--bg); }
+.nav { background: rgba(12, 14, 15, 0.72); }
+.brand-mark i { background: var(--ink); }
+
+.hero { position: relative; overflow: hidden; min-height: min(860px, 94vh); display: grid; align-items: center; padding-block: 48px 72px; }
+.hero > .shell { position: relative; z-index: 1; width: 100%; }
+#scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(12, 14, 15, 0.92) 0%, rgba(12, 14, 15, 0.55) 38%, rgba(12, 14, 15, 0) 62%), linear-gradient(0deg, var(--bg) 0%, rgba(12, 14, 15, 0) 22%); }
+@media (max-width: 920px) { .hero::after { background: linear-gradient(180deg, rgba(12, 14, 15, 0.55), rgba(12, 14, 15, 0.85) 60%, var(--bg)); } }
+.hero h1 { font-size: clamp(2.6rem, 5.6vw, 4.7rem); line-height: 0.98; letter-spacing: -0.045em; }
+.hero > .shell { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
+@media (max-width: 920px) { .hero > .shell { grid-template-columns: minmax(0, 1fr); } }
+.hero h1 em { background: linear-gradient(92deg, var(--signal-a), var(--signal) 55%, var(--signal-b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.hero h1 .w > span { display: inline-block; }
+.kicker { color: var(--signal); }
+.btn-primary { background: var(--signal); color: #161106; box-shadow: 0 10px 30px -10px rgba(var(--signal-rgb), 0.7); }
+.btn-primary:hover { background: var(--signal-hi); color: #161106; }
+.btn-ghost { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+.wire, .rail, .verdicts, .plots, .topo { background: var(--glass); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 30px 80px -40px rgba(0, 0, 0, 0.8); }
+.wire { background: rgba(14, 19, 26, 0.62); }
+.encode, .findings, .conclude { background: var(--surface); border-block: 0; }
+.wave { display: block; width: 100%; height: clamp(48px, 7vw, 110px); }
+.wave + section, section + .wave { margin-top: 0; }
+.question { background: linear-gradient(120deg, rgba(var(--signal-rgb), 0.16), rgba(var(--signal-rgb), 0.04)); border: 1px solid rgba(var(--signal-rgb), 0.25); }
+.seg button[aria-pressed="true"], .tabs button[aria-pressed="true"] { background: var(--signal); color: #161106; }
+input[type="text"], select { background: rgba(0, 0, 0, 0.25); }
+pre { background: #05070b; color: #d7e0e8; border: 1px solid var(--line); }
+tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
+.claim .num { background: linear-gradient(180deg, var(--signal-hi), var(--signal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.verdict-line em { color: var(--signal); }
+.mono-avatar { background: rgba(255, 255, 255, 0.06); }
+.track li::before { background: var(--bg); border-color: var(--ink-2); box-shadow: 0 0 0 4px var(--bg); }
+.track li:last-child::before { box-shadow: 0 0 18px rgba(var(--signal-rgb), 0.8); }
+.has-3d .hero > .shell { grid-template-columns: minmax(0, 1fr); }
+.has-3d .hero-copy { max-width: 640px; }
+.has-3d .hero .wire { justify-self: start; width: min(100%, 520px); margin-top: 8px; }
+.has-3d .hero .wire-head, .has-3d .hero #wire { display: none; }
+.has-3d .hero .wire-read { border-top: 0; }
+.hero h1 em .w > span { background: linear-gradient(92deg, var(--signal-a), var(--signal) 55%, var(--signal-b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 em { background: none; color: var(--signal); }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.secret { display: flex; gap: 0; margin-top: 28px; max-width: 520px; border: 1px solid rgba(var(--signal-rgb), 0.45); border-radius: var(--r); background: rgba(12, 14, 15, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.08), 0 20px 50px -20px rgba(var(--signal-rgb), 0.45); }
+.secret input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 1.25rem var(--mono); letter-spacing: 0.14em; padding: 14px 16px; text-transform: uppercase; }
+.secret input:focus { outline: none; }
+.secret:focus-within { box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.22), 0 20px 50px -20px rgba(var(--signal-rgb), 0.6); }
+.secret .btn { border-radius: 0 var(--r) var(--r) 0; padding-inline: 22px; }
+.link-cta { color: var(--ink-2); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--line); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
+.link-cta:hover { color: var(--ink); border-color: var(--signal); }
+.cta-row { margin-top: 18px; }
+.challenge { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: var(--r); border: 1px solid var(--line); background: var(--glass); font-weight: 500; }
+.challenge .tag { font: 600 0.72rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 8px; border-radius: 2px; white-space: nowrap; }
+.challenge[data-state="caught"] .tag { background: rgba(255, 111, 111, 0.15); color: var(--bad); }
+.challenge[data-state="partial"] .tag { background: var(--signal-soft); color: var(--signal); }
+.challenge[data-state="garbled"] .tag { background: var(--signal-soft); color: var(--signal); }
+.challenge[data-state="escaped"] { border-color: rgba(79, 209, 139, 0.5); box-shadow: 0 0 40px -10px rgba(79, 209, 139, 0.45); }
+.challenge[data-state="escaped"] .tag { background: rgba(79, 209, 139, 0.15); color: var(--ok); }
+.seg { grid-template-columns: repeat(4, 1fr); }
+.seg button { font-size: 0.74rem; }
+
+@media (prefers-reduced-transparency: reduce) {
+  .wire, .rail, .verdicts, .plots, .topo, .btn-ghost { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--surface); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .hero-copy > * { animation: none; }
+  .btn { transition: none; }
+}
+
+/* ---------- pages and navigation ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nav ul { gap: 4px; align-items: center; }
+.nav ul a { display: block; padding: 7px 12px; border-radius: 999px; transition: color 0.2s ease, background 0.2s ease; }
+.nav ul a[aria-current="page"] { color: #161106; background: var(--signal); font-weight: 600; }
+.nav ul .ext { margin-left: 10px; padding-left: 14px; border-left: 1px solid var(--line); }
+.nav-progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; background: linear-gradient(90deg, var(--normal), var(--signal)); transform-origin: 0 50%; transform: scaleX(0); transition: transform 0.5s cubic-bezier(.2,.8,.2,1); }
+@media (max-width: 760px) {
+  .nav .shell { height: auto; flex-wrap: wrap; padding-block: 10px 8px; row-gap: 8px; }
+  .nav ul { width: 100%; overflow-x: auto; scrollbar-width: none; font-size: 0.86rem; margin-inline: -4px; }
+  .nav ul::-webkit-scrollbar { display: none; }
+  .nav ul li:not(:last-child) { display: list-item; }
+  .nav ul a { white-space: nowrap; padding: 6px 11px; }
+}
+.page[hidden] { display: none !important; }
+.page.entering { animation: pageIn 0.55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .page.entering { animation: none; } }
+
+.chapters { padding-block: 8px clamp(56px, 8vw, 96px); }
+.chapter-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1000px) { .chapter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .chapter-grid { grid-template-columns: minmax(0, 1fr); } }
+.chapter-grid a { height: 100%; box-sizing: border-box; display: grid; align-content: start; gap: 6px; padding: 18px 18px 20px; text-decoration: none; border: 1px solid var(--line); border-radius: var(--r); background: var(--glass); transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease; }
+.chapter-grid a:hover { border-color: rgba(var(--signal-rgb), 0.6); background: rgba(var(--signal-rgb), 0.06); transform: translateY(-2px); }
+.chapter-grid .ch-n { font: 600 0.78rem var(--mono); color: var(--signal); letter-spacing: 0.08em; }
+.chapter-grid b { font: 700 1.05rem var(--display); color: var(--ink); }
+.chapter-grid span:last-child { color: var(--ink-2); font-size: 0.9rem; line-height: 1.45; }
+
+.pager { border-top: 1px solid var(--line); }
+.pager .shell { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding-block: 28px 40px; }
+.pager a { display: grid; gap: 4px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--r); text-decoration: none; transition: border-color 0.2s ease, background 0.2s ease; }
+.pager a:hover { border-color: rgba(var(--signal-rgb), 0.6); background: rgba(var(--signal-rgb), 0.06); }
+.pager small { font: 600 0.74rem var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.pager b { font: 700 1.2rem var(--display); color: var(--ink); }
+.pager .next { grid-column: 2; text-align: right; }
+.pager .next b::after { content: " →"; color: var(--signal); }
+.pager .prev b::before { content: "← "; color: var(--signal); }
+@media (max-width: 520px) { .pager .shell { grid-template-columns: minmax(0, 1fr); } .pager .next { grid-column: 1; } }
+</style>
+
+<nav class="nav" aria-label="Sections">
+  <div class="shell">
+    <a class="brand" href="#home"><span class="brand-mark" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>Ping Gap Detector</a>
+    <ul>
+      <li><a href="#home" data-nav="home">Home</a></li>
+      <li><a href="#why" data-nav="why">Why</a></li>
+      <li><a href="#lab" data-nav="lab">Lab</a></li>
+      <li><a href="#play" data-nav="play">Play</a></li>
+      <li><a href="#results" data-nav="results">Results</a></li>
+      <li><a href="#team" data-nav="team">Team</a></li>
+      <li class="ext"><a href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">Source ↗</a></li>
+    </ul>
+  </div>
+  <span class="nav-progress" aria-hidden="true"></span>
+</nav>
+
+<main id="pages">
+<div class="page" id="home" data-label="Home">
+<header class="hero" id="top">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="shell">
+    <div class="hero-copy">
+      <div class="kicker">An open lab for covert timing channels</div>
+      <h1>Finding hidden bits in the <em>gaps between pings</em></h1>
+      <p class="lede">Type a secret. It leaves as nothing but ping timing, gets decoded on the far side, and our detector tries to catch it.</p>
+      <form class="secret" id="secretForm" autocomplete="off">
+        <label for="secret" class="sr">Your secret</label>
+        <input type="text" id="secret" maxlength="16" value="HELLO" spellcheck="false">
+        <button class="btn btn-primary" type="submit">Send it</button>
+      </form>
+      <div class="cta-row">
+        <a class="link-cta" href="#bench">Think you can sneak it past the detector? Play</a>
+      </div>
+    </div>
+
+    <figure class="wire" style="margin:0" aria-label="Live simulation of normal and covert ping streams">
+      <div class="wire-head"><span>sender</span><span>simulated Echo Requests, 1 s nominal</span><span>receiver</span></div>
+      <canvas id="wire" aria-hidden="true"></canvas>
+      <div class="wire-read">
+        <div>
+          <span class="label">Receiver decodes</span>
+          <div class="decoded" id="wireText"><span class="cursor"></span></div>
+          <div class="bitstream" id="wireBits">&nbsp;</div>
+        </div>
+        <div>
+          <span class="label">Std of last 16 gaps</span>
+          <div class="meter">
+            <span>normal</span><b id="mNorm">0.000 s</b>
+            <span>covert</span><b id="mCov">0.000 s</b>
+          </div>
+          <span class="flag sus" id="mFlag">covert stream flagged</span>
+        </div>
+      </div>
+    </figure>
+  </div>
+</header>
+
+<section class="chapters" aria-labelledby="ch-h">
+  <div class="shell">
+    <h2 id="ch-h" class="sr-only">Explore</h2>
+    <ol class="chapter-grid">
+      <li><a href="#why"><span class="ch-n">01</span><b>Why it matters</b><span>Timing is a blind spot, and how one letter hides in eight gaps.</span></a></li>
+      <li><a href="#lab"><span class="ch-n">02</span><b>The lab</b><span>Three machines, real ping, netem jitter and loss.</span></a></li>
+      <li><a href="#play"><span class="ch-n">03</span><b>Play</b><span>Tune a covert sender and try to slip past three detectors.</span></a></li>
+      <li><a href="#results"><span class="ch-n">04</span><b>Results</b><span>Detection rates, false alarms, the pipeline and what we learned.</span></a></li>
+      <li><a href="#team"><span class="ch-n">05</span><b>Team and code</b><span>Who built it, and how to run it on your own captures.</span></a></li>
+    </ol>
+  </div>
+</section>
+</div>
+
+<div class="page" id="why" data-label="Why it matters" hidden>
+
+<section id="background" aria-labelledby="bg-h">
+  <div class="shell bg-grid">
+    <div class="problem">
+      <h2 id="bg-h">Timing is a blind spot for content inspection</h2>
+      <p class="lede">Firewalls and intrusion detection mostly read headers and payloads. A timing channel leaves every byte untouched and carries its message in when packets are sent. Normal traffic also varies, so a detector has to tell deliberate structure apart from ordinary noise.</p>
+      <p class="question">Can a simple detector built from a measured normal baseline tell covert ICMP timing apart from normal ping, and how does that change once jitter and load appear?</p>
+    </div>
+    <ol class="timeline" aria-label="Related work">
+      <li><span class="yr">2004</span><div><b>Cabuk, Brodley and Shields</b><span>Built an IP timing channel and caught it by its regularity, then showed how an encoder can break that regularity.</span></div></li>
+      <li><span class="yr">2005</span><div><b>Berk, Giani and Cybenko</b><span>Early statistical detection of binary codes hidden in packet delays.</span></div></li>
+      <li><span class="yr">2007</span><div><b>Gianvecchio and Wang</b><span>Entropy and corrected conditional entropy as detectors, beyond averages.</span></div></li>
+      <li><span class="yr">2008</span><div><b>Luo, Chan and Chang</b><span>TCPScript survives jitter, loss and reordering, which is why we test under netem.</span></div></li>
+      <li><span class="yr">2017</span><div><b>Iglesias Vázquez, Annessi and Zseby</b><span>Normal traffic varies widely in shape, so one outlier measure is not enough.</span></div></li>
+      <li class="near"><span class="yr">2022</span><div><b>Ondov and Helebrandt</b><span>Closest prior work: ICMP timing channels caught with combined statistics in a host IDS.</span></div></li>
+      <li><span class="yr">2023</span><div><b>Meusburger</b><span>Variability in legitimate traffic makes false positives the central problem.</span></div></li>
+    </ol>
+  </div>
+</section>
+
+<div class="wave" data-wave="in" aria-hidden="true"></div>
+<section class="encode" id="encoding" aria-labelledby="enc-h">
+  <div class="shell">
+    <div class="encode-intro">
+      <h2 id="enc-h">One letter, eight gaps</h2>
+      <p class="lede">The sender keeps every packet identical and only changes when it sends. A short gap means 0, a long gap means 1. Here is the letter <b class="mono" id="encLetter">V</b> leaving the sender.</p>
+    </div>
+    <div class="strip" id="encStrip"></div>
+    <div class="rules">
+      <div><strong>0.75 s</strong><span>Gap for a 0 bit, a quarter second early</span></div>
+      <div><strong>1.25 s</strong><span>Gap for a 1 bit, a quarter second late</span></div>
+      <div><strong>1.00 s</strong><span>Mean stays at the normal ping interval, so averages alone miss it</span></div>
+      <div><strong>~0.25 s</strong><span>Spread of the gaps, against a few milliseconds for real ping. This is what gives it away.</span></div>
+    </div>
+  </div>
+</section>
+<div class="wave" data-wave="out" aria-hidden="true"></div>
+</div>
+
+
+<div class="page" id="lab" data-label="The lab" hidden>
+<section class="testbed" id="testbed" aria-labelledby="tb-h">
+  <div class="shell">
+    <div class="encode-intro">
+      <h2 id="tb-h">A closed lab network</h2>
+      <p class="lede">Two machines the team controls, one link between them, and nothing on the campus network. The receiver captures every Echo Request so timing is measured where packets arrive.</p>
+    </div>
+    <figure class="topo" style="margin:0" aria-label="Testbed: sender host, Linux link with tc netem and iperf3, receiver host running tshark and the detector">
+      <svg viewBox="0 0 900 230" role="img">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-2)"></path></marker></defs>
+        <rect x="20" y="50" width="230" height="130" rx="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"></rect>
+        <text x="40" y="80" font-size="15" font-weight="700" fill="var(--ink)">Sender host</text>
+        <text x="40" y="110" font-size="12" fill="var(--ink-2)">ping, normal runs</text>
+        <text x="40" y="132" font-size="12" fill="var(--signal)">Scapy timing generator</text>
+        <text x="40" y="154" font-size="12" fill="var(--ink-2)">0.75 s / 1.25 s gaps</text>
+        <rect x="335" y="50" width="230" height="130" rx="3" fill="var(--bg)" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"></rect>
+        <text x="355" y="80" font-size="15" font-weight="700" fill="var(--ink)">Link conditions</text>
+        <text x="355" y="110" font-size="12" fill="var(--ink-2)">tc netem: delay jitter, loss</text>
+        <text x="355" y="132" font-size="12" fill="var(--ink-2)">iperf3: background load</text>
+        <text x="355" y="154" font-size="12" fill="var(--ink-2)">clean runs use neither</text>
+        <rect x="650" y="50" width="230" height="130" rx="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"></rect>
+        <text x="670" y="80" font-size="15" font-weight="700" fill="var(--ink)">Receiver host</text>
+        <text x="670" y="110" font-size="12" fill="var(--ink-2)">tshark capture</text>
+        <text x="670" y="132" font-size="12" fill="var(--ink-2)">CSV export of timestamps</text>
+        <text x="670" y="154" font-size="12" fill="var(--signal)">icmp_detector</text>
+        <line x1="254" y1="115" x2="329" y2="115" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#arr)"></line>
+        <line x1="569" y1="115" x2="644" y2="115" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#arr)"></line>
+        <text x="292" y="105" font-size="10" fill="var(--ink-2)" text-anchor="middle">Echo</text>
+        <text x="607" y="105" font-size="10" fill="var(--ink-2)" text-anchor="middle">Request</text>
+        <text x="450" y="215" font-size="11" fill="var(--ink-2)" text-anchor="middle">one direction of one ICMP flow is analysed: Echo Requests only</text>
+      </svg>
+    </figure>
+    <div class="specs">
+      <dl><h3>Traffic</h3>
+        <dt>1.00 s</dt><dd>Normal ping interval</dd>
+        <dt>0.75 / 1.25 s</dt><dd>Gaps for bit 0 and bit 1</dd>
+        <dt>64</dt><dd>Echo Requests per run</dd>
+      </dl>
+      <dl><h3>Baseline</h3>
+        <dt>10 runs</dt><dd>Normal traffic only, kept apart from tests</dd>
+        <dt>32</dt><dd>Requests per window, also 8 and 16</dd>
+        <dt>p95</dt><dd>Of normal window spread sets the threshold</dd>
+      </dl>
+      <dl><h3>Evaluation</h3>
+        <dt>10 + 10</dt><dd>Normal and covert runs per condition</dd>
+        <dt>0 to 150 ms</dt><dd>Added jitter, plus 5% loss</dd>
+        <dt>3 metrics</dt><dd>Detection rate, false positives, bits decoded</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="page" id="play" data-label="Play" hidden>
+<section id="bench" aria-labelledby="bench-h">
+  <div class="shell">
+    <div class="bench-head">
+      <h2 id="bench-h">Can you sneak a message past it?</h2>
+      <p class="lede">You control the sender and the network. The detectors only see timing. Make all three miss your message while it still arrives intact. Every change reruns 30 simulated captures.</p>
+    </div>
+    <div class="bench">
+      <form class="rail" id="controls" autocomplete="off">
+        <div class="group">
+          <h3>Covert sender</h3>
+          <div class="field">
+            <label for="msg">Hidden message <output id="msgBits"></output></label>
+            <input type="text" id="msg" value="HELLO" maxlength="24">
+          </div>
+          <div class="field">
+            <span class="flabel">Gaps for 0 / 1 (s)</span>
+            <div class="seg" role="group" aria-label="Timing classes">
+              <button type="button" data-g0="0.75" data-g1="1.25" aria-pressed="true">.75/1.25</button>
+              <button type="button" data-g0="0.9" data-g1="1.1" aria-pressed="false">.90/1.10</button>
+              <button type="button" data-g0="0.95" data-g1="1.05" aria-pressed="false">.95/1.05</button>
+              <button type="button" data-g0="0.98" data-g1="1.02" aria-pressed="false">.98/1.02</button>
+            </div>
+          </div>
+        </div>
+        <div class="group">
+          <h3>Network</h3>
+          <div class="field">
+            <label for="jitter">Added jitter (netem) <output id="jitterOut"></output></label>
+            <input type="range" id="jitter" min="0" max="200" step="5" value="0">
+          </div>
+          <div class="field">
+            <label for="loss">Packet loss <output id="lossOut"></output></label>
+            <input type="range" id="loss" min="0" max="10" step="1" value="0">
+          </div>
+        </div>
+        <div class="group">
+          <h3>Detector</h3>
+          <div class="field">
+            <label for="win">Window size</label>
+            <select id="win">
+              <option value="8">8 requests</option>
+              <option value="16">16 requests</option>
+              <option value="32" selected>32 requests</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="stdtol">Fixed std tolerance <output id="stdtolOut"></output></label>
+            <input type="range" id="stdtol" min="10" max="200" step="5" value="100">
+          </div>
+          <button type="button" class="btn btn-ghost" id="rerun">New random traffic</button>
+        </div>
+      </form>
+
+      <div class="scope">
+        <div class="challenge" id="challenge" aria-live="polite"><span class="tag">Caught</span><span id="challengeText">All three detectors caught your message.</span></div>
+        <div class="verdicts" id="verdicts"></div>
+        <div class="plots">
+          <div class="plot wide">
+            <div class="plot-title"><h3>Gaps seen by the receiver</h3><div class="legend"><span style="--c: var(--normal)">normal</span><span style="--c: var(--signal)">covert</span><span class="dash" style="--c: var(--ink-2)">1.0 s decode line</span></div></div>
+            <div id="seqChart"></div>
+          </div>
+          <div class="plot">
+            <div class="plot-title"><h3>Gap distribution</h3></div>
+            <div id="histChart"></div>
+          </div>
+          <div class="plot">
+            <div class="plot-title"><h3>Window spread vs thresholds</h3></div>
+            <div id="stdChart"></div>
+            <div class="legend"><span class="dash" style="--c: var(--ink)">fixed</span><span class="dash" style="--c: var(--ok)">clean baseline</span><span class="dash" style="--c: var(--bad)">matched baseline</span></div>
+          </div>
+          <div class="decode-out">
+            <h3>Receiver decoding</h3>
+            <div class="bits" id="bitsOut"></div>
+            <p class="decode-msg" id="decodeOut"></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+
+<div class="page" id="results" data-label="Results" hidden>
+<div class="wave" data-wave="in" aria-hidden="true"></div>
+<section class="findings" id="findings" aria-labelledby="find-h">
+  <div class="shell">
+    <h2 id="find-h">What the study shows</h2>
+    <div class="findings-grid">
+      <div class="claims" id="claims">
+        <div class="claim"><div class="num" id="c1">100%</div><p>of covert windows caught by both detectors with the planned 0.75 / 1.25 s gaps.<span>The spread of the gaps is about 80 times wider than normal ping.</span></p></div>
+        <div class="claim"><div class="num" id="c2">20 ms</div><p>of added jitter makes a baseline built on a clean LAN flag every normal window.<span>A baseline built under the same conditions keeps false alarms low.</span></p></div>
+        <div class="claim"><div class="num" id="c3">0%</div><p>of the subtler 0.95 / 1.05 s channel is caught by the fixed 0.1 s rule.<span>Its spread sits under the tolerance, and inside 100 ms of jitter.</span></p></div>
+      </div>
+      <div class="study">
+        <div class="tabs" id="studyTabs" role="group" aria-label="Channel"></div>
+        <div class="plot"><div class="plot-title"><h3>Detection rate</h3></div><div id="drChart"></div></div>
+        <div class="plot"><div class="plot-title"><h3>False-positive rate</h3><div class="legend"><span style="--c: var(--ink)">fixed</span><span style="--c: var(--ok)">clean baseline</span><span style="--c: var(--bad)">matched baseline</span></div></div><div id="fprChart"></div></div>
+        <details>
+          <summary>Full results table</summary>
+          <div class="table-scroll"><table id="studyTable"></table></div>
+        </details>
+      </div>
+    </div>
+    <p class="caveat" id="studyMeta">These numbers come from the simulator, not from lab captures. They show how the pipeline behaves; real captures replace them for the later reviews.</p>
+  </div>
+</section>
+<div class="wave" data-wave="out" aria-hidden="true"></div>
+
+
+<section id="pipeline" aria-labelledby="pipe-h">
+  <div class="shell">
+    <h2 id="pipe-h">From capture to verdict</h2>
+    <ol class="track">
+      <li><strong>Capture</strong><span>tshark on the receiver records Echo Requests</span></li>
+      <li><strong>Filter</strong><span>Keep one flow by source, destination and ICMP id</span></li>
+      <li><strong>Delays</strong><span><code>Δt = t(i) - t(i-1)</code>, skipping gaps across lost packets</span></li>
+      <li><strong>Window</strong><span>Split into 8, 16 or 32 request windows</span></li>
+      <li><strong>Features</strong><span>Mean, std, CV, IQR, entropy per window</span></li>
+      <li><strong>Decide</strong><span>Fixed tolerance or p95 of normal windows</span></li>
+      <li><strong>Score</strong><span>Detection rate, false positives, bits decoded</span></li>
+    </ol>
+  </div>
+</section>
+
+<div class="wave" data-wave="in" aria-hidden="true"></div>
+<section class="conclude" id="conclusions" aria-labelledby="con-h">
+  <div class="shell">
+    <h2 id="con-h">Conclusions</h2>
+    <p class="verdict-line">A crude timing channel is easy to catch. <em>Keeping false alarms down is the hard part.</em></p>
+    <div class="cols">
+      <div>
+        <h3>What we learned</h3>
+        <ul>
+          <li>The spread of inter-packet delays separates the planned channel from normal ping with a wide margin.</li>
+          <li>Averages are useless here: the channel's mean gap stays at 1 s.</li>
+          <li>A baseline only holds under the conditions it was measured in. Rebuild it when the network changes.</li>
+          <li>Sequence numbers stop a lost packet from looking like a deliberate long gap.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Limits and next steps</h3>
+        <ul>
+          <li>Results on this page are simulated until the lab captures replace them.</li>
+          <li>A channel with small gap differences hides inside heavy jitter. Entropy features from the literature are the next thing to try.</li>
+          <li>A sender that copies the timing distribution of normal traffic would defeat a spread-based detector.</li>
+          <li>Only Echo Requests in one direction are analysed; packet fields and payloads are checked separately.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="wave" data-wave="out" aria-hidden="true"></div>
+</div>
+
+<div class="page" id="team" data-label="Team and code" hidden>
+<section class="closing" aria-labelledby="team-h">
+  <div class="shell">
+    <div class="team">
+      <h2 id="team-h">Built by</h2>
+      <div class="people">
+        <div class="person"><span class="mono-avatar">HJ</span><div><b>Harsh Jha</b><span>Literature survey, timing generator, comparison design</span></div></div>
+        <div class="person"><span class="mono-avatar">AD</span><div><b>Anuj Deshpande</b><span>Normal traffic, capture and filtering, delay extraction, network tests</span></div></div>
+        <div class="person"><span class="mono-avatar">AS</span><div><b>Aarush Shetty</b><span>Features, baseline, detection engine, metrics and plots</span></div></div>
+      </div>
+    </div>
+    <div class="code-col">
+      <h2>Run it on your own captures</h2>
+<pre><span class="c"># export Echo Request timestamps from a capture</span>
+tshark -r normal1.pcap -Y "icmp.type == 8" -T fields \
+  -e frame.time_epoch -e ip.src -e ip.dst \
+  -e icmp.ident -e icmp.seq -E header=y -E separator=, &gt; normal1.csv
+
+<span class="c"># baseline from normal runs, then judge and score test runs</span>
+python -m icmp_detector baseline normal*.csv --window 32 --out baseline.json
+python -m icmp_detector detect test.csv --baseline baseline.json
+python -m icmp_detector evaluate --baseline baseline.json \
+  --normal test_normal*.csv --channel test_channel*.csv --bits 0101...
+
+<span class="c"># reproduce the simulated study and this page</span>
+python -m icmp_detector study --out results
+python scripts/build_site.py</pre>
+    </div>
+  </div>
+</section>
+</div>
+</main>
+
+<footer>
+  <div class="shell">
+    <span>Ping Gap Detector started as a BCSE308P Computer Networks project at VIT Vellore. It is defensive research: experiments run only on machines the team controls, and the simulator on this page sends no packets.</span>
+    <ol>
+      <li>Cabuk, Brodley and Shields. IP Covert Timing Channels: Design and Detection. ACM CCS 2004.</li>
+      <li>Gianvecchio and Wang. Detecting Covert Timing Channels: An Entropy-Based Approach. ACM CCS 2007.</li>
+      <li>Iglesias Vázquez, Annessi and Zseby. Analytic Study of Features for the Detection of Covert Timing Channels. JCSM 2017.</li>
+      <li>Ondov and Helebrandt. Covert Channel Detection Methods. ICETA 2022.</li>
+    </ol>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<script>
+// Pages: the site reads as separate pages (Home, Why, Lab, Play, Results, Team) behind the top bar.
+// Any #link resolves to the page that holds its target, so deep links like #bench still work.
+(() => {
+  "use strict";
+  const pages = [...document.querySelectorAll(".page")];
+  const ids = pages.map((p) => p.id);
+  const links = document.querySelectorAll("[data-nav]");
+  const bar = document.querySelector(".nav-progress");
+  pages.forEach((p, i) => {
+    const prev = pages[i - 1], next = pages[i + 1];
+    const nav = document.createElement("nav");
+    nav.className = "pager"; nav.setAttribute("aria-label", "More pages");
+    nav.innerHTML = '<div class="shell">' +
+      (prev ? `<a class="prev" href="#${prev.id}"><small>Previous</small><b>${prev.dataset.label}</b></a>` : "") +
+      (next ? `<a class="next" href="#${next.id}"><small>Next, ${String(i + 1).padStart(2, "0")} of ${String(pages.length - 1).padStart(2, "0")}</small><b>${next.dataset.label}</b></a>` : "") + "</div>";
+    p.appendChild(nav);
+  });
+
+  let current = null;
+  const scrollToY = (y, smooth) => {
+    const lenis = window.__lenis;
+    if (!smooth) { window.scrollTo(0, y); if (lenis) { lenis.resize(); lenis.scrollTo(y, { immediate: true, force: true }); } }
+    else if (lenis) lenis.scrollTo(y, { force: true });
+    else window.scrollTo({ top: y, behavior: "smooth" });
+  };
+  function go(id, push) {
+    const el = id && document.getElementById(id);
+    const page = el ? (el.classList.contains("page") ? el : el.closest(".page")) : null;
+    const target = page || pages[0];
+    if (target !== current) {
+      pages.forEach((p) => { p.hidden = p !== target; });
+      target.classList.remove("entering"); void target.offsetWidth; target.classList.add("entering");
+      current = target;
+      links.forEach((a) => (a.dataset.nav === target.id ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+      if (bar) bar.style.transform = `scaleX(${(ids.indexOf(target.id) + 1) / ids.length})`;
+      scrollToY(0, false);
+      window.dispatchEvent(new CustomEvent("pagechange", { detail: target.id }));
+    }
+    const inner = el && el !== target && el.id !== "top";
+    if (inner) requestAnimationFrame(() => scrollToY(el.getBoundingClientRect().top + window.scrollY - 70, true));
+    if (push) { try { history.pushState(null, "", "#" + (inner ? el.id : target.id)); } catch (err) { /* sandboxed */ } }
+  }
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute("href").slice(1);
+    if (!document.getElementById(id)) return;
+    e.preventDefault();
+    go(id, true);
+  });
+  window.addEventListener("popstate", () => go(location.hash.slice(1), false));
+  // arrow keys step through pages, handy when presenting
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    const i = ids.indexOf(current.id);
+    if (e.key === "ArrowRight" && i < ids.length - 1) go(ids[i + 1], true);
+    if (e.key === "ArrowLeft" && i > 0) go(ids[i - 1], true);
+  });
+  go(location.hash.slice(1), false);
+})();
+</script>
+
+<script>
+// Layered wave dividers between the dark bands (Haikei-style, generated here so they ship with the page).
+(() => {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const mix = (a, b, t) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); const x = p(a), y = p(b); return `rgb(${x.map((v, i) => Math.round(v + (y[i] - v) * t)).join(",")})`; };
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  document.querySelectorAll(".wave").forEach((holder) => {
+    const into = holder.dataset.wave === "in", from = css("--bg"), to = css("--surface");
+    const W = 1440, H = 120, svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("preserveAspectRatio", "none"); svg.setAttribute("class", "wave");
+    const bgRect = document.createElementNS(NS, "rect");
+    bgRect.setAttribute("width", W); bgRect.setAttribute("height", H); bgRect.setAttribute("fill", into ? from : to); svg.appendChild(bgRect);
+    const layers = 4;
+    for (let l = 0; l < layers; l++) {
+      const t = (l + 1) / layers, base = 20 + l * 24, pts = [];
+      for (let x = 0; x <= W; x += W / 6) pts.push([x, base + (rnd() - 0.5) * 26]);
+      let d = `M0,${pts[0][1]}`;
+      for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], cx = (x0 + x1) / 2; d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`; }
+      d += ` L${W},${H} L0,${H} Z`;
+      const path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill", into ? mix(from, to, t) : mix(to, from, t));
+      if (l === 0) { path.setAttribute("stroke", into ? `rgba(${css("--signal-rgb")},0.35)` : `rgba(${css("--normal-rgb")},0.25)`); path.setAttribute("stroke-width", "1.2"); }
+      svg.appendChild(path);
+    }
+    holder.replaceWith(svg);
+  });
+})();
+
+// Split the hero headline into words so GSAP can raise them line by line.
+(() => {
+  const h1 = document.querySelector(".hero h1");
+  if (!h1) return;
+  const wrap = (node) => {
+    [...node.childNodes].forEach((c) => {
+      if (c.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        c.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement("span"); w.className = "w";
+          const inner = document.createElement("span"); inner.textContent = part; w.appendChild(inner); frag.appendChild(w);
+        });
+        c.replaceWith(frag);
+      } else if (c.nodeType === 1) wrap(c);
+    });
+  };
+  wrap(h1);
+})();
+
+// 3D hero: two Echo Request streams fly toward the receiver. The normal stream keeps an even
+// 1 s rhythm; the covert stream spaces its packets 0.75 s or 1.25 s apart to spell its bits.
+(() => {
+  "use strict";
+  const THREE = window.THREE, canvas = document.getElementById("scene");
+  if (!THREE || !canvas) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch (e) { return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()), 0.045);
+  const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
+  camera.position.set(0, 1.1, 6);
+
+  const tok = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const ORANGE = new THREE.Color(tok("--signal")), BLUE = new THREE.Color(tok("--normal"));
+  const glowTex = (() => {
+    const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, "rgba(255,255,255,1)"); grd.addColorStop(0.25, "rgba(255,255,255,0.55)"); grd.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = grd; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+  })();
+  const bitTex = [0, 1].map((b) => {
+    const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    g.fillStyle = tok("--signal-hi"); g.font = "700 46px 'JetBrains Mono', monospace"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(b), 32, 34);
+    return new THREE.CanvasTexture(c);
+  });
+
+  // floor of points
+  const floor = new THREE.BufferGeometry(), fp = [];
+  for (let x = -24; x <= 24; x += 0.8) for (let z = -90; z <= 8; z += 0.8) fp.push(x, -1.1, z);
+  floor.setAttribute("position", new THREE.Float32BufferAttribute(fp, 3));
+  scene.add(new THREE.Points(floor, new THREE.PointsMaterial({ color: 0x3a5068, size: 0.035, transparent: true, opacity: 0.8 })));
+
+  // ambient traffic: faint packets from other hosts drifting past, for depth
+  const AMB = 520, ambGeo = new THREE.BufferGeometry(), ambPos = new Float32Array(AMB * 3), ambSpeed = new Float32Array(AMB);
+  for (let i = 0; i < AMB; i++) { ambPos[i * 3] = (Math.random() - 0.5) * 40; ambPos[i * 3 + 1] = Math.random() * 9 - 1; ambPos[i * 3 + 2] = -Math.random() * 90; ambSpeed[i] = 2 + Math.random() * 5; }
+  ambGeo.setAttribute("position", new THREE.BufferAttribute(ambPos, 3));
+  const amb = new THREE.Points(ambGeo, new THREE.PointsMaterial({ color: 0x9fc4ff, size: 0.06, map: glowTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  scene.add(amb);
+  function drift(dt) {
+    for (let i = 0; i < AMB; i++) { let z = ambPos[i * 3 + 2] + ambSpeed[i] * dt; if (z > 6) { z = -90; ambPos[i * 3] = (Math.random() - 0.5) * 40; } ambPos[i * 3 + 2] = z; }
+    ambGeo.attributes.position.needsUpdate = true;
+  }
+
+  const LANES = [{ x: -1.1, color: BLUE, covert: false }, { x: 1.1, color: ORANGE, covert: true }];
+  const toBits = (str) => [...str].flatMap((ch) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (ch.charCodeAt(0) >> k) & 1));
+  let bits = toBits("HELLO ");
+  const UNITS = 4.2; // world units per simulated second
+  LANES.forEach((lane) => {
+    const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(lane.x, 0, -90), new THREE.Vector3(lane.x, 0, 8)]);
+    scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: lane.color, transparent: true, opacity: 0.35 })));
+    lane.pool = Array.from({ length: 34 }, () => {
+      const group = new THREE.Group();
+      const core = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.5), new THREE.MeshBasicMaterial({ color: lane.color }));
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: lane.color, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+      glow.scale.set(1.3, 1.3, 1);
+      group.add(core, glow);
+      if (lane.covert) {
+        const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: bitTex[0], transparent: true, depthWrite: false }));
+        label.position.y = 0.7; label.scale.set(0.55, 0.55, 1); group.add(label); group.userData.label = label;
+      }
+      scene.add(group); return group;
+    });
+    lane.pk = []; lane.k = 0; lane.gaps = [];
+  });
+  // receiver gate
+  const gateGeo = new THREE.BufferGeometry().setFromPoints([[-2.4, -0.9], [2.4, -0.9], [2.4, 1.3], [-2.4, 1.3], [-2.4, -0.9]].map(([x, y]) => new THREE.Vector3(x, y, 0)));
+  const gate = new THREE.Line(gateGeo, new THREE.LineBasicMaterial({ color: 0xeaf0f5, transparent: true, opacity: 0.25 }));
+
+  let jseed = 99; const jit = () => { jseed = (jseed * 16807) % 2147483647; return (jseed / 2147483647 - 0.5) * 0.012; };
+  function extend(lane, upto) {
+    while (!lane.pk.length || lane.pk[lane.pk.length - 1].t < upto) {
+      const prev = lane.pk[lane.pk.length - 1];
+      let gap = 1 + jit(), bit = null;
+      if (lane.covert && prev) { bit = bits[lane.k++ % bits.length]; gap = (bit ? 1.25 : 0.75) + jit(); }
+      lane.pk.push({ t: prev ? prev.t + gap : -6, gap: prev ? gap : null, bit, done: false });
+    }
+  }
+  window.icmpSecret = (text) => {
+    bits = toBits(text.replace(/[^\x20-\x7e]/g, "?"));
+    const lane = LANES[1];
+    lane.pk = lane.pk.filter((p) => p.done); lane.k = 0;
+    decoded.length = 0;
+    document.getElementById("wireText").innerHTML = '<span class="cursor"></span>';
+    document.getElementById("wireBits").textContent = "";
+  };
+  // the receiver readout under the headline follows this scene
+  const decoded = [], sd = (a) => { if (a.length < 3) return 0; const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); };
+  const toText = (b) => { let out = ""; for (let i = 0; i + 8 <= b.length; i += 8) { const c = b.slice(i, i + 8).reduce((x, y) => x * 2 + y, 0); out += c >= 32 && c < 127 ? String.fromCharCode(c) : "?"; } return out; };
+  function arrive(lane, p) {
+    if (p.gap == null) return;
+    lane.gaps.push(p.gap); if (lane.gaps.length > 16) lane.gaps.shift();
+    if (lane.covert) {
+      decoded.push(p.bit);
+      const txt = toText(decoded).slice(-14).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      document.getElementById("wireText").innerHTML = txt + '<span class="cursor"></span>';
+      document.getElementById("wireBits").textContent = decoded.slice(-48).join("");
+    }
+    const a = sd(LANES[0].gaps), b = sd(LANES[1].gaps);
+    document.getElementById("mNorm").textContent = `${a.toFixed(3)} s`;
+    document.getElementById("mCov").textContent = `${b.toFixed(3)} s`;
+    const flag = document.getElementById("mFlag");
+    flag.textContent = b > 0.1 ? "covert stream flagged" : "collecting gaps"; flag.className = "flag " + (b > 0.1 ? "sus" : "ok");
+  }
+
+  let W = 0, H = 0, t = 0, last = performance.now(), mx = 0, my = 0, flash = 0;
+  function resize() {
+    W = canvas.clientWidth; H = canvas.clientHeight; if (!W || !H) return;
+    renderer.setSize(W, H, false); camera.aspect = W / H;
+    // push the vanishing point right of the headline on wide screens
+    if (W > 920) camera.setViewOffset(W, H, -W * 0.24, H * 0.04, W, H); else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  }
+  function frame() {
+    LANES.forEach((lane) => {
+      extend(lane, t + 24);
+      lane.pk.forEach((p) => { if (!p.done && p.t <= t) { p.done = true; arrive(lane, p); if (lane.covert) flash = 1; } });
+      while (lane.pk.length && lane.pk[0].t < t - 3) lane.pk.shift();
+      lane.pool.forEach((g, i) => {
+        const p = lane.pk[i], z = p ? -(p.t - t) * UNITS : -999;
+        g.visible = z > -90 && z < 4;
+        if (!g.visible) return;
+        g.position.set(lane.x, 0, z);
+        const fade = z > 1.8 ? Math.max(0, 1 - (z - 1.8) / 2.2) : 1;
+        g.children.forEach((c) => { c.material.opacity = fade; c.material.transparent = true; });
+        if (g.userData.label) { g.userData.label.visible = p.bit != null && z < -0.4; if (p.bit != null) g.userData.label.material.map = bitTex[p.bit]; }
+      });
+    });
+    flash *= 0.9;
+    camera.position.x += (mx * 0.8 - camera.position.x) * 0.04;
+    camera.position.y += (1.1 + my * 0.35 - camera.position.y) * 0.04;
+    camera.lookAt(0, 0.35, -30);
+    renderer.render(scene, camera);
+  }
+  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt * 2.6; drift(dt); frame(); raf = requestAnimationFrame(loop); }
+  let raf = 0, running = false;
+  new ResizeObserver(() => { resize(); frame(); }).observe(canvas);
+  resize();
+  window.addEventListener("pointermove", (e) => { mx = (e.clientX / window.innerWidth - 0.5) * 2; my = (e.clientY / window.innerHeight - 0.5) * 2; }, { passive: true });
+  document.documentElement.classList.add("has-3d");
+  if (reduce) { t = 12; frame(); return; }
+  // only animate while the hero is on screen
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && !running) { running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
+    else if (!e.isIntersecting && running) { running = false; cancelAnimationFrame(raf); }
+  }).observe(canvas);
+})();
+</script>
+<script id="study" type="application/json">__STUDY_JSON__</script>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+  // ---------- seeded random numbers ----------
+  function rngFrom(seed) {
+    let a = seed >>> 0;
+    const uni = () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const normal = (sd) => { const u = Math.max(uni(), 1e-12), v = uni(); return sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    return { uni, normal };
+  }
+  const textToBits = (s) => [...new TextEncoder().encode(s || "?")].flatMap((b) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (b >> k) & 1));
+  const bitsToText = (bits) => { let s = ""; for (let i = 0; i + 8 <= bits.length; i += 8) { const b = bits.slice(i, i + 8); if (b.includes(null)) { s += "?"; continue; } const c = b.reduce((x, y) => x * 2 + y, 0); s += c >= 32 && c < 127 ? String.fromCharCode(c) : "?"; } return s; };
+
+  // ---------- simulator (mirrors icmp_detector/simulate.py) ----------
+  const SENDER = { nominal: 1.0, sendJitter: 0.002, spikeProb: 0.02, spikeMax: 0.03 };
+  function sendGaps(n, bits, g0, g1, r) {
+    const gaps = [];
+    for (let i = 0; i < n; i++) {
+      let g = bits ? (bits[i % bits.length] ? g1 : g0) : SENDER.nominal;
+      g += r.normal(SENDER.sendJitter);
+      if (r.uni() < SENDER.spikeProb) g += r.uni() * SENDER.spikeMax;
+      gaps.push(Math.max(g, 1e-4));
+    }
+    return gaps;
+  }
+  function throughNetwork(gaps, jitter, loss, r) {
+    const pk = []; let t = 0;
+    for (let i = 0; i <= gaps.length; i++) {
+      const delay = 0.001 + (jitter ? Math.abs(r.normal(jitter)) : 0);
+      if (r.uni() >= loss) pk.push({ t: t + delay, seq: i });
+      if (i < gaps.length) t += gaps[i];
+    }
+    return pk.sort((a, b) => a.t - b.t);
+  }
+  const run = (n, bits, g0, g1, jitter, loss, r) => throughNetwork(sendGaps(n - 1, bits, g0, g1, r), jitter, loss, r);
+
+  // ---------- features and detectors (mirror features.py / detector.py) ----------
+  function windows(pk, size) {
+    const out = [];
+    for (let s = 0; s + size <= pk.length; s += size) {
+      const w = [];
+      for (let i = s + 1; i < s + size; i++) if (pk[i].seq - pk[i - 1].seq === 1) w.push(pk[i].t - pk[i - 1].t);
+      if (w.length >= 2) out.push(w);
+    }
+    return out;
+  }
+  const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
+  const std = (a) => { const m = mean(a); return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1)); };
+  function percentile(a, p) { const s = [...a].sort((x, y) => x - y); const k = (s.length - 1) * p / 100; const f = Math.floor(k), c = Math.ceil(k); return f === c ? s[f] : s[f] + (s[c] - s[f]) * (k - f); }
+  const baselineStd = (flows, size) => percentile(flows.flatMap((f) => windows(f, size)).map(std), 95);
+  const fmt = (v, d = 2) => Number(v).toFixed(d);
+
+  // ---------- hero: live wire ----------
+  (function wire() {
+    const canvas = $("wire"), ctx = canvas.getContext("2d");
+    const MSG = "VIT ", bits = textToBits(MSG);
+    const r = rngFrom(42);
+    const lanes = [{ name: "normal ping", key: "normal", pk: [], next: 0, gaps: [] }, { name: "covert", key: "signal", pk: [], next: 0, gaps: [], bit: 0 }];
+    const SPEED = 1.6; // simulated seconds per real second
+    let simT = 0, last = performance.now(), W = 0, H = 0, colors = {};
+    const decoded = [];
+    function readColors() { colors = { ink: css("--ink"), ink2: css("--ink-2"), line: css("--line"), normal: css("--normal"), signal: css("--signal"), surface: css("--surface") }; }
+    function size() { const dpr = window.devicePixelRatio || 1; W = canvas.clientWidth; H = canvas.clientHeight; canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0); }
+    function schedule(lane, upto) {
+      while (lane.next < upto) {
+        const prev = lane.pk[lane.pk.length - 1];
+        let gap;
+        if (lane.key === "normal") gap = 1 + r.normal(0.004);
+        else if (prev) { const b = bits[lane.bit % bits.length]; lane.bit++; gap = (b ? 1.25 : 0.75) + r.normal(0.004); }
+        else gap = 1;
+        const t = prev ? prev.t + gap : 0.5;
+        lane.pk.push({ t, gap: prev ? gap : null, bit: lane.key === "signal" && prev ? (gap >= 1 ? 1 : 0) : null, seen: false });
+        lane.next = t;
+      }
+    }
+    function arrive(lane, p) {
+      if (p.gap == null || document.documentElement.classList.contains("has-3d")) return;
+      lane.gaps.push(p.gap); if (lane.gaps.length > 16) lane.gaps.shift();
+      if (lane.key === "signal") {
+        decoded.push(p.bit);
+        const txt = bitsToText(decoded.slice(0, Math.floor(decoded.length / 8) * 8));
+        $("wireText").innerHTML = (txt.slice(-14) || "") + '<span class="cursor"></span>';
+        $("wireBits").textContent = decoded.slice(-48).join("");
+      }
+      const sd = (l) => (l.gaps.length > 2 ? std(l.gaps) : 0);
+      $("mNorm").textContent = `${fmt(sd(lanes[0]), 3)} s`;
+      $("mCov").textContent = `${fmt(sd(lanes[1]), 3)} s`;
+      const flagged = sd(lanes[1]) > 0.1;
+      $("mFlag").textContent = flagged ? "covert stream flagged" : "collecting gaps";
+      $("mFlag").className = "flag " + (flagged ? "sus" : "ok");
+    }
+    function draw() {
+      const rx = W * 0.84, pps = Math.max(70, W / 6.2), laneY = [H * 0.33, H * 0.73];
+      ctx.clearRect(0, 0, W, H);
+      ctx.font = "500 10px 'JetBrains Mono', monospace";
+      // receiver line
+      ctx.strokeStyle = colors.ink2; ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(rx, 10); ctx.lineTo(rx, H - 10); ctx.stroke(); ctx.setLineDash([]);
+      lanes.forEach((lane, li) => {
+        const y = laneY[li], col = colors[lane.key];
+        ctx.strokeStyle = colors.line; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+        ctx.fillStyle = colors.ink2; ctx.textAlign = "left"; ctx.fillText(lane.name.toUpperCase(), 88, y - 34);
+        for (let i = 0; i < lane.pk.length; i++) {
+          const p = lane.pk[i], x = rx - (p.t - simT) * pps;
+          if (x < -40 || x > W + 40) continue;
+          const arrived = p.t <= simT;
+          ctx.globalAlpha = arrived ? Math.max(0.12, 1 - (simT - p.t) * 0.9) : 1;
+          // gap annotation
+          const prev = lane.pk[i - 1];
+          if (prev && p.gap != null) {
+            const px = rx - (prev.t - simT) * pps, mid = (x + px) / 2;
+            ctx.strokeStyle = col; ctx.globalAlpha *= 0.55; ctx.beginPath(); ctx.moveTo(px + 5, y + 18); ctx.lineTo(x - 5, y + 18); ctx.stroke(); ctx.globalAlpha /= 0.55;
+            ctx.fillStyle = colors.ink2; ctx.textAlign = "center"; ctx.fillText(`${fmt(p.gap, 2)}s`, mid, y + 32);
+            if (p.bit != null) { ctx.fillStyle = col; ctx.font = "700 15px 'JetBrains Mono', monospace"; ctx.fillText(String(p.bit), mid, y - 12); ctx.font = "500 10px 'JetBrains Mono', monospace"; }
+          }
+          ctx.fillStyle = col; ctx.fillRect(x - 3, y - 9, 6, 18);
+          ctx.globalAlpha = 1;
+        }
+      });
+      // fade at the sender edge
+      const g = ctx.createLinearGradient(0, 0, 80, 0); g.addColorStop(0, "rgba(0,0,0,1)"); g.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalCompositeOperation = "destination-out"; ctx.fillStyle = g; ctx.fillRect(0, 0, 80, H); ctx.globalCompositeOperation = "source-over";
+    }
+    function step(now) {
+      const dt = Math.min(0.1, (now - last) / 1000); last = now; simT += dt * SPEED;
+      tick(); draw(); requestAnimationFrame(step);
+    }
+    function tick() {
+      lanes.forEach((lane) => {
+        schedule(lane, simT + 8);
+        lane.pk.forEach((p) => { if (!p.seen && p.t <= simT) { p.seen = true; arrive(lane, p); } });
+        while (lane.pk.length > 30 && lane.pk[0].t < simT - 4) lane.pk.shift();
+      });
+    }
+    readColors(); size();
+    new ResizeObserver(() => { size(); draw(); }).observe(canvas);
+    window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { readColors(); draw(); });
+    new MutationObserver(() => { readColors(); draw(); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    if (reduceMotion) { simT = 26; tick(); draw(); }
+    else { simT = 6; tick(); requestAnimationFrame((t) => { last = t; step(t); }); }
+  })();
+
+  // ---------- SVG helpers ----------
+  function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function frame(W, H, m) { const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }); return { svg, x0: m.l, x1: W - m.r, y0: H - m.b, y1: m.t }; }
+  function yAxis(f, ticks, sy, label, digits) {
+    for (const t of ticks) { const y = sy(t); el("line", { x1: f.x0, x2: f.x1, y1: y, y2: y, class: "grid" }, f.svg); el("text", { x: f.x0 - 6, y: y + 3, "text-anchor": "end" }, f.svg).textContent = typeof digits === "function" ? digits(t) : fmt(t, digits); }
+    if (label) el("text", { x: f.x0, y: f.y1 - 8 }, f.svg).textContent = label;
+  }
+  function xAxis(f, ticks, sx, label, digits = 0) {
+    el("line", { x1: f.x0, x2: f.x1, y1: f.y0, y2: f.y0, class: "axis" }, f.svg);
+    for (const t of ticks) el("text", { x: sx(t), y: f.y0 + 14, "text-anchor": "middle" }, f.svg).textContent = fmt(t, digits);
+    if (label) el("text", { x: f.x1, y: f.y0 + 28, "text-anchor": "end" }, f.svg).textContent = label;
+  }
+
+  // ---------- encoding strip ----------
+  (function encodingStrip() {
+    const letter = "V", bits = textToBits(letter);
+    const W = 1080, H = 190, x0 = 30, pps = 112, yT = 100;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img", "aria-label": `The letter ${letter} as eight gaps: ${bits.join(" ")}` });
+    el("text", { x: x0, y: 22, fill: "var(--ink-2)", "font-size": 11 }, svg).textContent = `"${letter}" = 0x${letter.charCodeAt(0).toString(16).toUpperCase()} = ${bits.join("")}`;
+    el("line", { x1: 0, x2: W, y1: yT, y2: yT, stroke: "var(--line)", "stroke-width": 1 }, svg);
+    let x = x0;
+    const xs = [x];
+    bits.forEach((b) => { x += (b ? 1.25 : 0.75) * pps; xs.push(x); });
+    // nominal 1 s grid
+    for (let i = 0; i <= 8; i++) {
+      const gx = x0 + i * pps;
+      el("line", { x1: gx, x2: gx, y1: yT + 26, y2: yT + 34, stroke: "var(--ink-2)", "stroke-width": 1 }, svg);
+      el("text", { x: gx, y: yT + 48, "text-anchor": "middle", "font-size": 10, fill: "var(--ink-2)" }, svg).textContent = `${i} s`;
+    }
+    el("text", { x: x0 + 8 * pps + 16, y: yT + 34, "font-size": 10, fill: "var(--ink-2)" }, svg).textContent = "regular ping";
+    bits.forEach((b, i) => {
+      const a = xs[i], c = xs[i + 1], mid = (a + c) / 2;
+      el("rect", { x: a + 4, y: yT - 52, width: c - a - 8, height: 34, fill: b ? "var(--signal-soft)" : "transparent", stroke: b ? "var(--signal)" : "var(--line)", "stroke-width": 1, rx: 2 }, svg);
+      el("text", { x: mid, y: yT - 29, "text-anchor": "middle", "font-size": 17, "font-weight": 700, fill: b ? "var(--signal)" : "var(--ink)" }, svg).textContent = b;
+      el("text", { x: mid, y: yT - 60, "text-anchor": "middle", "font-size": 10, fill: "var(--ink-2)" }, svg).textContent = `${b ? "1.25" : "0.75"} s`;
+    });
+    xs.forEach((px) => el("rect", { x: px - 3, y: yT - 11, width: 6, height: 22, fill: "var(--ink)" }, svg));
+    $("encStrip").appendChild(svg);
+    $("encLetter").textContent = letter;
+  })();
+
+  // ---------- bench charts ----------
+  function seqChart(normal, channel) {
+    const f = frame(820, 230, { l: 44, r: 12, t: 22, b: 34 });
+    const all = normal.concat(channel);
+    let lo = Math.min(...all, 0.9), hi = Math.max(...all, 1.1); const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    const n = Math.max(normal.length, channel.length);
+    const sx = (i) => f.x0 + (f.x1 - f.x0) * i / Math.max(n - 1, 1);
+    const sy = (v) => f.y0 - (f.y0 - f.y1) * (v - lo) / (hi - lo);
+    const step = (hi - lo) > 1 ? 0.5 : (hi - lo) > 0.5 ? 0.25 : 0.1;
+    const ticks = []; for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) ticks.push(+t.toFixed(3));
+    yAxis(f, ticks, sy, "gap (s)", 2);
+    xAxis(f, [0, 15, 31, 47, n - 1].filter((t) => t < n), sx, "gap number");
+    el("line", { x1: f.x0, x2: f.x1, y1: sy(1), y2: sy(1), stroke: "var(--ink-2)", "stroke-dasharray": "4 4", fill: "none" }, f.svg);
+    for (const [data, color] of [[normal, "var(--normal)"], [channel, "var(--signal)"]]) {
+      el("polyline", { points: data.map((v, i) => `${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: color, "stroke-width": 1.5, "stroke-linejoin": "round" }, f.svg);
+      data.forEach((v, i) => el("circle", { cx: sx(i), cy: sy(v), r: 2, fill: color }, f.svg));
+    }
+    return f.svg;
+  }
+  function histChart(normal, channel) {
+    const f = frame(400, 230, { l: 34, r: 16, t: 22, b: 34 });
+    const lo = 0.5, hi = 1.5, bw = 0.02, nb = Math.round((hi - lo) / bw);
+    const count = (a) => { const c = new Array(nb).fill(0); a.forEach((v) => c[Math.min(nb - 1, Math.max(0, Math.floor((v - lo) / bw)))]++); return c; };
+    const cn = count(normal), cc = count(channel), top = Math.max(4, ...cn, ...cc);
+    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - lo) / (hi - lo), sy = (v) => f.y0 - (f.y0 - f.y1) * v / top;
+    yAxis(f, [0, Math.round(top / 2), top], sy, "count", 0);
+    xAxis(f, [0.5, 0.75, 1, 1.25, 1.5], sx, "gap (s)", 2);
+    const bar = (c, color, op) => c.forEach((v, i) => { if (v) el("rect", { x: sx(lo + i * bw) + 0.5, width: Math.max(1, sx(bw) - sx(0) - 1), y: sy(v), height: f.y0 - sy(v), fill: color, "fill-opacity": op }, f.svg); });
+    bar(cn, "var(--normal)", 0.9); bar(cc, "var(--signal)", 0.75);
+    return f.svg;
+  }
+  function stdChart(nStd, cStd, lines) {
+    const f = frame(400, 230, { l: 46, r: 12, t: 22, b: 34 });
+    const all = nStd.concat(cStd, lines.map((l) => l.v)).filter((v) => v > 0);
+    const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...all)))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...all))));
+    const sy = (v) => f.y0 - (f.y0 - f.y1) * (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo));
+    const ticks = []; for (let t = lo; t <= hi * 1.001; t *= 10) ticks.push(t);
+    yAxis(f, ticks, sy, "std of gaps (s, log)", (t) => (t >= 1 ? t.toFixed(0) : String(+t.toPrecision(1))));
+    el("line", { x1: f.x0, x2: f.x1, y1: f.y0, y2: f.y0, class: "axis" }, f.svg);
+    for (const l of lines) el("line", { x1: f.x0, x2: f.x1, y1: sy(l.v), y2: sy(l.v), stroke: l.c, "stroke-dasharray": "5 4", "stroke-width": 1.4, fill: "none" }, f.svg);
+    [["normal windows", nStd, "var(--normal)", 0.3], ["covert windows", cStd, "var(--signal)", 0.72]].forEach(([label, vals, color, pos]) => {
+      const cx = f.x0 + (f.x1 - f.x0) * pos;
+      el("text", { x: cx, y: f.y0 + 14, "text-anchor": "middle" }, f.svg).textContent = label;
+      vals.forEach((v, i) => el("circle", { cx: cx + ((i * 37) % 64) - 32, cy: sy(v), r: 3, fill: color, "fill-opacity": 0.85 }, f.svg));
+    });
+    return f.svg;
+  }
+  function rateChart(series, xs, xLabel) {
+    const f = frame(440, 190, { l: 36, r: 14, t: 16, b: 34 });
+    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - xs[0]) / (xs[xs.length - 1] - xs[0]), sy = (v) => f.y0 - (f.y0 - f.y1) * v;
+    yAxis(f, [0, 0.5, 1], sy, "", (t) => `${Math.round(t * 100)}%`);
+    xAxis(f, xs, sx, xLabel);
+    series.forEach((s, k) => {
+      const off = (k - 1) * 1.5; // keep overlapping lines visible
+      el("polyline", { points: s.vals.map((v, i) => `${sx(xs[i])},${sy(v) + off}`).join(" "), fill: "none", stroke: s.c, "stroke-width": 2, "stroke-dasharray": s.dash || "" }, f.svg);
+      s.vals.forEach((v, i) => el("circle", { cx: sx(xs[i]), cy: sy(v) + off, r: 3.2, fill: s.c }, f.svg));
+    });
+    return f.svg;
+  }
+
+  // ---------- bench ----------
+  const state = { g0: 0.75, g1: 1.25, seed: 20261009 };
+  function verdict(name, rule, dr, fpr) {
+    const st = dr >= 0.9 && fpr <= 0.1 ? ["good", "Separates the two"] : dr >= 0.9 ? ["warn", "Too many false alarms"] : fpr <= 0.1 ? ["bad", "Misses the channel"] : ["bad", "Unreliable"];
+    const d = document.createElement("div"); d.className = "verdict"; d.dataset.state = st[0];
+    d.innerHTML = `<h3>${name}</h3><span class="rule">${rule}</span><div class="pair"><div><span class="big">${Math.round(dr * 100)}%</span><span class="small">caught</span></div><div><span class="big">${Math.round(fpr * 100)}%</span><span class="small">false alarms</span></div></div><span class="state">${st[1]}</span>`;
+    return d;
+  }
+  function update() {
+    const jitter = +$("jitter").value / 1000, loss = +$("loss").value / 100, size = +$("win").value, stdTol = +$("stdtol").value / 1000;
+    $("jitterOut").textContent = `${$("jitter").value} ms`;
+    $("lossOut").textContent = `${$("loss").value}%`;
+    $("stdtolOut").textContent = `${fmt(stdTol, 3)} s`;
+    const bits = textToBits($("msg").value);
+    $("msgBits").textContent = `${bits.length} bits`;
+    const r = rngFrom(state.seed), N = 64, RUNS = 10;
+    const cleanBase = Array.from({ length: RUNS }, () => run(N, null, 0, 0, 0, 0, r));
+    const matched = Array.from({ length: RUNS }, () => run(N, null, 0, 0, jitter, loss, r));
+    const testN = Array.from({ length: RUNS }, () => run(N, null, 0, 0, jitter, loss, r));
+    const testC = Array.from({ length: RUNS }, () => run(N, bits, state.g0, state.g1, jitter, loss, r));
+    const thrClean = baselineStd(cleanBase, size), thrMatched = baselineStd(matched, size);
+    const nW = testN.flatMap((f) => windows(f, size)), cW = testC.flatMap((f) => windows(f, size));
+    const fixed = (w) => std(w) > stdTol || Math.abs(mean(w) - 1) > 0.1;
+    const rate = (ws, fn) => (ws.length ? ws.filter(fn).length / ws.length : 0);
+    $("verdicts").replaceChildren(
+      verdict("Fixed rule", `std > ${fmt(stdTol, 3)} s or mean off by 0.1 s`, rate(cW, fixed), rate(nW, fixed)),
+      verdict("Clean baseline", `std > p95 of clean LAN = ${fmt(thrClean, 4)} s`, rate(cW, (w) => std(w) > thrClean), rate(nW, (w) => std(w) > thrClean)),
+      verdict("Matched baseline", `std > p95 under same network = ${fmt(thrMatched, 4)} s`, rate(cW, (w) => std(w) > thrMatched), rate(nW, (w) => std(w) > thrMatched)),
+    );
+    const ipd = (pk) => pk.slice(1).map((p, i) => p.t - pk[i].t);
+    $("seqChart").replaceChildren(seqChart(ipd(testN[0]), ipd(testC[0])));
+    $("histChart").replaceChildren(histChart(testN.flatMap(ipd), testC.flatMap(ipd)));
+    $("stdChart").replaceChildren(stdChart(nW.map(std), cW.map(std), [{ v: stdTol, c: "var(--ink)" }, { v: thrClean, c: "var(--ok)" }, { v: thrMatched, c: "var(--bad)" }]));
+    const pk = testC[0], sent = Array.from({ length: N - 1 }, (_, i) => bits[i % bits.length]);
+    const got = new Array(N - 1).fill(null);
+    for (let i = 1; i < pk.length; i++) if (pk[i].seq - pk[i - 1].seq === 1) got[pk[i - 1].seq] = pk[i].t - pk[i - 1].t >= 1 ? 1 : 0;
+    const correct = got.filter((b, i) => b === sent[i]).length;
+    // a detector only counts as catching you if it flags your windows without also flagging normal traffic
+    const tests = [fixed, (w) => std(w) > thrClean, (w) => std(w) > thrMatched];
+    const caughtBy = tests.filter((fn) => rate(cW, fn) >= 0.5 && rate(nW, fn) < 0.5).length;
+    const escaped = 3 - caughtBy, acc = correct / (N - 1);
+    const ch = $("challenge");
+    const [cState, tag, msg] = escaped === 3 && acc >= 0.9 ? ["escaped", "Escaped", `Clean escape. All three detectors missed it and ${Math.round(acc * 100)}% of your bits arrived.`]
+      : escaped === 3 ? ["garbled", "Garbled", `All three missed it, but the network scrambled your message: only ${Math.round(acc * 100)}% of bits arrived right.`]
+      : escaped > 0 ? ["partial", `${escaped} of 3`, `You slipped past ${escaped} detector${escaped > 1 ? "s" : ""}. Try smaller gaps, or hide in more jitter.`]
+      : ["caught", "Caught", "All three detectors caught your message. Try smaller gaps, or hide in more jitter."];
+    ch.dataset.state = cState; ch.querySelector(".tag").textContent = tag; $("challengeText").textContent = msg;
+    $("bitsOut").innerHTML = got.map((b, i) => (b === null ? '<span class="miss">?</span>' : b === sent[i] ? b : `<span class="err">${b}</span>`)).join("");
+    const text = bitsToText(got.slice(0, Math.floor((N - 1) / 8) * 8)).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+    $("decodeOut").innerHTML = `Recovered <b>${text}</b> with ${correct} of ${N - 1} bits right (${fmt((correct / (N - 1)) * 100, 1)}%). Red bits were flipped by jitter; ? marks a lost packet.`;
+  }
+  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    state.g0 = +b.dataset.g0; state.g1 = +b.dataset.g1; update();
+  }));
+  ["jitter", "loss", "win", "stdtol", "msg"].forEach((id) => $(id).addEventListener("input", update));
+  $("rerun").addEventListener("click", () => { state.seed = (Math.imul(state.seed, 1103515245) + 12345) >>> 0; update(); });
+  $("controls").addEventListener("submit", (e) => e.preventDefault());
+  $("secretForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = ($("secret").value || "HELLO").toUpperCase().slice(0, 16);
+    $("secret").value = text;
+    if (window.icmpSecret) window.icmpSecret(text + " ");
+    $("msg").value = text; update();
+  });
+  update();
+
+  // ---------- study results ----------
+  let study = null;
+  try { study = JSON.parse($("study").textContent); } catch (e) { study = null; }
+  if (!study) { $("studyMeta").textContent = "Run python -m icmp_detector study and scripts/build_site.py to embed the study here."; return; }
+  const cfg = study.config, W = study.baseline.window_size;
+  $("studyMeta").textContent = `These numbers come from the simulator, not from lab captures: ${cfg.runs_per_set} runs of ${cfg.requests_per_run} Echo Requests per set, ${W}-request windows, baseline p${cfg.percentile} from clean normal runs, seed ${cfg.seed}. Real captures replace them for the later reviews.`;
+  const DETS = [["fixed", "var(--ink)", ""], ["baseline (clean)", "var(--ok)", "6 4"], ["baseline (matched)", "var(--bad)", "2 3"]];
+  const channels = Object.keys(cfg.channels);
+  const row = (ch, cond, det) => study.results.find((r) => r.channel === ch && r.window === W && r.condition === cond && r.detector === det);
+  // claims from the data
+  const planned = channels[0], subtle = channels[channels.length - 1];
+  const minDR = Math.min(...["fixed", "baseline (clean)"].map((d) => row(planned, "clean", d).detection_rate));
+  $("c1").textContent = `${Math.round(minDR * 100)}%`;
+  const firstAll = cfg.conditions.filter((c) => c.loss === 0 && c.net_jitter > 0).find((c) => row(planned, c.name, "baseline (clean)").false_positive_rate >= 0.99);
+  if (firstAll) $("c2").textContent = `${Math.round(firstAll.net_jitter * 1000)} ms`;
+  $("c3").textContent = `${Math.round(row(subtle, "clean", "fixed").detection_rate * 100)}%`;
+  let current = planned;
+  function showStudy() {
+    document.querySelectorAll("#studyTabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ch === current)));
+    const conds = cfg.conditions.filter((c) => c.loss === 0), xs = conds.map((c) => Math.round(c.net_jitter * 1000));
+    const series = (key) => DETS.map(([d, c, dash]) => ({ c, dash, vals: conds.map((k) => row(current, k.name, d)[key]) }));
+    $("drChart").replaceChildren(rateChart(series("detection_rate"), xs, "added jitter (ms)"));
+    $("fprChart").replaceChildren(rateChart(series("false_positive_rate"), xs, "added jitter (ms)"));
+    let html = `<thead><tr><th>Condition</th>${DETS.map(([d]) => `<th>${d}<br>caught / false alarms</th>`).join("")}<th>Bits decoded</th></tr></thead><tbody>`;
+    for (const c of cfg.conditions) {
+      html += `<tr><td>${c.name}</td>`;
+      for (const [d] of DETS) { const r = row(current, c.name, d); html += `<td class="num ${r.detection_rate >= 0.9 && r.false_positive_rate <= 0.1 ? "ok" : "hi"}">${Math.round(r.detection_rate * 100)}% / ${Math.round(r.false_positive_rate * 100)}%</td>`; }
+      html += `<td class="num">${fmt(study.decoding_accuracy[current][c.name] * 100, 1)}%</td></tr>`;
+    }
+    $("studyTable").innerHTML = html + "</tbody>";
+  }
+  for (const ch of channels) {
+    const b = document.createElement("button"); b.type = "button"; b.dataset.ch = ch; b.textContent = ch.replace(" (subtle)", " subtle");
+    b.addEventListener("click", () => { current = ch; showStudy(); });
+    $("studyTabs").appendChild(b);
+  }
+  showStudy();
+})();
+</script>
+
+<script>
+// Motion layer: Lenis smooth scrolling plus GSAP ScrollTrigger. Every effect moves content
+// that is already visible (no hidden resting states), and all of it is skipped when the
+// libraries fail to load or the viewer prefers reduced motion.
+(() => {
+  "use strict";
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const { gsap, ScrollTrigger, Lenis } = window;
+  if (!gsap || !ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  // smooth scrolling, driven by GSAP's ticker so ScrollTrigger stays in sync
+  if (Lenis) {
+    try {
+      const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+      document.documentElement.style.scrollBehavior = "auto";
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      window.__lenis = lenis;  // the page router scrolls through Lenis so the two stay in sync
+    } catch (err) { /* fall back to native scrolling */ }
+  }
+
+  const ease = "power3.out";
+  // hero headline rises word by word, then the copy and the decoder panel follow
+  gsap.from(".hero h1 .w > span", { yPercent: 105, duration: 1, ease: "power4.out", stagger: 0.06, delay: 0.1 });
+  gsap.from(".hero .wire", { y: 40, duration: 1.1, ease, delay: 0.35 });
+  // section headings rise into place as each section arrives
+  gsap.utils.toArray("section h2").forEach((h) => {
+    gsap.from(h, { y: 28, duration: 0.9, ease, scrollTrigger: { trigger: h, start: "top 88%" } });
+  });
+
+  // related work reads as a timeline: entries arrive in date order
+  gsap.from(".timeline li", { x: 28, duration: 0.7, ease, stagger: 0.07, scrollTrigger: { trigger: ".timeline", start: "top 80%" } });
+
+  // the letter leaves the sender one gap at a time
+  const strip = document.querySelector("#encStrip svg");
+  if (strip) {
+    const boxes = strip.querySelectorAll("rect[height='34'], text[font-size='17']");
+    gsap.from(boxes, { y: -14, duration: 0.5, ease: "back.out(2)", stagger: 0.05, scrollTrigger: { trigger: strip, start: "top 80%" } });
+  }
+  gsap.from(".rules div", { y: 20, duration: 0.7, ease, stagger: 0.08, scrollTrigger: { trigger: ".rules", start: "top 88%" } });
+
+  // testbed: packets travel sender to receiver along the arrows
+  const topo = document.querySelector(".topo svg");
+  if (topo) {
+    const lines = topo.querySelectorAll("line");
+    // measured from the endpoints: getTotalLength throws while the Lab page is hidden
+    const len = (l) => Math.hypot(l.x2.baseVal.value - l.x1.baseVal.value, l.y2.baseVal.value - l.y1.baseVal.value) || 80;
+    lines.forEach((l) => { l.style.strokeDasharray = `${len(l)}`; });
+    gsap.fromTo(lines, { strokeDashoffset: (i, l) => len(l) }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", stagger: 0.35, immediateRender: false, scrollTrigger: { trigger: topo, start: "top 75%" } });
+  }
+
+  // findings: headline numbers count up from zero when they come into view
+  document.querySelectorAll(".claim .num").forEach((el) => {
+    const final = el.textContent, m = final.match(/^(\d+)(.*)$/);
+    if (!m) return;
+    const end = +m[1], unit = m[2], obj = { v: 0 };
+    ScrollTrigger.create({ trigger: el, start: "top 85%", once: true, onEnter: () => {
+      gsap.fromTo(obj, { v: 0 }, { v: end, duration: 1.2, ease: "power2.out", onUpdate: () => { el.textContent = `${Math.round(obj.v)}${unit}`; }, onComplete: () => { el.textContent = final; } });
+    } });
+  });
+  gsap.from(".claim", { x: -24, duration: 0.8, ease, stagger: 0.12, scrollTrigger: { trigger: ".claims", start: "top 80%" } });
+
+  // pipeline: the track fills as you scroll past it, stage by stage
+  const mm = gsap.matchMedia();
+  mm.add("(min-width: 901px)", () => {
+    gsap.fromTo(".track", { "--fill": 0 }, { "--fill": 1, ease: "none", scrollTrigger: { trigger: ".track", start: "top 85%", end: "bottom 55%", scrub: true } });
+  });
+  gsap.from(".track li", { y: 18, duration: 0.6, ease, stagger: 0.08, scrollTrigger: { trigger: ".track", start: "top 85%" } });
+
+  // conclusions: the verdict line lands, then the two lists
+  gsap.from(".verdict-line", { y: 24, duration: 0.9, ease, scrollTrigger: { trigger: ".verdict-line", start: "top 85%" } });
+  gsap.from(".cols li", { x: 16, duration: 0.5, ease, stagger: 0.05, scrollTrigger: { trigger: ".cols", start: "top 85%" } });
+
+  // detector feedback: verdict cards nudge when a control changes the result
+  const verdicts = document.getElementById("verdicts");
+  if (verdicts) new MutationObserver(() => gsap.fromTo("#verdicts .big", { y: 6 }, { y: 0, duration: 0.35, ease: "power2.out", overwrite: true })).observe(verdicts, { childList: true });
+
+  window.addEventListener("load", () => ScrollTrigger.refresh());
+  // a newly shown page has real positions now, so recompute every trigger
+  window.addEventListener("pagechange", () => requestAnimationFrame(() => ScrollTrigger.refresh()));
+})();
+</script>

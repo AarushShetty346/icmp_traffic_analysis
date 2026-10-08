@@ -133,6 +133,23 @@ def cmd_decode(args) -> None:
         print(f"decoding accuracy: {decoding_accuracy(sent, decoded):.1%}")
 
 
+def cmd_benchmark(args) -> None:
+    from .benchmark import accuracy_benchmark, markdown, plots, speed_benchmark
+
+    out = Path(args.out)
+    out.mkdir(parents=True, exist_ok=True)
+    acc = accuracy_benchmark(seed=args.seed, runs=args.runs)
+    speed = speed_benchmark(packets=args.packets)
+    site_path = out / "site.json"
+    site = json.loads(site_path.read_text()) if site_path.exists() else None
+    (out / "benchmark.json").write_text(json.dumps({"accuracy": acc, "speed": speed}, indent=1))
+    written = plots(acc, out)
+    (out / "BENCHMARK.md").write_text(markdown(acc, speed, site))
+    for p in [out / "benchmark.json", out / "BENCHMARK.md", *written]:
+        print(f"wrote {p}")
+    print(f"{speed['packets_per_s']:,.0f} packets/s end to end, {speed['us_per_window']:.0f} us per window")
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="icmp_detector", description="Detect ICMP covert timing channels from inter-packet delays.")
     sub = ap.add_subparsers(dest="command", required=True)
@@ -146,6 +163,13 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--percentile", type=float, default=95.0)
     _fixed_args(p)
     p.set_defaults(func=cmd_study)
+
+    p = sub.add_parser("benchmark", help="accuracy over channels x network conditions, plus pipeline speed")
+    p.add_argument("--out", default="results/benchmark")
+    p.add_argument("--seed", type=int, default=11)
+    p.add_argument("--runs", type=int, default=30, help="runs per labelled set (default 30)")
+    p.add_argument("--packets", type=int, default=100_000, help="capture length for the speed test")
+    p.set_defaults(func=cmd_benchmark)
 
     p = sub.add_parser("simulate", help="write one synthetic capture CSV (no packets are sent)")
     p.add_argument("kind", choices=["normal", "channel"])

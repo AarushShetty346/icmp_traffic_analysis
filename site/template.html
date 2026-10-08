@@ -207,7 +207,8 @@ td.hi { color: var(--bad); }
 
 /* pipeline */
 .track { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); position: relative; }
-.track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: linear-gradient(90deg, var(--normal), var(--signal)); }
+.track { --fill: 1; }
+.track::before { content: ""; position: absolute; left: 0; right: 0; top: 7px; height: 2px; background: linear-gradient(90deg, var(--normal), var(--signal)); transform: scaleX(var(--fill)); transform-origin: left center; }
 .track li { position: relative; padding: 30px 14px 0 0; display: grid; gap: 6px; align-content: start; }
 .track li::before { content: ""; position: absolute; top: 0; left: 0; width: 16px; height: 16px; border-radius: 50%; background: var(--bg); border: 2px solid var(--ink); }
 .track li:last-child::before { background: var(--signal); border-color: var(--signal); }
@@ -216,7 +217,7 @@ td.hi { color: var(--bad); }
 .track code { color: var(--ink); }
 @media (max-width: 900px) {
   .track { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-left: 30px; }
-  .track::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; background: linear-gradient(180deg, var(--normal), var(--signal)); }
+  .track::before { left: 7px; right: auto; top: 0; bottom: 0; width: 2px; height: auto; background: linear-gradient(180deg, var(--normal), var(--signal)); transform: none; }
   .track li { padding: 0; }
   .track li::before { left: -30px; top: 3px; }
 }
@@ -606,6 +607,9 @@ python scripts/build_site.py</pre>
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
 <script id="study" type="application/json">__STUDY_JSON__</script>
 <script>
 (() => {
@@ -943,5 +947,88 @@ python scripts/build_site.py</pre>
     $("studyTabs").appendChild(b);
   }
   showStudy();
+})();
+</script>
+
+<script>
+// Motion layer: Lenis smooth scrolling plus GSAP ScrollTrigger. Every effect moves content
+// that is already visible (no hidden resting states), and all of it is skipped when the
+// libraries fail to load or the viewer prefers reduced motion.
+(() => {
+  "use strict";
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const { gsap, ScrollTrigger, Lenis } = window;
+  if (!gsap || !ScrollTrigger) return;
+  gsap.registerPlugin(ScrollTrigger);
+
+  // smooth scrolling, driven by GSAP's ticker so ScrollTrigger stays in sync
+  if (Lenis) {
+    try {
+      const lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+      document.documentElement.style.scrollBehavior = "auto";
+      lenis.on("scroll", ScrollTrigger.update);
+      gsap.ticker.add((t) => lenis.raf(t * 1000));
+      gsap.ticker.lagSmoothing(0);
+      document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
+        const target = document.querySelector(a.getAttribute("href"));
+        if (!target) return;
+        e.preventDefault();
+        lenis.scrollTo(target.getBoundingClientRect().top + window.scrollY - 64);
+      }));
+    } catch (err) { /* fall back to native scrolling */ }
+  }
+
+  const ease = "power3.out";
+  // section headings rise into place as each section arrives
+  gsap.utils.toArray("section h2").forEach((h) => {
+    gsap.from(h, { y: 28, duration: 0.9, ease, scrollTrigger: { trigger: h, start: "top 88%" } });
+  });
+
+  // related work reads as a timeline: entries arrive in date order
+  gsap.from(".timeline li", { x: 28, duration: 0.7, ease, stagger: 0.07, scrollTrigger: { trigger: ".timeline", start: "top 80%" } });
+
+  // the letter leaves the sender one gap at a time
+  const strip = document.querySelector("#encStrip svg");
+  if (strip) {
+    const boxes = strip.querySelectorAll("rect[height='34'], text[font-size='17']");
+    gsap.from(boxes, { y: -14, duration: 0.5, ease: "back.out(2)", stagger: 0.05, scrollTrigger: { trigger: strip, start: "top 80%" } });
+  }
+  gsap.from(".rules div", { y: 20, duration: 0.7, ease, stagger: 0.08, scrollTrigger: { trigger: ".rules", start: "top 88%" } });
+
+  // testbed: packets travel sender to receiver along the arrows
+  const topo = document.querySelector(".topo svg");
+  if (topo) {
+    const lines = topo.querySelectorAll("line");
+    lines.forEach((l) => { const len = l.getTotalLength ? l.getTotalLength() : 80; l.style.strokeDasharray = `${len}`; });
+    gsap.fromTo(lines, { strokeDashoffset: (i, l) => (l.getTotalLength ? l.getTotalLength() : 80) }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", stagger: 0.35, immediateRender: false, scrollTrigger: { trigger: topo, start: "top 75%" } });
+  }
+
+  // findings: headline numbers count up from zero when they come into view
+  document.querySelectorAll(".claim .num").forEach((el) => {
+    const final = el.textContent, m = final.match(/^(\d+)(.*)$/);
+    if (!m) return;
+    const end = +m[1], unit = m[2], obj = { v: 0 };
+    ScrollTrigger.create({ trigger: el, start: "top 85%", once: true, onEnter: () => {
+      gsap.fromTo(obj, { v: 0 }, { v: end, duration: 1.2, ease: "power2.out", onUpdate: () => { el.textContent = `${Math.round(obj.v)}${unit}`; }, onComplete: () => { el.textContent = final; } });
+    } });
+  });
+  gsap.from(".claim", { x: -24, duration: 0.8, ease, stagger: 0.12, scrollTrigger: { trigger: ".claims", start: "top 80%" } });
+
+  // pipeline: the track fills as you scroll past it, stage by stage
+  const mm = gsap.matchMedia();
+  mm.add("(min-width: 901px)", () => {
+    gsap.fromTo(".track", { "--fill": 0 }, { "--fill": 1, ease: "none", scrollTrigger: { trigger: ".track", start: "top 85%", end: "bottom 55%", scrub: true } });
+  });
+  gsap.from(".track li", { y: 18, duration: 0.6, ease, stagger: 0.08, scrollTrigger: { trigger: ".track", start: "top 85%" } });
+
+  // conclusions: the verdict line lands, then the two lists
+  gsap.from(".verdict-line", { y: 24, duration: 0.9, ease, scrollTrigger: { trigger: ".verdict-line", start: "top 85%" } });
+  gsap.from(".cols li", { x: 16, duration: 0.5, ease, stagger: 0.05, scrollTrigger: { trigger: ".cols", start: "top 85%" } });
+
+  // detector feedback: verdict cards nudge when a control changes the result
+  const verdicts = document.getElementById("verdicts");
+  if (verdicts) new MutationObserver(() => gsap.fromTo("#verdicts .big", { y: 6 }, { y: 0, duration: 0.35, ease: "power2.out", overwrite: true })).observe(verdicts, { childList: true });
+
+  window.addEventListener("load", () => ScrollTrigger.refresh());
 })();
 </script>

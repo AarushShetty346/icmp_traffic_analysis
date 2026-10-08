@@ -15,21 +15,21 @@
    a control rail beside scope readouts, staggered findings, a pipeline track, then team and code. */
 /* Deliberately single-theme: a dark signal room, so it reads the same on any viewer setting. */
 :root {
-  --bg: #080b10;          /* deep blue-black, not pure black */
-  --surface: #0e131a;
-  --sunk: #131a23;
-  --glass: rgba(150, 180, 210, 0.05);
-  --ink: #eaf0f5;
-  --ink-2: #8e9cab;
-  --line: rgba(160, 190, 220, 0.12);
-  --signal: #ff6b2c;      /* the one accent: the covert channel */
-  --signal-rgb: 255, 107, 44;
-  --signal-hi: #ffb08a;
-  --signal-a: #ff8a4c;
-  --signal-b: #ff3d6e;
-  --normal-rgb: 106, 174, 255;
+  --bg: #0c0e0f;          /* deep charcoal, not pure black */
+  --surface: #131617;
+  --sunk: #191d1e;
+  --glass: rgba(200, 210, 200, 0.045);
+  --ink: #f1f0ea;
+  --ink-2: #9ba29e;
+  --line: rgba(210, 215, 200, 0.12);
+  --signal: #f2b544;      /* the one accent: the covert channel */
+  --signal-rgb: 242, 181, 68;
+  --signal-hi: #ffdc95;
+  --signal-a: #ffd27a;
+  --signal-b: #e8903a;
+  --normal-rgb: 63, 193, 176;
   --signal-soft: rgba(var(--signal-rgb), 0.14);
-  --normal: #6aaeff;      /* data colour for normal traffic */
+  --normal: #3fc1b0;      /* data colour for normal traffic */
   --ok: #4fd18b;
   --bad: #ff6f6f;
   --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
@@ -289,15 +289,15 @@ body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-even
 html, body { overflow-x: clip; }
 section { overflow-x: clip; }
 body { background: var(--bg); }
-.nav { background: rgba(8, 11, 16, 0.72); }
+.nav { background: rgba(12, 14, 15, 0.72); }
 .brand-mark i { background: var(--ink); }
 
 .hero { position: relative; overflow: hidden; min-height: min(860px, 94vh); display: grid; align-items: center; padding-block: 48px 72px; }
 .hero > .shell { position: relative; z-index: 1; width: 100%; }
 #scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 .hero::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-  background: linear-gradient(90deg, rgba(8, 11, 16, 0.92) 0%, rgba(8, 11, 16, 0.55) 38%, rgba(8, 11, 16, 0) 62%), linear-gradient(0deg, var(--bg) 0%, rgba(8, 11, 16, 0) 22%); }
-@media (max-width: 920px) { .hero::after { background: linear-gradient(180deg, rgba(8, 11, 16, 0.55), rgba(8, 11, 16, 0.85) 60%, var(--bg)); } }
+  background: linear-gradient(90deg, rgba(12, 14, 15, 0.92) 0%, rgba(12, 14, 15, 0.55) 38%, rgba(12, 14, 15, 0) 62%), linear-gradient(0deg, var(--bg) 0%, rgba(12, 14, 15, 0) 22%); }
+@media (max-width: 920px) { .hero::after { background: linear-gradient(180deg, rgba(12, 14, 15, 0.55), rgba(12, 14, 15, 0.85) 60%, var(--bg)); } }
 .hero h1 { font-size: clamp(2.6rem, 5.6vw, 4.7rem); line-height: 0.98; letter-spacing: -0.045em; }
 .hero > .shell { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
 @media (max-width: 920px) { .hero > .shell { grid-template-columns: minmax(0, 1fr); } }
@@ -305,8 +305,8 @@ body { background: var(--bg); }
 .hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
 .hero h1 .w > span { display: inline-block; }
 .kicker { color: var(--signal); }
-.btn-primary { background: var(--signal); color: #120a05; box-shadow: 0 10px 30px -10px rgba(var(--signal-rgb), 0.7); }
-.btn-primary:hover { background: var(--signal-hi); color: #120a05; }
+.btn-primary { background: var(--signal); color: #161106; box-shadow: 0 10px 30px -10px rgba(var(--signal-rgb), 0.7); }
+.btn-primary:hover { background: var(--signal-hi); color: #161106; }
 .btn-ghost { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 
 .wire, .rail, .verdicts, .plots, .topo { background: var(--glass); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 30px 80px -40px rgba(0, 0, 0, 0.8); }
@@ -315,7 +315,7 @@ body { background: var(--bg); }
 .wave { display: block; width: 100%; height: clamp(48px, 7vw, 110px); }
 .wave + section, section + .wave { margin-top: 0; }
 .question { background: linear-gradient(120deg, rgba(var(--signal-rgb), 0.16), rgba(var(--signal-rgb), 0.04)); border: 1px solid rgba(var(--signal-rgb), 0.25); }
-.seg button[aria-pressed="true"], .tabs button[aria-pressed="true"] { background: var(--signal); color: #120a05; }
+.seg button[aria-pressed="true"], .tabs button[aria-pressed="true"] { background: var(--signal); color: #161106; }
 input[type="text"], select { background: rgba(0, 0, 0, 0.25); }
 pre { background: #05070b; color: #d7e0e8; border: 1px solid var(--line); }
 tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
@@ -333,7 +333,7 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
 .hero h1 em { background: none; color: var(--signal); }
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.secret { display: flex; gap: 0; margin-top: 28px; max-width: 520px; border: 1px solid rgba(var(--signal-rgb), 0.45); border-radius: var(--r); background: rgba(8, 11, 16, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.08), 0 20px 50px -20px rgba(var(--signal-rgb), 0.45); }
+.secret { display: flex; gap: 0; margin-top: 28px; max-width: 520px; border: 1px solid rgba(var(--signal-rgb), 0.45); border-radius: var(--r); background: rgba(12, 14, 15, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.08), 0 20px 50px -20px rgba(var(--signal-rgb), 0.45); }
 .secret input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 1.25rem var(--mono); letter-spacing: 0.14em; padding: 14px 16px; text-transform: uppercase; }
 .secret input:focus { outline: none; }
 .secret:focus-within { box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.22), 0 20px 50px -20px rgba(var(--signal-rgb), 0.6); }

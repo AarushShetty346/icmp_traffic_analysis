@@ -744,9 +744,6 @@ python scripts/build_site.py</pre>
     </div>
   </div>
 </section>
-</div>
-</main>
-
 <footer>
   <div class="shell">
     <span>Ping Gap Detector started as a BCSE308P Computer Networks project at VIT Vellore. It is defensive research: experiments run only on machines the team controls, and the simulator on this page sends no packets.</span>
@@ -758,6 +755,9 @@ python scripts/build_site.py</pre>
     </ol>
   </div>
 </footer>
+</div>
+</main>
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -780,7 +780,7 @@ python scripts/build_site.py</pre>
     nav.innerHTML = '<div class="shell">' +
       (prev ? `<a class="prev" href="#${prev.id}"><small>Previous</small><b>${prev.dataset.label}</b></a>` : "") +
       (next ? `<a class="next" href="#${next.id}"><small>Next, ${String(i + 1).padStart(2, "0")} of ${String(pages.length - 1).padStart(2, "0")}</small><b>${next.dataset.label}</b></a>` : "") + "</div>";
-    p.appendChild(nav);
+    p.insertBefore(nav, p.querySelector(":scope > footer"));  // sources stay last on the Team page
   });
 
   let current = null;

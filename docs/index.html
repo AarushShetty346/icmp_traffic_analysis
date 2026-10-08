@@ -246,6 +246,43 @@ footer { border-top: 1px solid var(--line); padding-block: 28px 40px; font-size:
 footer .shell { display: grid; gap: 8px; }
 footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
 
+
+/* background */
+.bg-grid { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: clamp(28px, 5vw, 72px); align-items: start; }
+@media (max-width: 900px) { .bg-grid { grid-template-columns: minmax(0, 1fr); } }
+.problem { display: grid; gap: 16px; position: sticky; top: calc(env(safe-area-inset-top, 0px) + 80px); }
+@media (max-width: 900px) { .problem { position: static; } }
+.question { font: 600 1.15rem/1.45 var(--body); padding: 16px 18px; background: var(--signal-soft); border-radius: var(--r); }
+.timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.timeline li { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1px solid var(--line); }
+.timeline li:last-child { border-bottom: 1px solid var(--line); }
+.timeline .yr { font: 500 0.95rem var(--mono); color: var(--ink-2); padding-top: 2px; }
+.timeline b { font-weight: 600; display: block; }
+.timeline span { color: var(--ink-2); font-size: 0.92rem; }
+.timeline li.near .yr { color: var(--signal); }
+
+/* testbed */
+.testbed .shell { display: grid; gap: 32px; }
+.topo { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(12px, 3vw, 28px); overflow-x: auto; }
+.topo svg { display: block; width: 100%; min-width: 680px; height: auto; }
+.topo text { font-family: var(--mono); }
+.specs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 4vw, 48px); }
+@media (max-width: 760px) { .specs { grid-template-columns: minmax(0, 1fr); } }
+.specs dl { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; align-content: start; font-size: 0.92rem; }
+.specs h3 { grid-column: 1 / -1; margin-bottom: 4px; }
+.specs dt { font: 500 0.92rem var(--mono); font-variant-numeric: tabular-nums; }
+.specs dd { margin: 0; color: var(--ink-2); }
+
+/* conclusions */
+.conclude { background: var(--surface); border-block: 1px solid var(--line); }
+.conclude .shell { display: grid; gap: 36px; }
+.verdict-line { font: 700 clamp(1.4rem, 3vw, 2.1rem)/1.2 var(--display); letter-spacing: -0.02em; max-width: 30ch; }
+.verdict-line em { font-style: normal; color: var(--signal); }
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(24px, 5vw, 64px); }
+@media (max-width: 760px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.cols ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 10px; color: var(--ink-2); }
+.cols li::marker { color: var(--signal); }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero-copy > * { animation: none; }
@@ -257,7 +294,9 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   <div class="shell">
     <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>Ping Gap Detector</a>
     <ul>
+      <li><a href="#background">Background</a></li>
       <li><a href="#encoding">How it hides</a></li>
+      <li><a href="#testbed">Testbed</a></li>
       <li><a href="#bench">Detector</a></li>
       <li><a href="#findings">Findings</a></li>
       <li><a href="#pipeline">Pipeline</a></li>
@@ -300,6 +339,26 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   </div>
 </header>
 
+
+<section id="background" aria-labelledby="bg-h">
+  <div class="shell bg-grid">
+    <div class="problem">
+      <h2 id="bg-h">Timing is a blind spot for content inspection</h2>
+      <p class="lede">Firewalls and intrusion detection mostly read headers and payloads. A timing channel leaves every byte untouched and carries its message in when packets are sent. Normal traffic also varies, so a detector has to tell deliberate structure apart from ordinary noise.</p>
+      <p class="question">Can a simple detector built from a measured normal baseline tell covert ICMP timing apart from normal ping, and how does that change once jitter and load appear?</p>
+    </div>
+    <ol class="timeline" aria-label="Related work">
+      <li><span class="yr">2004</span><div><b>Cabuk, Brodley and Shields</b><span>Built an IP timing channel and caught it by its regularity, then showed how an encoder can break that regularity.</span></div></li>
+      <li><span class="yr">2005</span><div><b>Berk, Giani and Cybenko</b><span>Early statistical detection of binary codes hidden in packet delays.</span></div></li>
+      <li><span class="yr">2007</span><div><b>Gianvecchio and Wang</b><span>Entropy and corrected conditional entropy as detectors, beyond averages.</span></div></li>
+      <li><span class="yr">2008</span><div><b>Luo, Chan and Chang</b><span>TCPScript survives jitter, loss and reordering, which is why we test under netem.</span></div></li>
+      <li><span class="yr">2017</span><div><b>Iglesias Vázquez, Annessi and Zseby</b><span>Normal traffic varies widely in shape, so one outlier measure is not enough.</span></div></li>
+      <li class="near"><span class="yr">2022</span><div><b>Ondov and Helebrandt</b><span>Closest prior work: ICMP timing channels caught with combined statistics in a host IDS.</span></div></li>
+      <li><span class="yr">2023</span><div><b>Meusburger</b><span>Variability in legitimate traffic makes false positives the central problem.</span></div></li>
+    </ol>
+  </div>
+</section>
+
 <section class="encode" id="encoding" aria-labelledby="enc-h">
   <div class="shell">
     <div class="encode-intro">
@@ -312,6 +371,58 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
       <div><strong>1.25 s</strong><span>Gap for a 1 bit, a quarter second late</span></div>
       <div><strong>1.00 s</strong><span>Mean stays at the normal ping interval, so averages alone miss it</span></div>
       <div><strong>~0.25 s</strong><span>Spread of the gaps, against a few milliseconds for real ping. This is what gives it away.</span></div>
+    </div>
+  </div>
+</section>
+
+
+<section class="testbed" id="testbed" aria-labelledby="tb-h">
+  <div class="shell">
+    <div class="encode-intro">
+      <h2 id="tb-h">A closed lab network</h2>
+      <p class="lede">Two machines the team controls, one link between them, and nothing on the campus network. The receiver captures every Echo Request so timing is measured where packets arrive.</p>
+    </div>
+    <figure class="topo" style="margin:0" aria-label="Testbed: sender host, Linux link with tc netem and iperf3, receiver host running tshark and the detector">
+      <svg viewBox="0 0 900 230" role="img">
+        <defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-2)"></path></marker></defs>
+        <rect x="20" y="50" width="230" height="130" rx="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"></rect>
+        <text x="40" y="80" font-size="15" font-weight="700" fill="var(--ink)">Sender host</text>
+        <text x="40" y="110" font-size="12" fill="var(--ink-2)">ping, normal runs</text>
+        <text x="40" y="132" font-size="12" fill="var(--signal)">Scapy timing generator</text>
+        <text x="40" y="154" font-size="12" fill="var(--ink-2)">0.75 s / 1.25 s gaps</text>
+        <rect x="335" y="50" width="230" height="130" rx="3" fill="var(--bg)" stroke="var(--ink-2)" stroke-width="1.5" stroke-dasharray="5 4"></rect>
+        <text x="355" y="80" font-size="15" font-weight="700" fill="var(--ink)">Link conditions</text>
+        <text x="355" y="110" font-size="12" fill="var(--ink-2)">tc netem: delay jitter, loss</text>
+        <text x="355" y="132" font-size="12" fill="var(--ink-2)">iperf3: background load</text>
+        <text x="355" y="154" font-size="12" fill="var(--ink-2)">clean runs use neither</text>
+        <rect x="650" y="50" width="230" height="130" rx="3" fill="var(--bg)" stroke="var(--ink)" stroke-width="1.5"></rect>
+        <text x="670" y="80" font-size="15" font-weight="700" fill="var(--ink)">Receiver host</text>
+        <text x="670" y="110" font-size="12" fill="var(--ink-2)">tshark capture</text>
+        <text x="670" y="132" font-size="12" fill="var(--ink-2)">CSV export of timestamps</text>
+        <text x="670" y="154" font-size="12" fill="var(--signal)">icmp_detector</text>
+        <line x1="254" y1="115" x2="329" y2="115" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#arr)"></line>
+        <line x1="569" y1="115" x2="644" y2="115" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#arr)"></line>
+        <text x="292" y="105" font-size="10" fill="var(--ink-2)" text-anchor="middle">Echo</text>
+        <text x="607" y="105" font-size="10" fill="var(--ink-2)" text-anchor="middle">Request</text>
+        <text x="450" y="215" font-size="11" fill="var(--ink-2)" text-anchor="middle">one direction of one ICMP flow is analysed: Echo Requests only</text>
+      </svg>
+    </figure>
+    <div class="specs">
+      <dl><h3>Traffic</h3>
+        <dt>1.00 s</dt><dd>Normal ping interval</dd>
+        <dt>0.75 / 1.25 s</dt><dd>Gaps for bit 0 and bit 1</dd>
+        <dt>64</dt><dd>Echo Requests per run</dd>
+      </dl>
+      <dl><h3>Baseline</h3>
+        <dt>10 runs</dt><dd>Normal traffic only, kept apart from tests</dd>
+        <dt>32</dt><dd>Requests per window, also 8 and 16</dd>
+        <dt>p95</dt><dd>Of normal window spread sets the threshold</dd>
+      </dl>
+      <dl><h3>Evaluation</h3>
+        <dt>10 + 10</dt><dd>Normal and covert runs per condition</dd>
+        <dt>0 to 150 ms</dt><dd>Added jitter, plus 5% loss</dd>
+        <dt>3 metrics</dt><dd>Detection rate, false positives, bits decoded</dd>
+      </dl>
     </div>
   </div>
 </section>
@@ -418,6 +529,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   </div>
 </section>
 
+
 <section id="pipeline" aria-labelledby="pipe-h">
   <div class="shell">
     <h2 id="pipe-h">From capture to verdict</h2>
@@ -433,7 +545,34 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   </div>
 </section>
 
-<section class="closing" aria-labelledby="team-h" style="padding-top:0">
+<section class="conclude" id="conclusions" aria-labelledby="con-h">
+  <div class="shell">
+    <h2 id="con-h">Conclusions</h2>
+    <p class="verdict-line">A crude timing channel is easy to catch. <em>Keeping false alarms down is the hard part.</em></p>
+    <div class="cols">
+      <div>
+        <h3>What we learned</h3>
+        <ul>
+          <li>The spread of inter-packet delays separates the planned channel from normal ping with a wide margin.</li>
+          <li>Averages are useless here: the channel's mean gap stays at 1 s.</li>
+          <li>A baseline only holds under the conditions it was measured in. Rebuild it when the network changes.</li>
+          <li>Sequence numbers stop a lost packet from looking like a deliberate long gap.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Limits and next steps</h3>
+        <ul>
+          <li>Results on this page are simulated until the lab captures replace them.</li>
+          <li>A channel with small gap differences hides inside heavy jitter. Entropy features from the literature are the next thing to try.</li>
+          <li>A sender that copies the timing distribution of normal traffic would defeat a spread-based detector.</li>
+          <li>Only Echo Requests in one direction are analysed; packet fields and payloads are checked separately.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="closing" aria-labelledby="team-h">
   <div class="shell">
     <div class="team">
       <h2 id="team-h">Team</h2>

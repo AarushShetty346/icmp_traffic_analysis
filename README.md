@@ -20,7 +20,9 @@ It reports detection rate, false-positive rate and decoding accuracy.
 | `icmp_detector/simulate.py` | Offline model of receiver timestamps (sends no packets) |
 | `icmp_detector/experiment.py` | Labelled evaluation and the simulated study |
 | `icmp_detector/report.py` | Plots and `RESULTS.md` |
-| `results/` | Output of the simulated study |
+| `icmp_detector/benchmark.py` | Accuracy over 4 gap settings x 10 network conditions, and pipeline speed |
+| `results/` | Output of the simulated study; `results/benchmark/BENCHMARK.md` holds the benchmark |
+| `scripts/site_check.js` | Clicks every button on the site with Playwright and times page load |
 | `docs/index.html` | Interactive dashboard (GitHub Pages ready), built from `site/template.html` |
 | `tests/` | Unit tests |
 
@@ -31,6 +33,8 @@ pip install -r requirements.txt
 python -m unittest                                  # run the tests
 python -m icmp_detector study --out results         # simulated study + plots
 python scripts/build_site.py                        # refresh docs/index.html
+python -m icmp_detector benchmark                   # accuracy grid + speed -> results/benchmark/
+node scripts/site_check.js docs/index.html node_modules results/benchmark/site.json  # site buttons + load time
 ```
 
 ## Using lab captures

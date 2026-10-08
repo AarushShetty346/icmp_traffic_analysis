@@ -311,7 +311,9 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
 .mono-avatar { background: rgba(255, 255, 255, 0.06); }
 .track li::before { background: var(--bg); border-color: var(--ink-2); box-shadow: 0 0 0 4px var(--bg); }
 .track li:last-child::before { box-shadow: 0 0 18px rgba(255, 107, 44, 0.8); }
-.has-3d .hero .wire { align-self: end; justify-self: end; width: min(100%, 460px); }
+.has-3d .hero > .shell { grid-template-columns: minmax(0, 1fr); }
+.has-3d .hero-copy { max-width: 640px; }
+.has-3d .hero .wire { justify-self: start; width: min(100%, 520px); margin-top: 8px; }
 .has-3d .hero .wire-head, .has-3d .hero #wire { display: none; }
 .has-3d .hero .wire-read { border-top: 0; }
 .hero h1 em .w > span { background: linear-gradient(92deg, #ff8a4c, var(--signal) 55%, #ff3d6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -728,8 +730,8 @@ python scripts/build_site.py</pre>
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x080b10, 0.045);
-  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
-  camera.position.set(0, 1.6, 7);
+  const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
+  camera.position.set(0, 1.1, 6);
 
   const ORANGE = new THREE.Color(0xff6b2c), BLUE = new THREE.Color(0x6aaeff);
   const glowTex = (() => {
@@ -750,7 +752,18 @@ python scripts/build_site.py</pre>
   floor.setAttribute("position", new THREE.Float32BufferAttribute(fp, 3));
   scene.add(new THREE.Points(floor, new THREE.PointsMaterial({ color: 0x3a5068, size: 0.035, transparent: true, opacity: 0.8 })));
 
-  const LANES = [{ x: -1.3, color: BLUE, covert: false }, { x: 1.3, color: ORANGE, covert: true }];
+  // ambient traffic: faint packets from other hosts drifting past, for depth
+  const AMB = 520, ambGeo = new THREE.BufferGeometry(), ambPos = new Float32Array(AMB * 3), ambSpeed = new Float32Array(AMB);
+  for (let i = 0; i < AMB; i++) { ambPos[i * 3] = (Math.random() - 0.5) * 40; ambPos[i * 3 + 1] = Math.random() * 9 - 1; ambPos[i * 3 + 2] = -Math.random() * 90; ambSpeed[i] = 2 + Math.random() * 5; }
+  ambGeo.setAttribute("position", new THREE.BufferAttribute(ambPos, 3));
+  const amb = new THREE.Points(ambGeo, new THREE.PointsMaterial({ color: 0x9fc4ff, size: 0.06, map: glowTex, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false }));
+  scene.add(amb);
+  function drift(dt) {
+    for (let i = 0; i < AMB; i++) { let z = ambPos[i * 3 + 2] + ambSpeed[i] * dt; if (z > 6) { z = -90; ambPos[i * 3] = (Math.random() - 0.5) * 40; } ambPos[i * 3 + 2] = z; }
+    ambGeo.attributes.position.needsUpdate = true;
+  }
+
+  const LANES = [{ x: -1.1, color: BLUE, covert: false }, { x: 1.1, color: ORANGE, covert: true }];
   const bits = [..."VIT "].flatMap((ch) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (ch.charCodeAt(0) >> k) & 1));
   const UNITS = 4.2; // world units per simulated second
   LANES.forEach((lane) => {
@@ -773,7 +786,6 @@ python scripts/build_site.py</pre>
   // receiver gate
   const gateGeo = new THREE.BufferGeometry().setFromPoints([[-2.4, -0.9], [2.4, -0.9], [2.4, 1.3], [-2.4, 1.3], [-2.4, -0.9]].map(([x, y]) => new THREE.Vector3(x, y, 0)));
   const gate = new THREE.Line(gateGeo, new THREE.LineBasicMaterial({ color: 0xeaf0f5, transparent: true, opacity: 0.25 }));
-  scene.add(gate);
 
   let jseed = 99; const jit = () => { jseed = (jseed * 16807) % 2147483647; return (jseed / 2147483647 - 0.5) * 0.012; };
   function extend(lane, upto) {
@@ -808,7 +820,7 @@ python scripts/build_site.py</pre>
     W = canvas.clientWidth; H = canvas.clientHeight; if (!W || !H) return;
     renderer.setSize(W, H, false); camera.aspect = W / H;
     // push the vanishing point right of the headline on wide screens
-    if (W > 920) camera.setViewOffset(W, H, -W * 0.2, 0, W, H); else camera.clearViewOffset();
+    if (W > 920) camera.setViewOffset(W, H, -W * 0.24, H * 0.04, W, H); else camera.clearViewOffset();
     camera.updateProjectionMatrix();
   }
   function frame() {
@@ -818,21 +830,21 @@ python scripts/build_site.py</pre>
       while (lane.pk.length && lane.pk[0].t < t - 3) lane.pk.shift();
       lane.pool.forEach((g, i) => {
         const p = lane.pk[i], z = p ? -(p.t - t) * UNITS : -999;
-        g.visible = z > -90 && z < 2.2;
+        g.visible = z > -90 && z < 4;
         if (!g.visible) return;
         g.position.set(lane.x, 0, z);
-        const fade = z > 0 ? Math.max(0, 1 - z / 2.2) : 1;
+        const fade = z > 1.8 ? Math.max(0, 1 - (z - 1.8) / 2.2) : 1;
         g.children.forEach((c) => { c.material.opacity = fade; c.material.transparent = true; });
         if (g.userData.label) { g.userData.label.visible = p.bit != null && z < -0.4; if (p.bit != null) g.userData.label.material.map = bitTex[p.bit]; }
       });
     });
-    gate.material.opacity = 0.1 + flash * 0.45; flash *= 0.9;
+    flash *= 0.9;
     camera.position.x += (mx * 0.8 - camera.position.x) * 0.04;
-    camera.position.y += (1.6 + my * 0.4 - camera.position.y) * 0.04;
-    camera.lookAt(0, 0.2, -20);
+    camera.position.y += (1.1 + my * 0.35 - camera.position.y) * 0.04;
+    camera.lookAt(0, 0.35, -30);
     renderer.render(scene, camera);
   }
-  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt * 1.4; frame(); raf = requestAnimationFrame(loop); }
+  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt * 1.4; drift(dt); frame(); raf = requestAnimationFrame(loop); }
   let raf = 0, running = false;
   new ResizeObserver(() => { resize(); frame(); }).observe(canvas);
   resize();

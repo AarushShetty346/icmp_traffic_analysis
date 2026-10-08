@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<title>ICMP Timing Channel Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an instrument bench. Controls rail on the left, scope readouts on the right, study results below as a lab notebook. */
+:root {
+  --bg: #eef1f3;
+  --panel: #fbfcfc;
+  --ink: #17222b;
+  --muted: #5b6b77;
+  --rule: #d3dade;
+  --normal: #2363a8;
+  --channel: #c2660f;
+  --accent: #0d7a6f;
+  --bad: #b3261e;
+  --good: #1f7a3a;
+  --grid: #e1e6ea;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11181d; --panel: #18222a; --ink: #e3eaee; --muted: #93a3ae; --rule: #2b3842;
+    --normal: #6ea8e8; --channel: #f0a050; --accent: #4cc2b3; --bad: #f2867c; --good: #6fcf8a; --grid: #23303a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11181d; --panel: #18222a; --ink: #e3eaee; --muted: #93a3ae; --rule: #2b3842;
+  --normal: #6ea8e8; --channel: #f0a050; --accent: #4cc2b3; --bad: #f2867c; --good: #6fcf8a; --grid: #23303a;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--body); }
+.wrap { max-width: 1180px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 64px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.7rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.01em; line-height: 1.1; }
+h2 { font-size: 1.35rem; font-weight: 700; }
+h3 { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+p { margin: 0; max-width: 68ch; }
+.mono, code { font-family: var(--mono); font-size: 0.88em; }
+.muted { color: var(--muted); }
+header { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); letter-spacing: 0.04em; }
+.formula { font-family: var(--mono); color: var(--accent); }
+.badge { display: inline-block; font-family: var(--mono); font-size: 0.72rem; padding: 2px 8px; border-radius: 3px; border: 1px solid var(--channel); color: var(--channel); letter-spacing: 0.04em; }
+
+.bench { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .bench { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.controls { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); }
+@media (max-width: 860px) { .controls { position: static; } }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 0.82rem; font-weight: 600; display: flex; justify-content: space-between; gap: 8px; }
+.field label output { font-family: var(--mono); font-weight: 400; color: var(--accent); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+input[type="text"], select { width: 100%; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--rule); border-radius: 4px; background: var(--bg); color: var(--ink); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--rule); border-radius: 4px; overflow: hidden; }
+.seg button { font: 500 0.8rem var(--body); padding: 7px 4px; border: 0; background: transparent; color: var(--ink); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--rule); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--panel); }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { font: 600 0.85rem var(--body); padding: 8px 12px; border-radius: 4px; border: 1px solid var(--accent); background: transparent; color: var(--accent); cursor: pointer; }
+.btn:hover { background: var(--accent); color: var(--panel); }
+.hint { font-size: 0.78rem; color: var(--muted); }
+
+.readouts { display: grid; gap: 20px; min-width: 0; }
+.verdicts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .verdicts { grid-template-columns: minmax(0, 1fr); } }
+.verdict { border-top: 3px solid var(--rule); padding-top: 10px; display: grid; gap: 4px; }
+.verdict .name { font-size: 0.8rem; font-weight: 600; }
+.verdict .nums { font-family: var(--mono); font-size: 0.86rem; display: grid; grid-template-columns: auto auto; justify-content: start; column-gap: 12px; font-variant-numeric: tabular-nums; }
+.verdict .nums b { font-weight: 500; }
+.verdict[data-state="good"] { border-top-color: var(--good); }
+.verdict[data-state="warn"] { border-top-color: var(--channel); }
+.verdict[data-state="bad"] { border-top-color: var(--bad); }
+.verdict .state { font-size: 0.75rem; font-family: var(--mono); }
+.verdict[data-state="good"] .state { color: var(--good); }
+.verdict[data-state="warn"] .state { color: var(--channel); }
+.verdict[data-state="bad"] .state { color: var(--bad); }
+
+.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.charts .wide { grid-column: 1 / -1; }
+@media (max-width: 760px) { .charts { grid-template-columns: minmax(0, 1fr); } }
+.chart { display: grid; gap: 6px; min-width: 0; }
+.chart svg { width: 100%; height: auto; display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.78rem; color: var(--muted); }
+.legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border-radius: 2px; background: var(--c); }
+.legend .line::before { height: 0; border-top: 2px dashed var(--c); border-radius: 0; background: none; vertical-align: 3px; }
+svg text { fill: var(--muted); font: 10px var(--mono); }
+svg .axis { stroke: var(--rule); }
+svg .gridline { stroke: var(--grid); }
+
+.decode { font-family: var(--mono); font-size: 0.85rem; display: grid; gap: 6px; min-width: 0; }
+.bits { overflow-x: auto; white-space: nowrap; padding-bottom: 4px; letter-spacing: 0.06em; }
+.bits .err { color: var(--bad); text-decoration: underline; }
+.bits .miss { color: var(--muted); }
+
+.notebook { display: grid; gap: 18px; }
+.table-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+td.num { font-family: var(--mono); text-align: right; }
+td.hi { color: var(--bad); }
+td.ok { color: var(--good); }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.tabs button { font: 500 0.82rem var(--body); padding: 6px 12px; border-radius: 4px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; }
+.tabs button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+
+.pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; counter-reset: step; border: 1px solid var(--rule); border-radius: 6px; background: var(--panel); }
+.pipeline li { list-style: none; padding: 14px 16px; border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); display: grid; gap: 4px; counter-increment: step; }
+.pipeline li::before { content: counter(step, decimal-leading-zero); font-family: var(--mono); color: var(--accent); font-size: 0.75rem; }
+.pipeline li strong { font-size: 0.9rem; }
+.pipeline li span { font-size: 0.8rem; color: var(--muted); }
+pre { background: var(--panel); border: 1px solid var(--rule); border-radius: 6px; padding: 14px; overflow-x: auto; font: 0.8rem/1.6 var(--mono); margin: 0; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.two > div { align-content: start; }
+@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
+footer { font-size: 0.8rem; color: var(--muted); border-top: 1px solid var(--rule); padding-top: 14px; display: grid; gap: 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">BCSE308P Computer Networks · VIT Vellore · Fall 2026–27</div>
+    <h1>Detecting ICMP covert timing channels from inter-packet delays</h1>
+    <p>A sender can hide bits in the gaps between ping packets: a short gap for 0, a long gap for 1. This bench simulates normal and timing-encoded ICMP Echo Requests as the receiver sees them, computes <span class="formula">Δtᵢ = tᵢ − tᵢ₋₁</span>, and runs the project's two detectors on fixed windows. Change the network conditions and watch where each detector holds up or starts raising false alarms.</p>
+    <p class="muted">Harsh Jha · Anuj Deshpande · Aarush Shetty &nbsp; <span class="badge">SIMULATED TRAFFIC</span></p>
+  </header>
+
+  <section class="bench" aria-label="Interactive detector">
+    <form class="panel controls" id="controls" autocomplete="off">
+      <h3>Channel</h3>
+      <div class="field">
+        <label for="msg">Hidden test message <output id="msgBits"></output></label>
+        <input type="text" id="msg" value="VIT" maxlength="24">
+      </div>
+      <div class="field">
+        <span class="hint">Gap for bit 0 / bit 1</span>
+        <div class="seg" role="group" aria-label="Timing classes">
+          <button type="button" id="preset-planned" data-g0="0.75" data-g1="1.25" aria-pressed="true">0.75 / 1.25</button>
+          <button type="button" id="preset-mid" data-g0="0.9" data-g1="1.1" aria-pressed="false">0.90 / 1.10</button>
+          <button type="button" id="preset-subtle" data-g0="0.95" data-g1="1.05" aria-pressed="false">0.95 / 1.05</button>
+        </div>
+      </div>
+      <h3>Network between sender and receiver</h3>
+      <div class="field">
+        <label for="jitter">Added jitter (netem σ) <output id="jitterOut"></output></label>
+        <input type="range" id="jitter" min="0" max="200" step="5" value="0">
+      </div>
+      <div class="field">
+        <label for="loss">Packet loss <output id="lossOut"></output></label>
+        <input type="range" id="loss" min="0" max="10" step="1" value="0">
+      </div>
+      <h3>Detector</h3>
+      <div class="field">
+        <label for="win">Observation window</label>
+        <select id="win">
+          <option value="8">8 requests</option>
+          <option value="16">16 requests</option>
+          <option value="32" selected>32 requests</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="stdtol">Fixed rule: std tolerance <output id="stdtolOut"></output></label>
+        <input type="range" id="stdtol" min="10" max="200" step="5" value="100">
+      </div>
+      <button type="button" class="btn" id="rerun">Run again with new random traffic</button>
+      <p class="hint">Each run: 10 clean normal runs build the baseline, then 10 normal and 10 channel runs of 64 Echo Requests are tested under the chosen conditions.</p>
+    </form>
+
+    <div class="readouts">
+      <div class="panel">
+        <h3>Detector verdicts on this run</h3>
+        <div class="verdicts" id="verdicts"></div>
+      </div>
+      <div class="panel charts">
+        <div class="chart wide">
+          <h3>Inter-packet delay at the receiver</h3>
+          <div id="seqChart"></div>
+          <div class="legend"><span style="--c: var(--normal)">normal ping</span><span style="--c: var(--channel)">timing channel</span><span class="line" style="--c: var(--muted)">decode threshold 1.0 s</span></div>
+        </div>
+        <div class="chart">
+          <h3>Δt distribution</h3>
+          <div id="histChart"></div>
+          <div class="legend"><span style="--c: var(--normal)">normal</span><span style="--c: var(--channel)">channel</span></div>
+        </div>
+        <div class="chart">
+          <h3>Window std vs thresholds</h3>
+          <div id="stdChart"></div>
+          <div class="legend"><span class="line" style="--c: var(--ink)">fixed</span><span class="line" style="--c: var(--accent)">baseline (clean)</span><span class="line" style="--c: var(--bad)">baseline (matched)</span></div>
+        </div>
+        <div class="decode wide">
+          <h3>Receiver decoding (gap ≥ 1.0 s → 1)</h3>
+          <div class="bits" id="bitsOut"></div>
+          <div id="decodeOut"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="notebook" aria-labelledby="study-h">
+    <div style="display:grid;gap:8px">
+      <h2 id="study-h">Study results from the Python pipeline</h2>
+      <p class="muted" id="studyMeta"></p>
+    </div>
+    <div class="tabs" id="studyTabs" role="group" aria-label="Channel"></div>
+    <div class="panel charts">
+      <div class="chart"><h3>Detection rate vs added jitter</h3><div id="drChart"></div></div>
+      <div class="chart"><h3>False-positive rate vs added jitter</h3><div id="fprChart"></div></div>
+      <div class="legend wide"><span style="--c: var(--ink)">fixed</span><span style="--c: var(--accent)">baseline (clean)</span><span style="--c: var(--bad)">baseline (matched)</span></div>
+    </div>
+    <div class="panel table-scroll"><table id="studyTable"></table></div>
+    <div class="two">
+      <div style="display:grid;gap:8px">
+        <h3>What the numbers say</h3>
+        <p>The planned 0.75 / 1.25 s channel is easy to catch: its gaps spread about 0.25 s around the mean, while ordinary ping spreads a few milliseconds. Both detectors find every channel window.</p>
+        <p>The trouble is false alarms. A baseline measured on a clean LAN flags all normal traffic once 20 ms of jitter appears. A baseline measured under the same conditions fixes that. The fixed 0.1 s rule stays quiet until jitter reaches about 100 ms and then fails.</p>
+        <p>The subtle 0.95 / 1.05 s channel slips under the fixed rule completely and hides inside 100 ms of jitter even for the matched baseline. Network noise and the channel's own spread overlap.</p>
+      </div>
+      <div style="display:grid;gap:8px">
+        <h3>Limits of these numbers</h3>
+        <p>They come from the simulator, not the lab testbed, so they show how the pipeline behaves and which effects to look for. Real captures replace them for Review 2 and 3.</p>
+        <p>Loss is handled with ICMP sequence numbers: a gap across a missing request is skipped, so one lost packet does not look like a deliberate 2 s gap.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="notebook" aria-labelledby="how-h">
+    <h2 id="how-h">Pipeline</h2>
+    <ol class="pipeline" style="padding:0;margin:0">
+      <li><strong>Capture</strong><span>Receiver-side tshark capture of Echo Requests</span></li>
+      <li><strong>Filter flow</strong><span>Source, destination and ICMP identifier</span></li>
+      <li><strong>Inter-packet delay</strong><span>Δtᵢ = tᵢ − tᵢ₋₁, skipping gaps across lost requests</span></li>
+      <li><strong>Windows</strong><span>Fixed windows of 8, 16 or 32 requests</span></li>
+      <li><strong>Features</strong><span>Mean, variance, std, CV, IQR, entropy, off-nominal share</span></li>
+      <li><strong>Decide</strong><span>Fixed rule vs p95 of the normal baseline</span></li>
+      <li><strong>Score</strong><span>Detection rate, false-positive rate, decoding accuracy</span></li>
+    </ol>
+    <div class="two">
+      <div style="display:grid;gap:8px">
+        <h3>Run on lab captures</h3>
+<pre>tshark -r normal1.pcap -Y "icmp.type == 8" -T fields \
+  -e frame.time_epoch -e ip.src -e ip.dst \
+  -e icmp.ident -e icmp.seq -E header=y -E separator=, \
+  &gt; normal1.csv
+
+python -m icmp_detector baseline normal*.csv --window 32 --out baseline.json
+python -m icmp_detector detect test.csv --baseline baseline.json
+python -m icmp_detector evaluate --baseline baseline.json \
+  --normal test_normal*.csv --channel test_channel*.csv --bits 010101...</pre>
+      </div>
+      <div style="display:grid;gap:8px">
+        <h3>Reproduce the study</h3>
+<pre>pip install -r requirements.txt
+python -m icmp_detector study --out results
+python -m unittest</pre>
+        <p class="hint">Writes <code>results/results.json</code>, <code>RESULTS.md</code> and the plots. The same detector logic runs in this page.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Defensive research in a closed lab testbed only. The simulator models arrival timestamps; it sends no packets.</span>
+    <span>Refs: Cabuk, Brodley &amp; Shields (CCS 2004) · Gianvecchio &amp; Wang (CCS 2007) · Iglesias Vázquez et al. (2017) · Ondov &amp; Helebrandt (ICETA 2022)</span>
+  </footer>
+</div>
+
+<script id="study" type="application/json">{"simulated":true,"config":{"seed":7,"runs_per_set":10,"requests_per_run":64,"window_sizes":[8,16,32],"percentile":95.0,"fixed_rule":{"nominal":1.0,"mean_tol":0.1,"std_tol":0.1},"conditions":[{"name":"clean","net_jitter":0.0,"loss":0.0},{"name":"jitter 20 ms","net_jitter":0.02,"loss":0.0},{"name":"jitter 50 ms","net_jitter":0.05,"loss":0.0},{"name":"jitter 100 ms","net_jitter":0.1,"loss":0.0},{"name":"jitter 150 ms","net_jitter":0.15,"loss":0.0},{"name":"loss 5%","net_jitter":0.0,"loss":0.05}],"channels":{"0.75/1.25 s":{"nominal":1.0,"gap0":0.75,"gap1":1.25,"send_jitter":0.002,"spike_prob":0.02,"spike_max":0.03},"0.95/1.05 s (subtle)":{"nominal":1.0,"gap0":0.95,"gap1":1.05,"send_jitter":0.002,"spike_prob":0.02,"spike_max":0.03}}},"baseline":{"window_size":32,"n_windows":20,"upper":{"mean":1.0006739557315931,"var":1.3164663603994722e-05,"std":0.0036280412505896743,"cv":0.003626167363545245,"median":1.000779796257123,"iqr":0.0035512878164064344,"min":0.9968374008579465,"max":1.0169537422937909,"entropy":0.9992492479956565,"off_nominal":0.0},"lower":{"mean":0.99920761537582,"median":0.9993192358323011,"min":0.9939635926942081}},"results":[{"channel":"0.75/1.25 s","condition":"clean","window":8,"detector":"fixed","tp":80,"fn":0,"fp":0,"tn":80,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"clean","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":7,"tn":73,"detection_rate":1.0,"false_positive_rate":0.0875,"accuracy":0.95625},{"channel":"0.75/1.25 s","condition":"clean","window":8,"detector":"baseline (matched)","tp":80,"fn":0,"fp":6,"tn":74,"detection_rate":1.0,"false_positive_rate":0.075,"accuracy":0.9625},{"channel":"0.75/1.25 s","condition":"clean","window":16,"detector":"fixed","tp":40,"fn":0,"fp":0,"tn":40,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"clean","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":5,"tn":35,"detection_rate":1.0,"false_positive_rate":0.125,"accuracy":0.9375},{"channel":"0.75/1.25 s","condition":"clean","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":3,"tn":37,"detection_rate":1.0,"false_positive_rate":0.075,"accuracy":0.9625},{"channel":"0.75/1.25 s","condition":"clean","window":32,"detector":"fixed","tp":20,"fn":0,"fp":0,"tn":20,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"clean","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":5,"tn":15,"detection_rate":1.0,"false_positive_rate":0.25,"accuracy":0.875},{"channel":"0.75/1.25 s","condition":"clean","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":3,"tn":17,"detection_rate":1.0,"false_positive_rate":0.15,"accuracy":0.925},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":8,"detector":"fixed","tp":0,"fn":80,"fp":0,"tn":80,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":8,"detector":"baseline (clean)","tp":79,"fn":1,"fp":7,"tn":73,"detection_rate":0.9875,"false_positive_rate":0.0875,"accuracy":0.95},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":8,"detector":"baseline (matched)","tp":79,"fn":1,"fp":6,"tn":74,"detection_rate":0.9875,"false_positive_rate":0.075,"accuracy":0.95625},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":16,"detector":"fixed","tp":0,"fn":40,"fp":0,"tn":40,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":5,"tn":35,"detection_rate":1.0,"false_positive_rate":0.125,"accuracy":0.9375},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":3,"tn":37,"detection_rate":1.0,"false_positive_rate":0.075,"accuracy":0.9625},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":32,"detector":"fixed","tp":0,"fn":20,"fp":0,"tn":20,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":5,"tn":15,"detection_rate":1.0,"false_positive_rate":0.25,"accuracy":0.875},{"channel":"0.95/1.05 s (subtle)","condition":"clean","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":3,"tn":17,"detection_rate":1.0,"false_positive_rate":0.15,"accuracy":0.925},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":8,"detector":"fixed","tp":80,"fn":0,"fp":0,"tn":80,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":79,"tn":1,"detection_rate":1.0,"false_positive_rate":0.9875,"accuracy":0.50625},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":8,"detector":"baseline (matched)","tp":77,"fn":3,"fp":8,"tn":72,"detection_rate":0.9625,"false_positive_rate":0.1,"accuracy":0.93125},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":16,"detector":"fixed","tp":40,"fn":0,"fp":0,"tn":40,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":5,"tn":35,"detection_rate":1.0,"false_positive_rate":0.125,"accuracy":0.9375},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":32,"detector":"fixed","tp":20,"fn":0,"fp":0,"tn":20,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 20 ms","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":2,"tn":18,"detection_rate":1.0,"false_positive_rate":0.1,"accuracy":0.95},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":8,"detector":"fixed","tp":0,"fn":80,"fp":0,"tn":80,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":79,"tn":1,"detection_rate":1.0,"false_positive_rate":0.9875,"accuracy":0.50625},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":8,"detector":"baseline (matched)","tp":77,"fn":3,"fp":8,"tn":72,"detection_rate":0.9625,"false_positive_rate":0.1,"accuracy":0.93125},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":16,"detector":"fixed","tp":0,"fn":40,"fp":0,"tn":40,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":5,"tn":35,"detection_rate":1.0,"false_positive_rate":0.125,"accuracy":0.9375},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":32,"detector":"fixed","tp":0,"fn":20,"fp":0,"tn":20,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 20 ms","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":2,"tn":18,"detection_rate":1.0,"false_positive_rate":0.1,"accuracy":0.95},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":8,"detector":"fixed","tp":80,"fn":0,"fp":0,"tn":80,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":80,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":8,"detector":"baseline (matched)","tp":80,"fn":0,"fp":5,"tn":75,"detection_rate":1.0,"false_positive_rate":0.0625,"accuracy":0.96875},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":16,"detector":"fixed","tp":40,"fn":0,"fp":0,"tn":40,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":3,"tn":37,"detection_rate":1.0,"false_positive_rate":0.075,"accuracy":0.9625},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":32,"detector":"fixed","tp":20,"fn":0,"fp":0,"tn":20,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 50 ms","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":0,"tn":20,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":8,"detector":"fixed","tp":2,"fn":78,"fp":0,"tn":80,"detection_rate":0.025,"false_positive_rate":0.0,"accuracy":0.5125},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":80,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":8,"detector":"baseline (matched)","tp":27,"fn":53,"fp":5,"tn":75,"detection_rate":0.3375,"false_positive_rate":0.0625,"accuracy":0.6375},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":16,"detector":"fixed","tp":0,"fn":40,"fp":0,"tn":40,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":16,"detector":"baseline (matched)","tp":30,"fn":10,"fp":3,"tn":37,"detection_rate":0.75,"false_positive_rate":0.075,"accuracy":0.8375},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":32,"detector":"fixed","tp":0,"fn":20,"fp":0,"tn":20,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 50 ms","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":0,"tn":20,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":8,"detector":"fixed","tp":80,"fn":0,"fp":28,"tn":52,"detection_rate":1.0,"false_positive_rate":0.35,"accuracy":0.825},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":80,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":8,"detector":"baseline (matched)","tp":79,"fn":1,"fp":15,"tn":65,"detection_rate":0.9875,"false_positive_rate":0.1875,"accuracy":0.9},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":16,"detector":"fixed","tp":40,"fn":0,"fp":11,"tn":29,"detection_rate":1.0,"false_positive_rate":0.275,"accuracy":0.8625},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":4,"tn":36,"detection_rate":1.0,"false_positive_rate":0.1,"accuracy":0.95},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":32,"detector":"fixed","tp":20,"fn":0,"fp":4,"tn":16,"detection_rate":1.0,"false_positive_rate":0.2,"accuracy":0.9},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 100 ms","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":1,"tn":19,"detection_rate":1.0,"false_positive_rate":0.05,"accuracy":0.975},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":8,"detector":"fixed","tp":30,"fn":50,"fp":28,"tn":52,"detection_rate":0.375,"false_positive_rate":0.35,"accuracy":0.5125},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":80,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":8,"detector":"baseline (matched)","tp":19,"fn":61,"fp":15,"tn":65,"detection_rate":0.2375,"false_positive_rate":0.1875,"accuracy":0.525},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":16,"detector":"fixed","tp":13,"fn":27,"fp":11,"tn":29,"detection_rate":0.325,"false_positive_rate":0.275,"accuracy":0.525},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":16,"detector":"baseline (matched)","tp":6,"fn":34,"fp":4,"tn":36,"detection_rate":0.15,"false_positive_rate":0.1,"accuracy":0.525},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":32,"detector":"fixed","tp":8,"fn":12,"fp":4,"tn":16,"detection_rate":0.4,"false_positive_rate":0.2,"accuracy":0.6},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 100 ms","window":32,"detector":"baseline (matched)","tp":2,"fn":18,"fp":1,"tn":19,"detection_rate":0.1,"false_positive_rate":0.05,"accuracy":0.525},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":8,"detector":"fixed","tp":80,"fn":0,"fp":63,"tn":17,"detection_rate":1.0,"false_positive_rate":0.7875,"accuracy":0.60625},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":80,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":8,"detector":"baseline (matched)","tp":70,"fn":10,"fp":6,"tn":74,"detection_rate":0.875,"false_positive_rate":0.075,"accuracy":0.9},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":16,"detector":"fixed","tp":40,"fn":0,"fp":33,"tn":7,"detection_rate":1.0,"false_positive_rate":0.825,"accuracy":0.5875},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":16,"detector":"baseline (matched)","tp":40,"fn":0,"fp":0,"tn":40,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":32,"detector":"fixed","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.75/1.25 s","condition":"jitter 150 ms","window":32,"detector":"baseline (matched)","tp":20,"fn":0,"fp":2,"tn":18,"detection_rate":1.0,"false_positive_rate":0.1,"accuracy":0.95},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":8,"detector":"fixed","tp":62,"fn":18,"fp":63,"tn":17,"detection_rate":0.775,"false_positive_rate":0.7875,"accuracy":0.49375},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":8,"detector":"baseline (clean)","tp":80,"fn":0,"fp":80,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":8,"detector":"baseline (matched)","tp":1,"fn":79,"fp":6,"tn":74,"detection_rate":0.0125,"false_positive_rate":0.075,"accuracy":0.46875},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":16,"detector":"fixed","tp":32,"fn":8,"fp":33,"tn":7,"detection_rate":0.8,"false_positive_rate":0.825,"accuracy":0.4875},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":16,"detector":"baseline (clean)","tp":40,"fn":0,"fp":40,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":16,"detector":"baseline (matched)","tp":0,"fn":40,"fp":0,"tn":40,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":32,"detector":"fixed","tp":19,"fn":1,"fp":20,"tn":0,"detection_rate":0.95,"false_positive_rate":1.0,"accuracy":0.475},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":32,"detector":"baseline (clean)","tp":20,"fn":0,"fp":20,"tn":0,"detection_rate":1.0,"false_positive_rate":1.0,"accuracy":0.5},{"channel":"0.95/1.05 s (subtle)","condition":"jitter 150 ms","window":32,"detector":"baseline (matched)","tp":1,"fn":19,"fp":2,"tn":18,"detection_rate":0.05,"false_positive_rate":0.1,"accuracy":0.475},{"channel":"0.75/1.25 s","condition":"loss 5%","window":8,"detector":"fixed","tp":70,"fn":0,"fp":0,"tn":72,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"loss 5%","window":8,"detector":"baseline (clean)","tp":68,"fn":2,"fp":3,"tn":69,"detection_rate":0.9714285714285714,"false_positive_rate":0.041666666666666664,"accuracy":0.9647887323943662},{"channel":"0.75/1.25 s","condition":"loss 5%","window":8,"detector":"baseline (matched)","tp":68,"fn":2,"fp":2,"tn":70,"detection_rate":0.9714285714285714,"false_positive_rate":0.027777777777777776,"accuracy":0.971830985915493},{"channel":"0.75/1.25 s","condition":"loss 5%","window":16,"detector":"fixed","tp":30,"fn":0,"fp":0,"tn":32,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"loss 5%","window":16,"detector":"baseline (clean)","tp":30,"fn":0,"fp":2,"tn":30,"detection_rate":1.0,"false_positive_rate":0.0625,"accuracy":0.967741935483871},{"channel":"0.75/1.25 s","condition":"loss 5%","window":16,"detector":"baseline (matched)","tp":30,"fn":0,"fp":1,"tn":31,"detection_rate":1.0,"false_positive_rate":0.03125,"accuracy":0.9838709677419355},{"channel":"0.75/1.25 s","condition":"loss 5%","window":32,"detector":"fixed","tp":10,"fn":0,"fp":0,"tn":12,"detection_rate":1.0,"false_positive_rate":0.0,"accuracy":1.0},{"channel":"0.75/1.25 s","condition":"loss 5%","window":32,"detector":"baseline (clean)","tp":10,"fn":0,"fp":2,"tn":10,"detection_rate":1.0,"false_positive_rate":0.16666666666666666,"accuracy":0.9090909090909091},{"channel":"0.75/1.25 s","condition":"loss 5%","window":32,"detector":"baseline (matched)","tp":10,"fn":0,"fp":1,"tn":11,"detection_rate":1.0,"false_positive_rate":0.08333333333333333,"accuracy":0.9545454545454546},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":8,"detector":"fixed","tp":0,"fn":70,"fp":0,"tn":72,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5070422535211268},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":8,"detector":"baseline (clean)","tp":69,"fn":1,"fp":3,"tn":69,"detection_rate":0.9857142857142858,"false_positive_rate":0.041666666666666664,"accuracy":0.971830985915493},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":8,"detector":"baseline (matched)","tp":69,"fn":1,"fp":2,"tn":70,"detection_rate":0.9857142857142858,"false_positive_rate":0.027777777777777776,"accuracy":0.9788732394366197},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":16,"detector":"fixed","tp":0,"fn":30,"fp":0,"tn":32,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5161290322580645},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":16,"detector":"baseline (clean)","tp":30,"fn":0,"fp":2,"tn":30,"detection_rate":1.0,"false_positive_rate":0.0625,"accuracy":0.967741935483871},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":16,"detector":"baseline (matched)","tp":30,"fn":0,"fp":1,"tn":31,"detection_rate":1.0,"false_positive_rate":0.03125,"accuracy":0.9838709677419355},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":32,"detector":"fixed","tp":0,"fn":10,"fp":0,"tn":12,"detection_rate":0.0,"false_positive_rate":0.0,"accuracy":0.5454545454545454},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":32,"detector":"baseline (clean)","tp":10,"fn":0,"fp":2,"tn":10,"detection_rate":1.0,"false_positive_rate":0.16666666666666666,"accuracy":0.9090909090909091},{"channel":"0.95/1.05 s (subtle)","condition":"loss 5%","window":32,"detector":"baseline (matched)","tp":10,"fn":0,"fp":1,"tn":11,"detection_rate":1.0,"false_positive_rate":0.08333333333333333,"accuracy":0.9545454545454546}],"decoding_accuracy":{"0.75/1.25 s":{"clean":1.0,"jitter 20 ms":1.0,"jitter 50 ms":1.0,"jitter 100 ms":0.9920634920634921,"jitter 150 ms":0.9746031746031747,"loss 5%":0.8952380952380953},"0.95/1.05 s (subtle)":{"clean":1.0,"jitter 20 ms":0.9936507936507937,"jitter 50 ms":0.8761904761904763,"jitter 100 ms":0.7476190476190476,"jitter 150 ms":0.6841269841269841,"loss 5%":0.9063492063492063}}}</script>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const NS = "http://www.w3.org/2000/svg";
+
+  // ---------- seeded random numbers ----------
+  function rngFrom(seed) {
+    let a = seed >>> 0;
+    const uni = () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const normal = (sd) => { const u = Math.max(uni(), 1e-12), v = uni(); return sd * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+    return { uni, normal };
+  }
+
+  // ---------- simulator (mirrors icmp_detector/simulate.py) ----------
+  const SENDER = { nominal: 1.0, sendJitter: 0.002, spikeProb: 0.02, spikeMax: 0.03 };
+  function sendGaps(n, bits, g0, g1, r) {
+    const gaps = [];
+    for (let i = 0; i < n; i++) {
+      let g = bits ? (bits[i % bits.length] ? g1 : g0) : SENDER.nominal;
+      g += r.normal(SENDER.sendJitter);
+      if (r.uni() < SENDER.spikeProb) g += r.uni() * SENDER.spikeMax;
+      gaps.push(Math.max(g, 1e-4));
+    }
+    return gaps;
+  }
+  function throughNetwork(gaps, jitter, loss, r) {
+    const pk = [];
+    let t = 0;
+    for (let i = 0; i <= gaps.length; i++) {
+      const delay = 0.001 + (jitter ? Math.abs(r.normal(jitter)) : 0);
+      const lost = r.uni() < loss;
+      if (!lost) pk.push({ t: t + delay, seq: i });
+      if (i < gaps.length) t += gaps[i];
+    }
+    pk.sort((a, b) => a.t - b.t);
+    return pk;
+  }
+  const run = (n, bits, g0, g1, jitter, loss, r) => throughNetwork(sendGaps(n - 1, bits, g0, g1, r), jitter, loss, r);
+
+  // ---------- features and detectors (mirror features.py / detector.py) ----------
+  function windows(pk, size) {
+    const out = [];
+    for (let s = 0; s + size <= pk.length; s += size) {
+      const w = [];
+      for (let i = s + 1; i < s + size; i++) if (pk[i].seq - pk[i - 1].seq === 1) w.push(pk[i].t - pk[i - 1].t);
+      if (w.length >= 2) out.push(w);
+    }
+    return out;
+  }
+  const mean = (a) => a.reduce((s, x) => s + x, 0) / a.length;
+  const std = (a) => { const m = mean(a); return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / (a.length - 1)); };
+  function percentile(a, p) {
+    const s = [...a].sort((x, y) => x - y); const k = (s.length - 1) * p / 100; const f = Math.floor(k), c = Math.ceil(k);
+    return f === c ? s[f] : s[f] + (s[c] - s[f]) * (k - f);
+  }
+  const baselineStd = (flows, size) => percentile(flows.flatMap((f) => windows(f, size)).map(std), 95);
+
+  // ---------- SVG helpers ----------
+  function el(tag, attrs, parent) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; }
+  function frame(W, H, m) { const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" }); return { svg, x0: m.l, x1: W - m.r, y0: H - m.b, y1: m.t }; }
+  const fmt = (v, d = 2) => Number(v).toFixed(d);
+
+  function yAxis(f, ticks, sy, label, digits) {
+    for (const t of ticks) {
+      const y = sy(t);
+      el("line", { x1: f.x0, x2: f.x1, y1: y, y2: y, class: "gridline" }, f.svg);
+      el("text", { x: f.x0 - 6, y: y + 3, "text-anchor": "end" }, f.svg).textContent = typeof digits === "function" ? digits(t) : fmt(t, digits);
+    }
+    if (label) el("text", { x: f.x0, y: f.y1 - 8, "text-anchor": "start" }, f.svg).textContent = label;
+  }
+  function xAxis(f, ticks, sx, label, digits = 0) {
+    el("line", { x1: f.x0, x2: f.x1, y1: f.y0, y2: f.y0, class: "axis" }, f.svg);
+    for (const t of ticks) el("text", { x: sx(t), y: f.y0 + 14, "text-anchor": "middle" }, f.svg).textContent = fmt(t, digits);
+    if (label) el("text", { x: f.x1, y: f.y0 + 28, "text-anchor": "end" }, f.svg).textContent = label;
+  }
+
+  function seqChart(normal, channel) {
+    const f = frame(760, 240, { l: 44, r: 10, t: 22, b: 34 });
+    const all = normal.concat(channel);
+    let lo = Math.min(...all, 0.9), hi = Math.max(...all, 1.1);
+    const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    const n = Math.max(normal.length, channel.length);
+    const sx = (i) => f.x0 + (f.x1 - f.x0) * i / Math.max(n - 1, 1);
+    const sy = (v) => f.y0 - (f.y0 - f.y1) * (v - lo) / (hi - lo);
+    const step = (hi - lo) > 1 ? 0.5 : (hi - lo) > 0.5 ? 0.25 : 0.1;
+    const ticks = []; for (let t = Math.ceil(lo / step) * step; t <= hi; t += step) ticks.push(+t.toFixed(3));
+    yAxis(f, ticks, sy, "Δt (s)", 2);
+    xAxis(f, [0, 15, 31, 47, n - 1].filter((t) => t < n), sx, "gap index");
+    el("line", { x1: f.x0, x2: f.x1, y1: sy(1), y2: sy(1), stroke: "var(--muted)", "stroke-dasharray": "4 4", fill: "none" }, f.svg);
+    for (const [data, color] of [[normal, "var(--normal)"], [channel, "var(--channel)"]]) {
+      el("polyline", { points: data.map((v, i) => `${sx(i)},${sy(v)}`).join(" "), fill: "none", stroke: color, "stroke-width": 1.6, "stroke-linejoin": "round" }, f.svg);
+      data.forEach((v, i) => el("circle", { cx: sx(i), cy: sy(v), r: 1.8, fill: color }, f.svg));
+    }
+    return f.svg;
+  }
+
+  function histChart(normal, channel) {
+    const f = frame(380, 220, { l: 34, r: 16, t: 22, b: 34 });
+    const lo = 0.5, hi = 1.5, bw = 0.02, nb = Math.round((hi - lo) / bw);
+    const count = (a) => { const c = new Array(nb).fill(0); a.forEach((v) => c[Math.min(nb - 1, Math.max(0, Math.floor((v - lo) / bw)))]++); return c; };
+    const cn = count(normal), cc = count(channel);
+    const top = Math.max(4, ...cn, ...cc);
+    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - lo) / (hi - lo);
+    const sy = (v) => f.y0 - (f.y0 - f.y1) * v / top;
+    const yt = [0, Math.round(top / 2), top];
+    yAxis(f, yt, sy, "count", 0);
+    xAxis(f, [0.5, 0.75, 1, 1.25, 1.5], sx, "Δt (s)", 2);
+    const bar = (c, color, op) => c.forEach((v, i) => { if (v) el("rect", { x: sx(lo + i * bw) + 0.5, width: Math.max(1, sx(bw) - sx(0) - 1), y: sy(v), height: f.y0 - sy(v), fill: color, "fill-opacity": op }, f.svg); });
+    bar(cn, "var(--normal)", 0.85); bar(cc, "var(--channel)", 0.7);
+    return f.svg;
+  }
+
+  function stdChart(nStd, cStd, lines) {
+    const f = frame(380, 220, { l: 44, r: 8, t: 22, b: 34 });
+    const all = nStd.concat(cStd, lines.map((l) => l.v)).filter((v) => v > 0);
+    const lo = Math.pow(10, Math.floor(Math.log10(Math.min(...all)))), hi = Math.pow(10, Math.ceil(Math.log10(Math.max(...all))));
+    const sy = (v) => f.y0 - (f.y0 - f.y1) * (Math.log10(Math.max(v, lo)) - Math.log10(lo)) / (Math.log10(hi) - Math.log10(lo));
+    const ticks = []; for (let t = lo; t <= hi * 1.001; t *= 10) ticks.push(t);
+    yAxis(f, ticks, sy, "std Δt (s, log)", (t) => (t >= 1 ? t.toFixed(0) : t.toString()));
+    el("line", { x1: f.x0, x2: f.x1, y1: f.y0, y2: f.y0, class: "axis" }, f.svg);
+    const cols = [["normal windows", nStd, "var(--normal)", 0.3], ["channel windows", cStd, "var(--channel)", 0.7]];
+    for (const [label, vals, color, pos] of cols) {
+      const cx = f.x0 + (f.x1 - f.x0) * pos;
+      el("text", { x: cx, y: f.y0 + 14, "text-anchor": "middle" }, f.svg).textContent = label;
+      vals.forEach((v, i) => el("circle", { cx: cx + ((i * 37) % 60) - 30, cy: sy(v), r: 2.6, fill: color, "fill-opacity": 0.8 }, f.svg));
+    }
+    for (const l of lines) el("line", { x1: f.x0, x2: f.x1, y1: sy(l.v), y2: sy(l.v), stroke: l.c, "stroke-dasharray": "5 4", "stroke-width": 1.4, fill: "none" }, f.svg);
+    return f.svg;
+  }
+
+  function rateChart(series, xs, xLabel) {
+    const f = frame(380, 210, { l: 34, r: 12, t: 22, b: 34 });
+    const sx = (v) => f.x0 + (f.x1 - f.x0) * (v - xs[0]) / (xs[xs.length - 1] - xs[0]);
+    const sy = (v) => f.y0 - (f.y0 - f.y1) * v;
+    yAxis(f, [0, 0.25, 0.5, 0.75, 1], sy, "rate", 2);
+    xAxis(f, xs, sx, xLabel);
+    for (const s of series) {
+      el("polyline", { points: s.vals.map((v, i) => `${sx(xs[i])},${sy(v)}`).join(" "), fill: "none", stroke: s.c, "stroke-width": 1.8, "stroke-dasharray": s.dash || "" }, f.svg);
+      s.vals.forEach((v, i) => el("circle", { cx: sx(xs[i]), cy: sy(v), r: 3, fill: s.c }, f.svg));
+    }
+    return f.svg;
+  }
+
+  // ---------- live bench ----------
+  const state = { g0: 0.75, g1: 1.25, seed: 20261009 };
+  const textToBits = (s) => [...new TextEncoder().encode(s || "?")].flatMap((b) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (b >> k) & 1));
+  const bitsToText = (bits) => { let s = ""; for (let i = 0; i + 8 <= bits.length; i += 8) { const b = bits.slice(i, i + 8); if (b.includes(null)) { s += "·"; continue; } const c = b.reduce((a, x) => a * 2 + x, 0); s += c >= 32 && c < 127 ? String.fromCharCode(c) : "·"; } return s; };
+
+  function verdictCard(name, rule, dr, fpr) {
+    const st = dr >= 0.9 && fpr <= 0.1 ? ["good", "separates the classes"] : dr >= 0.9 ? ["warn", "too many false alarms"] : fpr <= 0.1 ? ["bad", "misses the channel"] : ["bad", "unreliable"];
+    const d = document.createElement("div");
+    d.className = "verdict"; d.dataset.state = st[0];
+    d.innerHTML = `<span class="name">${name}</span><span class="hint">${rule}</span><div class="nums"><span>detection</span><b>${(dr * 100).toFixed(0)}%</b><span>false positives</span><b>${(fpr * 100).toFixed(0)}%</b></div><span class="state">${st[1]}</span>`;
+    return d;
+  }
+
+  function update() {
+    const jitter = +$("jitter").value / 1000, loss = +$("loss").value / 100, size = +$("win").value, stdTol = +$("stdtol").value / 1000;
+    $("jitterOut").textContent = `${$("jitter").value} ms`;
+    $("lossOut").textContent = `${$("loss").value}%`;
+    $("stdtolOut").textContent = `${fmt(stdTol, 3)} s`;
+    const bits = textToBits($("msg").value);
+    $("msgBits").textContent = `${bits.length} bits`;
+    const r = rngFrom(state.seed);
+    const N = 64, RUNS = 10;
+    const cleanBase = Array.from({ length: RUNS }, () => run(N, null, 0, 0, 0, 0, r));
+    const matched = Array.from({ length: RUNS }, () => run(N, null, 0, 0, jitter, loss, r));
+    const testN = Array.from({ length: RUNS }, () => run(N, null, 0, 0, jitter, loss, r));
+    const testC = Array.from({ length: RUNS }, () => run(N, bits, state.g0, state.g1, jitter, loss, r));
+    const thrClean = baselineStd(cleanBase, size), thrMatched = baselineStd(matched, size);
+    const nW = testN.flatMap((f) => windows(f, size)), cW = testC.flatMap((f) => windows(f, size));
+    const nS = nW.map(std), cS = cW.map(std);
+    const fixed = (w) => std(w) > stdTol || Math.abs(mean(w) - 1) > 0.1;
+    const rate = (ws, fn) => (ws.length ? ws.filter(fn).length / ws.length : 0);
+    const v = $("verdicts"); v.replaceChildren(
+      verdictCard("Fixed rule", `std > ${fmt(stdTol, 3)} s or |mean − 1| > 0.1 s`, rate(cW, fixed), rate(nW, fixed)),
+      verdictCard("Baseline (clean LAN)", `std > p95 = ${fmt(thrClean, 4)} s`, rate(cW, (w) => std(w) > thrClean), rate(nW, (w) => std(w) > thrClean)),
+      verdictCard("Baseline (same conditions)", `std > p95 = ${fmt(thrMatched, 4)} s`, rate(cW, (w) => std(w) > thrMatched), rate(nW, (w) => std(w) > thrMatched)),
+    );
+    const ipd = (pk) => pk.slice(1).map((p, i) => p.t - pk[i].t);
+    $("seqChart").replaceChildren(seqChart(ipd(testN[0]), ipd(testC[0])));
+    $("histChart").replaceChildren(histChart(testN.flatMap(ipd), testC.flatMap(ipd)));
+    $("stdChart").replaceChildren(stdChart(nS, cS, [{ v: stdTol, c: "var(--ink)" }, { v: thrClean, c: "var(--accent)" }, { v: thrMatched, c: "var(--bad)" }]));
+
+    // decode the first channel run, using sequence numbers to place each bit
+    const pk = testC[0], sent = Array.from({ length: N - 1 }, (_, i) => bits[i % bits.length]);
+    const got = new Array(N - 1).fill(null);
+    for (let i = 1; i < pk.length; i++) if (pk[i].seq - pk[i - 1].seq === 1) got[pk[i - 1].seq] = pk[i].t - pk[i - 1].t >= 1 ? 1 : 0;
+    const correct = got.filter((b, i) => b === sent[i]).length;
+    $("bitsOut").innerHTML = got.map((b, i) => (b === null ? '<span class="miss">?</span>' : b === sent[i] ? b : `<span class="err">${b}</span>`)).join("");
+    $("decodeOut").textContent = `Recovered "${bitsToText(got.slice(0, Math.floor((N - 1) / 8) * 8))}" · ${correct}/${N - 1} bits correct (${((correct / (N - 1)) * 100).toFixed(1)}%) · red = flipped by jitter, ? = lost packet`;
+  }
+
+  document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll(".seg button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+    state.g0 = +b.dataset.g0; state.g1 = +b.dataset.g1; update();
+  }));
+  ["jitter", "loss", "win", "stdtol", "msg"].forEach((id) => $(id).addEventListener("input", update));
+  $("rerun").addEventListener("click", () => { state.seed = (state.seed * 1103515245 + 12345) >>> 0; update(); });
+  $("controls").addEventListener("submit", (e) => e.preventDefault());
+  update();
+
+  // ---------- study results ----------
+  let study = null;
+  try { study = JSON.parse($("study").textContent); } catch (e) { study = null; }
+  if (!study) { $("studyMeta").textContent = "Run python -m icmp_detector study and scripts/build_site.py to embed results here."; return; }
+  const cfg = study.config;
+  $("studyMeta").textContent = `Simulated: ${cfg.runs_per_set} runs × ${cfg.requests_per_run} Echo Requests per labelled set, ${study.baseline.window_size}-request windows, baseline p${cfg.percentile} from clean normal runs (${study.baseline.n_windows} windows). Seed ${cfg.seed}.`;
+  const DETS = [["fixed", "var(--ink)", ""], ["baseline (clean)", "var(--accent)", "6 4"], ["baseline (matched)", "var(--bad)", "2 3"]];
+  const channels = Object.keys(cfg.channels);
+  let current = channels[0];
+  const W = study.baseline.window_size;
+  function showStudy() {
+    document.querySelectorAll("#studyTabs button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.ch === current));
+    const conds = cfg.conditions.filter((c) => c.loss === 0);
+    const xs = conds.map((c) => Math.round(c.net_jitter * 1000));
+    const row = (cond, det) => study.results.find((r) => r.channel === current && r.window === W && r.condition === cond && r.detector === det);
+    const series = (key) => DETS.map(([d, c, dash]) => ({ c, dash, vals: conds.map((k) => row(k.name, d)[key]) }));
+    $("drChart").replaceChildren(rateChart(series("detection_rate"), xs, "added jitter (ms)"));
+    $("fprChart").replaceChildren(rateChart(series("false_positive_rate"), xs, "added jitter (ms)"));
+    const t = $("studyTable");
+    let html = `<thead><tr><th>Condition</th>${DETS.map(([d]) => `<th>${d}<br>DR / FPR</th>`).join("")}<th>Decoding</th></tr></thead><tbody>`;
+    for (const c of cfg.conditions) {
+      html += `<tr><td>${c.name}</td>`;
+      for (const [d] of DETS) { const r = row(c.name, d); html += `<td class="num ${r.detection_rate >= 0.9 && r.false_positive_rate <= 0.1 ? "ok" : "hi"}">${fmt(r.detection_rate)} / ${fmt(r.false_positive_rate)}</td>`; }
+      html += `<td class="num">${(study.decoding_accuracy[current][c.name] * 100).toFixed(1)}%</td></tr>`;
+    }
+    t.innerHTML = html + "</tbody>";
+  }
+  for (const ch of channels) {
+    const b = document.createElement("button"); b.type = "button"; b.dataset.ch = ch; b.textContent = `Channel ${ch}`;
+    b.addEventListener("click", () => { current = ch; showStudy(); });
+    $("studyTabs").appendChild(b);
+  }
+  showStudy();
+})();
+</script>
+
+</body>
+</html>

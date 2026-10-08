@@ -113,5 +113,18 @@ class StudyTests(unittest.TestCase):
         self.assertTrue(all(x["detection_rate"] == 1.0 for x in planned))
 
 
+class BenchmarkTests(unittest.TestCase):
+    def test_small_benchmark_runs_and_reports(self):
+        from icmp_detector.benchmark import accuracy_benchmark, markdown, speed_benchmark
+
+        acc = accuracy_benchmark(runs=2, window_sizes=(16, 32))
+        speed = speed_benchmark(packets=2_000, repeats=1)
+        json.dumps(acc)
+        planned = [r for r in acc["results"] if r["channel"] == "0.75/1.25 s" and r["condition"] == "clean"]
+        self.assertTrue(all(r["detection_rate"] == 1.0 for r in planned))
+        self.assertGreater(speed["packets_per_s"], 0)
+        self.assertIn("SIMULATED", markdown(acc, speed))
+
+
 if __name__ == "__main__":
     unittest.main()

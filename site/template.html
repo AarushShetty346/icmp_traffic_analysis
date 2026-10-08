@@ -15,7 +15,12 @@
   --ink-2: #8e9cab;
   --line: rgba(160, 190, 220, 0.12);
   --signal: #ff6b2c;      /* the one accent: the covert channel */
-  --signal-soft: rgba(255, 107, 44, 0.14);
+  --signal-rgb: 255, 107, 44;
+  --signal-hi: #ffb08a;
+  --signal-a: #ff8a4c;
+  --signal-b: #ff3d6e;
+  --normal-rgb: 106, 174, 255;
+  --signal-soft: rgba(var(--signal-rgb), 0.14);
   --normal: #6aaeff;      /* data colour for normal traffic */
   --ok: #4fd18b;
   --bad: #ff6f6f;
@@ -270,9 +275,9 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
 /* ---------- cinematic layer ---------- */
 body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background:
-    radial-gradient(60vw 50vh at 85% 8%, rgba(255, 107, 44, 0.10), transparent 60%),
-    radial-gradient(55vw 60vh at 5% 40%, rgba(106, 174, 255, 0.08), transparent 65%),
-    radial-gradient(50vw 50vh at 70% 95%, rgba(255, 107, 44, 0.06), transparent 60%); }
+    radial-gradient(60vw 50vh at 85% 8%, rgba(var(--signal-rgb), 0.10), transparent 60%),
+    radial-gradient(55vw 60vh at 5% 40%, rgba(var(--normal-rgb), 0.08), transparent 65%),
+    radial-gradient(50vw 50vh at 70% 95%, rgba(var(--signal-rgb), 0.06), transparent 60%); }
 html, body { overflow-x: clip; }
 section { overflow-x: clip; }
 body { background: var(--bg); }
@@ -288,12 +293,12 @@ body { background: var(--bg); }
 .hero h1 { font-size: clamp(2.6rem, 5.6vw, 4.7rem); line-height: 0.98; letter-spacing: -0.045em; }
 .hero > .shell { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
 @media (max-width: 920px) { .hero > .shell { grid-template-columns: minmax(0, 1fr); } }
-.hero h1 em { background: linear-gradient(92deg, #ff8a4c, var(--signal) 55%, #ff3d6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 em { background: linear-gradient(92deg, var(--signal-a), var(--signal) 55%, var(--signal-b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
 .hero h1 .w > span { display: inline-block; }
 .kicker { color: var(--signal); }
-.btn-primary { background: var(--signal); color: #120a05; box-shadow: 0 10px 30px -10px rgba(255, 107, 44, 0.7); }
-.btn-primary:hover { background: #ff8247; color: #120a05; }
+.btn-primary { background: var(--signal); color: #120a05; box-shadow: 0 10px 30px -10px rgba(var(--signal-rgb), 0.7); }
+.btn-primary:hover { background: var(--signal-hi); color: #120a05; }
 .btn-ghost { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
 
 .wire, .rail, .verdicts, .plots, .topo { background: var(--glass); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 30px 80px -40px rgba(0, 0, 0, 0.8); }
@@ -301,23 +306,42 @@ body { background: var(--bg); }
 .encode, .findings, .conclude { background: var(--surface); border-block: 0; }
 .wave { display: block; width: 100%; height: clamp(48px, 7vw, 110px); }
 .wave + section, section + .wave { margin-top: 0; }
-.question { background: linear-gradient(120deg, rgba(255, 107, 44, 0.16), rgba(255, 107, 44, 0.04)); border: 1px solid rgba(255, 107, 44, 0.25); }
+.question { background: linear-gradient(120deg, rgba(var(--signal-rgb), 0.16), rgba(var(--signal-rgb), 0.04)); border: 1px solid rgba(var(--signal-rgb), 0.25); }
 .seg button[aria-pressed="true"], .tabs button[aria-pressed="true"] { background: var(--signal); color: #120a05; }
 input[type="text"], select { background: rgba(0, 0, 0, 0.25); }
 pre { background: #05070b; color: #d7e0e8; border: 1px solid var(--line); }
 tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
-.claim .num { background: linear-gradient(180deg, #ffb08a, var(--signal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.claim .num { background: linear-gradient(180deg, var(--signal-hi), var(--signal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .verdict-line em { color: var(--signal); }
 .mono-avatar { background: rgba(255, 255, 255, 0.06); }
 .track li::before { background: var(--bg); border-color: var(--ink-2); box-shadow: 0 0 0 4px var(--bg); }
-.track li:last-child::before { box-shadow: 0 0 18px rgba(255, 107, 44, 0.8); }
+.track li:last-child::before { box-shadow: 0 0 18px rgba(var(--signal-rgb), 0.8); }
 .has-3d .hero > .shell { grid-template-columns: minmax(0, 1fr); }
 .has-3d .hero-copy { max-width: 640px; }
 .has-3d .hero .wire { justify-self: start; width: min(100%, 520px); margin-top: 8px; }
 .has-3d .hero .wire-head, .has-3d .hero #wire { display: none; }
 .has-3d .hero .wire-read { border-top: 0; }
-.hero h1 em .w > span { background: linear-gradient(92deg, #ff8a4c, var(--signal) 55%, #ff3d6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 em .w > span { background: linear-gradient(92deg, var(--signal-a), var(--signal) 55%, var(--signal-b)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .hero h1 em { background: none; color: var(--signal); }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.secret { display: flex; gap: 0; margin-top: 28px; max-width: 520px; border: 1px solid rgba(var(--signal-rgb), 0.45); border-radius: var(--r); background: rgba(8, 11, 16, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.08), 0 20px 50px -20px rgba(var(--signal-rgb), 0.45); }
+.secret input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: 500 1.25rem var(--mono); letter-spacing: 0.14em; padding: 14px 16px; text-transform: uppercase; }
+.secret input:focus { outline: none; }
+.secret:focus-within { box-shadow: 0 0 0 4px rgba(var(--signal-rgb), 0.22), 0 20px 50px -20px rgba(var(--signal-rgb), 0.6); }
+.secret .btn { border-radius: 0 var(--r) var(--r) 0; padding-inline: 22px; }
+.link-cta { color: var(--ink-2); text-decoration: none; font-weight: 500; border-bottom: 1px solid var(--line); padding-bottom: 2px; transition: color 0.2s, border-color 0.2s; }
+.link-cta:hover { color: var(--ink); border-color: var(--signal); }
+.cta-row { margin-top: 18px; }
+.challenge { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: var(--r); border: 1px solid var(--line); background: var(--glass); font-weight: 500; }
+.challenge .tag { font: 600 0.72rem var(--mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 4px 8px; border-radius: 2px; white-space: nowrap; }
+.challenge[data-state="caught"] .tag { background: rgba(255, 111, 111, 0.15); color: var(--bad); }
+.challenge[data-state="partial"] .tag { background: var(--signal-soft); color: var(--signal); }
+.challenge[data-state="garbled"] .tag { background: var(--signal-soft); color: var(--signal); }
+.challenge[data-state="escaped"] { border-color: rgba(79, 209, 139, 0.5); box-shadow: 0 0 40px -10px rgba(79, 209, 139, 0.45); }
+.challenge[data-state="escaped"] .tag { background: rgba(79, 209, 139, 0.15); color: var(--ok); }
+.seg { grid-template-columns: repeat(4, 1fr); }
+.seg button { font-size: 0.74rem; }
 
 @media (prefers-reduced-transparency: reduce) {
   .wire, .rail, .verdicts, .plots, .topo, .btn-ghost { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--surface); }
@@ -334,11 +358,11 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
   <div class="shell">
     <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>Ping Gap Detector</a>
     <ul>
-      <li><a href="#background">Background</a></li>
+      <li><a href="#background">Why</a></li>
       <li><a href="#encoding">How it hides</a></li>
-      <li><a href="#testbed">Testbed</a></li>
-      <li><a href="#bench">Detector</a></li>
-      <li><a href="#findings">Findings</a></li>
+      <li><a href="#testbed">Lab</a></li>
+      <li><a href="#bench">Play</a></li>
+      <li><a href="#findings">Results</a></li>
       <li><a href="#pipeline">Pipeline</a></li>
       <li><a href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">Source</a></li>
     </ul>
@@ -349,12 +373,16 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
   <canvas id="scene" aria-hidden="true"></canvas>
   <div class="shell">
     <div class="hero-copy">
-      <div class="kicker">BCSE308P Computer Networks, VIT Vellore</div>
+      <div class="kicker">An open lab for covert timing channels</div>
       <h1>Finding hidden bits in the <em>gaps between pings</em></h1>
-      <p class="lede">We hide a message in ICMP inter-packet delays on a closed lab network, then test whether simple statistics can catch it.</p>
+      <p class="lede">Type a secret. It leaves as nothing but ping timing, gets decoded on the far side, and our detector tries to catch it.</p>
+      <form class="secret" id="secretForm" autocomplete="off">
+        <label for="secret" class="sr">Your secret</label>
+        <input type="text" id="secret" maxlength="16" value="HELLO" spellcheck="false">
+        <button class="btn btn-primary" type="submit">Send it</button>
+      </form>
       <div class="cta-row">
-        <a class="btn btn-primary" href="#bench">Try the detector</a>
-        <a class="btn btn-ghost" href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">View source</a>
+        <a class="link-cta" href="#bench">Think you can sneak it past the detector? Play</a>
       </div>
     </div>
 
@@ -473,8 +501,8 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
 <section id="bench" aria-labelledby="bench-h">
   <div class="shell">
     <div class="bench-head">
-      <h2 id="bench-h">Run the detector</h2>
-      <p class="lede">Every change reruns the experiment: 10 clean runs build the baseline, then 10 normal and 10 covert runs of 64 requests are judged window by window.</p>
+      <h2 id="bench-h">Can you sneak a message past it?</h2>
+      <p class="lede">You control the sender and the network. The detectors only see timing. Make all three miss your message while it still arrives intact. Every change reruns 30 simulated captures.</p>
     </div>
     <div class="bench">
       <form class="rail" id="controls" autocomplete="off">
@@ -482,7 +510,7 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
           <h3>Covert sender</h3>
           <div class="field">
             <label for="msg">Hidden message <output id="msgBits"></output></label>
-            <input type="text" id="msg" value="VIT" maxlength="24">
+            <input type="text" id="msg" value="HELLO" maxlength="24">
           </div>
           <div class="field">
             <span class="flabel">Gaps for 0 / 1 (s)</span>
@@ -490,6 +518,7 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
               <button type="button" data-g0="0.75" data-g1="1.25" aria-pressed="true">.75/1.25</button>
               <button type="button" data-g0="0.9" data-g1="1.1" aria-pressed="false">.90/1.10</button>
               <button type="button" data-g0="0.95" data-g1="1.05" aria-pressed="false">.95/1.05</button>
+              <button type="button" data-g0="0.98" data-g1="1.02" aria-pressed="false">.98/1.02</button>
             </div>
           </div>
         </div>
@@ -523,7 +552,8 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
       </form>
 
       <div class="scope">
-        <div class="verdicts" id="verdicts" aria-live="polite"></div>
+        <div class="challenge" id="challenge" aria-live="polite"><span class="tag">Caught</span><span id="challengeText">All three detectors caught your message.</span></div>
+        <div class="verdicts" id="verdicts"></div>
         <div class="plots">
           <div class="plot wide">
             <div class="plot-title"><h3>Gaps seen by the receiver</h3><div class="legend"><span style="--c: var(--normal)">normal</span><span style="--c: var(--signal)">covert</span><span class="dash" style="--c: var(--ink-2)">1.0 s decode line</span></div></div>
@@ -622,7 +652,7 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
 <section class="closing" aria-labelledby="team-h">
   <div class="shell">
     <div class="team">
-      <h2 id="team-h">Team</h2>
+      <h2 id="team-h">Built by</h2>
       <div class="people">
         <div class="person"><span class="mono-avatar">HJ</span><div><b>Harsh Jha</b><span>Literature survey, timing generator, comparison design</span></div></div>
         <div class="person"><span class="mono-avatar">AD</span><div><b>Anuj Deshpande</b><span>Normal traffic, capture and filtering, delay extraction, network tests</span></div></div>
@@ -630,7 +660,7 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
       </div>
     </div>
     <div class="code-col">
-      <h2>Run it on lab captures</h2>
+      <h2>Run it on your own captures</h2>
 <pre><span class="c"># export Echo Request timestamps from a capture</span>
 tshark -r normal1.pcap -Y "icmp.type == 8" -T fields \
   -e frame.time_epoch -e ip.src -e ip.dst \
@@ -651,7 +681,7 @@ python scripts/build_site.py</pre>
 
 <footer>
   <div class="shell">
-    <span>Defensive research on machines the team controls. The simulator models arrival timestamps and sends no packets.</span>
+    <span>Ping Gap Detector started as a BCSE308P Computer Networks project at VIT Vellore. It is defensive research: experiments run only on machines the team controls, and the simulator on this page sends no packets.</span>
     <ol>
       <li>Cabuk, Brodley and Shields. IP Covert Timing Channels: Design and Detection. ACM CCS 2004.</li>
       <li>Gianvecchio and Wang. Detecting Covert Timing Channels: An Entropy-Based Approach. ACM CCS 2007.</li>
@@ -690,7 +720,7 @@ python scripts/build_site.py</pre>
       const path = document.createElementNS(NS, "path");
       path.setAttribute("d", d);
       path.setAttribute("fill", into ? mix(from, to, t) : mix(to, from, t));
-      if (l === 0) { path.setAttribute("stroke", into ? "rgba(255,107,44,0.35)" : "rgba(106,174,255,0.25)"); path.setAttribute("stroke-width", "1.2"); }
+      if (l === 0) { path.setAttribute("stroke", into ? `rgba(${css("--signal-rgb")},0.35)` : `rgba(${css("--normal-rgb")},0.25)`); path.setAttribute("stroke-width", "1.2"); }
       svg.appendChild(path);
     }
     holder.replaceWith(svg);
@@ -729,11 +759,12 @@ python scripts/build_site.py</pre>
   try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch (e) { return; }
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x080b10, 0.045);
+  scene.fog = new THREE.FogExp2(new THREE.Color(getComputedStyle(document.documentElement).getPropertyValue("--bg").trim()), 0.045);
   const camera = new THREE.PerspectiveCamera(58, 1, 0.1, 200);
   camera.position.set(0, 1.1, 6);
 
-  const ORANGE = new THREE.Color(0xff6b2c), BLUE = new THREE.Color(0x6aaeff);
+  const tok = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const ORANGE = new THREE.Color(tok("--signal")), BLUE = new THREE.Color(tok("--normal"));
   const glowTex = (() => {
     const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
     const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
@@ -742,7 +773,7 @@ python scripts/build_site.py</pre>
   })();
   const bitTex = [0, 1].map((b) => {
     const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
-    g.fillStyle = "#ffb08a"; g.font = "700 46px 'JetBrains Mono', monospace"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(b), 32, 34);
+    g.fillStyle = tok("--signal-hi"); g.font = "700 46px 'JetBrains Mono', monospace"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(b), 32, 34);
     return new THREE.CanvasTexture(c);
   });
 
@@ -764,7 +795,8 @@ python scripts/build_site.py</pre>
   }
 
   const LANES = [{ x: -1.1, color: BLUE, covert: false }, { x: 1.1, color: ORANGE, covert: true }];
-  const bits = [..."VIT "].flatMap((ch) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (ch.charCodeAt(0) >> k) & 1));
+  const toBits = (str) => [...str].flatMap((ch) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (ch.charCodeAt(0) >> k) & 1));
+  let bits = toBits("HELLO ");
   const UNITS = 4.2; // world units per simulated second
   LANES.forEach((lane) => {
     const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(lane.x, 0, -90), new THREE.Vector3(lane.x, 0, 8)]);
@@ -796,6 +828,14 @@ python scripts/build_site.py</pre>
       lane.pk.push({ t: prev ? prev.t + gap : -6, gap: prev ? gap : null, bit, done: false });
     }
   }
+  window.icmpSecret = (text) => {
+    bits = toBits(text.replace(/[^\x20-\x7e]/g, "?"));
+    const lane = LANES[1];
+    lane.pk = lane.pk.filter((p) => p.done); lane.k = 0;
+    decoded.length = 0;
+    document.getElementById("wireText").innerHTML = '<span class="cursor"></span>';
+    document.getElementById("wireBits").textContent = "";
+  };
   // the receiver readout under the headline follows this scene
   const decoded = [], sd = (a) => { if (a.length < 3) return 0; const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); };
   const toText = (b) => { let out = ""; for (let i = 0; i + 8 <= b.length; i += 8) { const c = b.slice(i, i + 8).reduce((x, y) => x * 2 + y, 0); out += c >= 32 && c < 127 ? String.fromCharCode(c) : "?"; } return out; };
@@ -844,7 +884,7 @@ python scripts/build_site.py</pre>
     camera.lookAt(0, 0.35, -30);
     renderer.render(scene, camera);
   }
-  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt * 1.4; drift(dt); frame(); raf = requestAnimationFrame(loop); }
+  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt * 2.6; drift(dt); frame(); raf = requestAnimationFrame(loop); }
   let raf = 0, running = false;
   new ResizeObserver(() => { resize(); frame(); }).observe(canvas);
   resize();
@@ -1145,6 +1185,14 @@ python scripts/build_site.py</pre>
     const got = new Array(N - 1).fill(null);
     for (let i = 1; i < pk.length; i++) if (pk[i].seq - pk[i - 1].seq === 1) got[pk[i - 1].seq] = pk[i].t - pk[i - 1].t >= 1 ? 1 : 0;
     const correct = got.filter((b, i) => b === sent[i]).length;
+    const drs = [rate(cW, fixed), rate(cW, (w) => std(w) > thrClean), rate(cW, (w) => std(w) > thrMatched)];
+    const escaped = drs.filter((d) => d < 0.5).length, acc = correct / (N - 1);
+    const ch = $("challenge");
+    const [cState, tag, msg] = escaped === 3 && acc >= 0.9 ? ["escaped", "Escaped", `Clean escape. All three detectors missed it and ${Math.round(acc * 100)}% of your bits arrived.`]
+      : escaped === 3 ? ["garbled", "Garbled", `All three missed it, but the network scrambled your message: only ${Math.round(acc * 100)}% of bits arrived right.`]
+      : escaped > 0 ? ["partial", `${escaped} of 3`, `You slipped past ${escaped} detector${escaped > 1 ? "s" : ""}. Try smaller gaps, or hide in more jitter.`]
+      : ["caught", "Caught", "All three detectors caught your message. Try smaller gaps, or hide in more jitter."];
+    ch.dataset.state = cState; ch.querySelector(".tag").textContent = tag; $("challengeText").textContent = msg;
     $("bitsOut").innerHTML = got.map((b, i) => (b === null ? '<span class="miss">?</span>' : b === sent[i] ? b : `<span class="err">${b}</span>`)).join("");
     const text = bitsToText(got.slice(0, Math.floor((N - 1) / 8) * 8)).replace(/&/g, "&amp;").replace(/</g, "&lt;");
     $("decodeOut").innerHTML = `Recovered <b>${text}</b> with ${correct} of ${N - 1} bits right (${fmt((correct / (N - 1)) * 100, 1)}%). Red bits were flipped by jitter; ? marks a lost packet.`;
@@ -1156,6 +1204,13 @@ python scripts/build_site.py</pre>
   ["jitter", "loss", "win", "stdtol", "msg"].forEach((id) => $(id).addEventListener("input", update));
   $("rerun").addEventListener("click", () => { state.seed = (Math.imul(state.seed, 1103515245) + 12345) >>> 0; update(); });
   $("controls").addEventListener("submit", (e) => e.preventDefault());
+  $("secretForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = ($("secret").value || "HELLO").toUpperCase().slice(0, 16);
+    $("secret").value = text;
+    if (window.icmpSecret) window.icmpSecret(text + " ");
+    $("msg").value = text; update();
+  });
   update();
 
   // ---------- study results ----------

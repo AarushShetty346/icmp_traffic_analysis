@@ -5,33 +5,24 @@
 <style>
 /* Layout: a signal bench. Asymmetric hero with a live packet wire, a full-width encoding strip,
    a control rail beside scope readouts, staggered findings, a pipeline track, then team and code. */
+/* Deliberately single-theme: a dark signal room, so it reads the same on any viewer setting. */
 :root {
-  --bg: #edf0f2;          /* cool lab grey */
-  --surface: #f8f9fa;
-  --sunk: #e3e7ea;
-  --ink: #131a21;
-  --ink-2: #4a5763;
-  --line: #cfd6dc;
-  --signal: #cf4a1c;      /* the one accent: the covert channel */
-  --signal-soft: rgba(207, 74, 28, 0.12);
-  --normal: #2f5a80;      /* data colour for normal traffic */
-  --ok: #217a45;
-  --bad: #b3261e;
+  --bg: #080b10;          /* deep blue-black, not pure black */
+  --surface: #0e131a;
+  --sunk: #131a23;
+  --glass: rgba(150, 180, 210, 0.05);
+  --ink: #eaf0f5;
+  --ink-2: #8e9cab;
+  --line: rgba(160, 190, 220, 0.12);
+  --signal: #ff6b2c;      /* the one accent: the covert channel */
+  --signal-soft: rgba(255, 107, 44, 0.14);
+  --normal: #6aaeff;      /* data colour for normal traffic */
+  --ok: #4fd18b;
+  --bad: #ff6f6f;
   --display: "Bricolage Grotesque", "Arial Narrow", Arial, sans-serif;
   --body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
   --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --r: 3px;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0f1418; --surface: #161d23; --sunk: #1d262d; --ink: #e6ecef; --ink-2: #98a6b1; --line: #2a353e;
-    --signal: #ff7b47; --signal-soft: rgba(255, 123, 71, 0.14); --normal: #7fb0dc; --ok: #6bcf8f; --bad: #f2867c;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0f1418; --surface: #161d23; --sunk: #1d262d; --ink: #e6ecef; --ink-2: #98a6b1; --line: #2a353e;
-  --signal: #ff7b47; --signal-soft: rgba(255, 123, 71, 0.14); --normal: #7fb0dc; --ok: #6bcf8f; --bad: #f2867c;
+  --r: 4px;
   color-scheme: dark;
 }
 
@@ -276,6 +267,60 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
 .cols ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 10px; color: var(--ink-2); }
 .cols li::marker { color: var(--signal); }
 
+/* ---------- cinematic layer ---------- */
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60vw 50vh at 85% 8%, rgba(255, 107, 44, 0.10), transparent 60%),
+    radial-gradient(55vw 60vh at 5% 40%, rgba(106, 174, 255, 0.08), transparent 65%),
+    radial-gradient(50vw 50vh at 70% 95%, rgba(255, 107, 44, 0.06), transparent 60%); }
+html, body { overflow-x: clip; }
+section { overflow-x: clip; }
+body { background: var(--bg); }
+.nav { background: rgba(8, 11, 16, 0.72); }
+.brand-mark i { background: var(--ink); }
+
+.hero { position: relative; overflow: hidden; min-height: min(860px, 94vh); display: grid; align-items: center; padding-block: 48px 72px; }
+.hero > .shell { position: relative; z-index: 1; width: 100%; }
+#scene { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
+.hero::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, rgba(8, 11, 16, 0.92) 0%, rgba(8, 11, 16, 0.55) 38%, rgba(8, 11, 16, 0) 62%), linear-gradient(0deg, var(--bg) 0%, rgba(8, 11, 16, 0) 22%); }
+@media (max-width: 920px) { .hero::after { background: linear-gradient(180deg, rgba(8, 11, 16, 0.55), rgba(8, 11, 16, 0.85) 60%, var(--bg)); } }
+.hero h1 { font-size: clamp(2.6rem, 5.6vw, 4.7rem); line-height: 0.98; letter-spacing: -0.045em; }
+.hero > .shell { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); }
+@media (max-width: 920px) { .hero > .shell { grid-template-columns: minmax(0, 1fr); } }
+.hero h1 em { background: linear-gradient(92deg, #ff8a4c, var(--signal) 55%, #ff3d6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.08em; margin-bottom: -0.08em; }
+.hero h1 .w > span { display: inline-block; }
+.kicker { color: var(--signal); }
+.btn-primary { background: var(--signal); color: #120a05; box-shadow: 0 10px 30px -10px rgba(255, 107, 44, 0.7); }
+.btn-primary:hover { background: #ff8247; color: #120a05; }
+.btn-ghost { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+
+.wire, .rail, .verdicts, .plots, .topo { background: var(--glass); backdrop-filter: blur(16px) saturate(140%); -webkit-backdrop-filter: blur(16px) saturate(140%); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 30px 80px -40px rgba(0, 0, 0, 0.8); }
+.wire { background: rgba(14, 19, 26, 0.62); }
+.encode, .findings, .conclude { background: var(--surface); border-block: 0; }
+.wave { display: block; width: 100%; height: clamp(48px, 7vw, 110px); }
+.wave + section, section + .wave { margin-top: 0; }
+.question { background: linear-gradient(120deg, rgba(255, 107, 44, 0.16), rgba(255, 107, 44, 0.04)); border: 1px solid rgba(255, 107, 44, 0.25); }
+.seg button[aria-pressed="true"], .tabs button[aria-pressed="true"] { background: var(--signal); color: #120a05; }
+input[type="text"], select { background: rgba(0, 0, 0, 0.25); }
+pre { background: #05070b; color: #d7e0e8; border: 1px solid var(--line); }
+tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
+.claim .num { background: linear-gradient(180deg, #ffb08a, var(--signal)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.verdict-line em { color: var(--signal); }
+.mono-avatar { background: rgba(255, 255, 255, 0.06); }
+.track li::before { background: var(--bg); border-color: var(--ink-2); box-shadow: 0 0 0 4px var(--bg); }
+.track li:last-child::before { box-shadow: 0 0 18px rgba(255, 107, 44, 0.8); }
+.has-3d .hero .wire { align-self: end; justify-self: end; width: min(100%, 460px); }
+.has-3d .hero .wire-head, .has-3d .hero #wire { display: none; }
+.has-3d .hero .wire-read { border-top: 0; }
+.hero h1 em .w > span { background: linear-gradient(92deg, #ff8a4c, var(--signal) 55%, #ff3d6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero h1 em { background: none; color: var(--signal); }
+
+@media (prefers-reduced-transparency: reduce) {
+  .wire, .rail, .verdicts, .plots, .topo, .btn-ghost { backdrop-filter: none; -webkit-backdrop-filter: none; background: var(--surface); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .hero-copy > * { animation: none; }
@@ -299,6 +344,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
 </nav>
 
 <header class="hero" id="top">
+  <canvas id="scene" aria-hidden="true"></canvas>
   <div class="shell">
     <div class="hero-copy">
       <div class="kicker">BCSE308P Computer Networks, VIT Vellore</div>
@@ -352,6 +398,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   </div>
 </section>
 
+<div class="wave" data-wave="in" aria-hidden="true"></div>
 <section class="encode" id="encoding" aria-labelledby="enc-h">
   <div class="shell">
     <div class="encode-intro">
@@ -367,6 +414,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
     </div>
   </div>
 </section>
+<div class="wave" data-wave="out" aria-hidden="true"></div>
 
 
 <section class="testbed" id="testbed" aria-labelledby="tb-h">
@@ -499,6 +547,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   </div>
 </section>
 
+<div class="wave" data-wave="in" aria-hidden="true"></div>
 <section class="findings" id="findings" aria-labelledby="find-h">
   <div class="shell">
     <h2 id="find-h">What the study shows</h2>
@@ -521,6 +570,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
     <p class="caveat" id="studyMeta">These numbers come from the simulator, not from lab captures. They show how the pipeline behaves; real captures replace them for the later reviews.</p>
   </div>
 </section>
+<div class="wave" data-wave="out" aria-hidden="true"></div>
 
 
 <section id="pipeline" aria-labelledby="pipe-h">
@@ -538,6 +588,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
   </div>
 </section>
 
+<div class="wave" data-wave="in" aria-hidden="true"></div>
 <section class="conclude" id="conclusions" aria-labelledby="con-h">
   <div class="shell">
     <h2 id="con-h">Conclusions</h2>
@@ -564,6 +615,7 @@ footer ol { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
     </div>
   </div>
 </section>
+<div class="wave" data-wave="out" aria-hidden="true"></div>
 
 <section class="closing" aria-labelledby="team-h">
   <div class="shell">
@@ -607,9 +659,193 @@ python scripts/build_site.py</pre>
   </div>
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<script>
+// Layered wave dividers between the dark bands (Haikei-style, generated here so they ship with the page).
+(() => {
+  "use strict";
+  const NS = "http://www.w3.org/2000/svg";
+  const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const mix = (a, b, t) => { const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); const x = p(a), y = p(b); return `rgb(${x.map((v, i) => Math.round(v + (y[i] - v) * t)).join(",")})`; };
+  let seed = 7; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  document.querySelectorAll(".wave").forEach((holder) => {
+    const into = holder.dataset.wave === "in", from = css("--bg"), to = css("--surface");
+    const W = 1440, H = 120, svg = document.createElementNS(NS, "svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.setAttribute("preserveAspectRatio", "none"); svg.setAttribute("class", "wave");
+    const bgRect = document.createElementNS(NS, "rect");
+    bgRect.setAttribute("width", W); bgRect.setAttribute("height", H); bgRect.setAttribute("fill", into ? from : to); svg.appendChild(bgRect);
+    const layers = 4;
+    for (let l = 0; l < layers; l++) {
+      const t = (l + 1) / layers, base = 20 + l * 24, pts = [];
+      for (let x = 0; x <= W; x += W / 6) pts.push([x, base + (rnd() - 0.5) * 26]);
+      let d = `M0,${pts[0][1]}`;
+      for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], cx = (x0 + x1) / 2; d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`; }
+      d += ` L${W},${H} L0,${H} Z`;
+      const path = document.createElementNS(NS, "path");
+      path.setAttribute("d", d);
+      path.setAttribute("fill", into ? mix(from, to, t) : mix(to, from, t));
+      if (l === 0) { path.setAttribute("stroke", into ? "rgba(255,107,44,0.35)" : "rgba(106,174,255,0.25)"); path.setAttribute("stroke-width", "1.2"); }
+      svg.appendChild(path);
+    }
+    holder.replaceWith(svg);
+  });
+})();
+
+// Split the hero headline into words so GSAP can raise them line by line.
+(() => {
+  const h1 = document.querySelector(".hero h1");
+  if (!h1) return;
+  const wrap = (node) => {
+    [...node.childNodes].forEach((c) => {
+      if (c.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        c.textContent.split(/(\s+)/).forEach((part) => {
+          if (!part) return;
+          if (/^\s+$/.test(part)) { frag.appendChild(document.createTextNode(part)); return; }
+          const w = document.createElement("span"); w.className = "w";
+          const inner = document.createElement("span"); inner.textContent = part; w.appendChild(inner); frag.appendChild(w);
+        });
+        c.replaceWith(frag);
+      } else if (c.nodeType === 1) wrap(c);
+    });
+  };
+  wrap(h1);
+})();
+
+// 3D hero: two Echo Request streams fly toward the receiver. The normal stream keeps an even
+// 1 s rhythm; the covert stream spaces its packets 0.75 s or 1.25 s apart to spell its bits.
+(() => {
+  "use strict";
+  const THREE = window.THREE, canvas = document.getElementById("scene");
+  if (!THREE || !canvas) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); } catch (e) { return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x080b10, 0.045);
+  const camera = new THREE.PerspectiveCamera(52, 1, 0.1, 200);
+  camera.position.set(0, 1.6, 7);
+
+  const ORANGE = new THREE.Color(0xff6b2c), BLUE = new THREE.Color(0x6aaeff);
+  const glowTex = (() => {
+    const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, "rgba(255,255,255,1)"); grd.addColorStop(0.25, "rgba(255,255,255,0.55)"); grd.addColorStop(1, "rgba(255,255,255,0)");
+    g.fillStyle = grd; g.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+  })();
+  const bitTex = [0, 1].map((b) => {
+    const c = document.createElement("canvas"); c.width = c.height = 64; const g = c.getContext("2d");
+    g.fillStyle = "#ffb08a"; g.font = "700 46px 'JetBrains Mono', monospace"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText(String(b), 32, 34);
+    return new THREE.CanvasTexture(c);
+  });
+
+  // floor of points
+  const floor = new THREE.BufferGeometry(), fp = [];
+  for (let x = -24; x <= 24; x += 0.8) for (let z = -90; z <= 8; z += 0.8) fp.push(x, -1.1, z);
+  floor.setAttribute("position", new THREE.Float32BufferAttribute(fp, 3));
+  scene.add(new THREE.Points(floor, new THREE.PointsMaterial({ color: 0x3a5068, size: 0.035, transparent: true, opacity: 0.8 })));
+
+  const LANES = [{ x: -1.3, color: BLUE, covert: false }, { x: 1.3, color: ORANGE, covert: true }];
+  const bits = [..."VIT "].flatMap((ch) => [7, 6, 5, 4, 3, 2, 1, 0].map((k) => (ch.charCodeAt(0) >> k) & 1));
+  const UNITS = 4.2; // world units per simulated second
+  LANES.forEach((lane) => {
+    const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(lane.x, 0, -90), new THREE.Vector3(lane.x, 0, 8)]);
+    scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({ color: lane.color, transparent: true, opacity: 0.35 })));
+    lane.pool = Array.from({ length: 34 }, () => {
+      const group = new THREE.Group();
+      const core = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.16, 0.5), new THREE.MeshBasicMaterial({ color: lane.color }));
+      const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: lane.color, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false }));
+      glow.scale.set(1.3, 1.3, 1);
+      group.add(core, glow);
+      if (lane.covert) {
+        const label = new THREE.Sprite(new THREE.SpriteMaterial({ map: bitTex[0], transparent: true, depthWrite: false }));
+        label.position.y = 0.7; label.scale.set(0.55, 0.55, 1); group.add(label); group.userData.label = label;
+      }
+      scene.add(group); return group;
+    });
+    lane.pk = []; lane.k = 0; lane.gaps = [];
+  });
+  // receiver gate
+  const gateGeo = new THREE.BufferGeometry().setFromPoints([[-2.4, -0.9], [2.4, -0.9], [2.4, 1.3], [-2.4, 1.3], [-2.4, -0.9]].map(([x, y]) => new THREE.Vector3(x, y, 0)));
+  const gate = new THREE.Line(gateGeo, new THREE.LineBasicMaterial({ color: 0xeaf0f5, transparent: true, opacity: 0.25 }));
+  scene.add(gate);
+
+  let jseed = 99; const jit = () => { jseed = (jseed * 16807) % 2147483647; return (jseed / 2147483647 - 0.5) * 0.012; };
+  function extend(lane, upto) {
+    while (!lane.pk.length || lane.pk[lane.pk.length - 1].t < upto) {
+      const prev = lane.pk[lane.pk.length - 1];
+      let gap = 1 + jit(), bit = null;
+      if (lane.covert && prev) { bit = bits[lane.k++ % bits.length]; gap = (bit ? 1.25 : 0.75) + jit(); }
+      lane.pk.push({ t: prev ? prev.t + gap : -6, gap: prev ? gap : null, bit, done: false });
+    }
+  }
+  // the receiver readout under the headline follows this scene
+  const decoded = [], sd = (a) => { if (a.length < 3) return 0; const m = a.reduce((x, y) => x + y, 0) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); };
+  const toText = (b) => { let out = ""; for (let i = 0; i + 8 <= b.length; i += 8) { const c = b.slice(i, i + 8).reduce((x, y) => x * 2 + y, 0); out += c >= 32 && c < 127 ? String.fromCharCode(c) : "?"; } return out; };
+  function arrive(lane, p) {
+    if (p.gap == null) return;
+    lane.gaps.push(p.gap); if (lane.gaps.length > 16) lane.gaps.shift();
+    if (lane.covert) {
+      decoded.push(p.bit);
+      const txt = toText(decoded).slice(-14).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      document.getElementById("wireText").innerHTML = txt + '<span class="cursor"></span>';
+      document.getElementById("wireBits").textContent = decoded.slice(-48).join("");
+    }
+    const a = sd(LANES[0].gaps), b = sd(LANES[1].gaps);
+    document.getElementById("mNorm").textContent = `${a.toFixed(3)} s`;
+    document.getElementById("mCov").textContent = `${b.toFixed(3)} s`;
+    const flag = document.getElementById("mFlag");
+    flag.textContent = b > 0.1 ? "covert stream flagged" : "collecting gaps"; flag.className = "flag " + (b > 0.1 ? "sus" : "ok");
+  }
+
+  let W = 0, H = 0, t = 0, last = performance.now(), mx = 0, my = 0, flash = 0;
+  function resize() {
+    W = canvas.clientWidth; H = canvas.clientHeight; if (!W || !H) return;
+    renderer.setSize(W, H, false); camera.aspect = W / H;
+    // push the vanishing point right of the headline on wide screens
+    if (W > 920) camera.setViewOffset(W, H, -W * 0.2, 0, W, H); else camera.clearViewOffset();
+    camera.updateProjectionMatrix();
+  }
+  function frame() {
+    LANES.forEach((lane) => {
+      extend(lane, t + 24);
+      lane.pk.forEach((p) => { if (!p.done && p.t <= t) { p.done = true; arrive(lane, p); if (lane.covert) flash = 1; } });
+      while (lane.pk.length && lane.pk[0].t < t - 3) lane.pk.shift();
+      lane.pool.forEach((g, i) => {
+        const p = lane.pk[i], z = p ? -(p.t - t) * UNITS : -999;
+        g.visible = z > -90 && z < 2.2;
+        if (!g.visible) return;
+        g.position.set(lane.x, 0, z);
+        const fade = z > 0 ? Math.max(0, 1 - z / 2.2) : 1;
+        g.children.forEach((c) => { c.material.opacity = fade; c.material.transparent = true; });
+        if (g.userData.label) { g.userData.label.visible = p.bit != null && z < -0.4; if (p.bit != null) g.userData.label.material.map = bitTex[p.bit]; }
+      });
+    });
+    gate.material.opacity = 0.1 + flash * 0.45; flash *= 0.9;
+    camera.position.x += (mx * 0.8 - camera.position.x) * 0.04;
+    camera.position.y += (1.6 + my * 0.4 - camera.position.y) * 0.04;
+    camera.lookAt(0, 0.2, -20);
+    renderer.render(scene, camera);
+  }
+  function loop(now) { const dt = Math.min(0.05, (now - last) / 1000); last = now; t += dt * 1.4; frame(); raf = requestAnimationFrame(loop); }
+  let raf = 0, running = false;
+  new ResizeObserver(() => { resize(); frame(); }).observe(canvas);
+  resize();
+  window.addEventListener("pointermove", (e) => { mx = (e.clientX / window.innerWidth - 0.5) * 2; my = (e.clientY / window.innerHeight - 0.5) * 2; }, { passive: true });
+  document.documentElement.classList.add("has-3d");
+  if (reduce) { t = 12; frame(); return; }
+  // only animate while the hero is on screen
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && !running) { running = true; last = performance.now(); raf = requestAnimationFrame(loop); }
+    else if (!e.isIntersecting && running) { running = false; cancelAnimationFrame(raf); }
+  }).observe(canvas);
+})();
+</script>
 <script id="study" type="application/json">__STUDY_JSON__</script>
 <script>
 (() => {
@@ -692,7 +928,7 @@ python scripts/build_site.py</pre>
       }
     }
     function arrive(lane, p) {
-      if (p.gap == null) return;
+      if (p.gap == null || document.documentElement.classList.contains("has-3d")) return;
       lane.gaps.push(p.gap); if (lane.gaps.length > 16) lane.gaps.shift();
       if (lane.key === "signal") {
         decoded.push(p.bit);
@@ -979,6 +1215,9 @@ python scripts/build_site.py</pre>
   }
 
   const ease = "power3.out";
+  // hero headline rises word by word, then the copy and the decoder panel follow
+  gsap.from(".hero h1 .w > span", { yPercent: 105, duration: 1, ease: "power4.out", stagger: 0.06, delay: 0.1 });
+  gsap.from(".hero .wire", { y: 40, duration: 1.1, ease, delay: 0.35 });
   // section headings rise into place as each section arrives
   gsap.utils.toArray("section h2").forEach((h) => {
     gsap.from(h, { y: 28, duration: 0.9, ease, scrollTrigger: { trigger: h, start: "top 88%" } });

@@ -1193,8 +1193,10 @@ python scripts/build_site.py</pre>
     const got = new Array(N - 1).fill(null);
     for (let i = 1; i < pk.length; i++) if (pk[i].seq - pk[i - 1].seq === 1) got[pk[i - 1].seq] = pk[i].t - pk[i - 1].t >= 1 ? 1 : 0;
     const correct = got.filter((b, i) => b === sent[i]).length;
-    const drs = [rate(cW, fixed), rate(cW, (w) => std(w) > thrClean), rate(cW, (w) => std(w) > thrMatched)];
-    const escaped = drs.filter((d) => d < 0.5).length, acc = correct / (N - 1);
+    // a detector only counts as catching you if it flags your windows without also flagging normal traffic
+    const tests = [fixed, (w) => std(w) > thrClean, (w) => std(w) > thrMatched];
+    const caughtBy = tests.filter((fn) => rate(cW, fn) >= 0.5 && rate(nW, fn) < 0.5).length;
+    const escaped = 3 - caughtBy, acc = correct / (N - 1);
     const ch = $("challenge");
     const [cState, tag, msg] = escaped === 3 && acc >= 0.9 ? ["escaped", "Escaped", `Clean escape. All three detectors missed it and ${Math.round(acc * 100)}% of your bits arrived.`]
       : escaped === 3 ? ["garbled", "Garbled", `All three missed it, but the network scrambled your message: only ${Math.round(acc * 100)}% of bits arrived right.`]

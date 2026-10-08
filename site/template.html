@@ -352,23 +352,66 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
   .hero-copy > * { animation: none; }
   .btn { transition: none; }
 }
+
+/* ---------- pages and navigation ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.nav ul { gap: 4px; align-items: center; }
+.nav ul a { display: block; padding: 7px 12px; border-radius: 999px; transition: color 0.2s ease, background 0.2s ease; }
+.nav ul a[aria-current="page"] { color: #161106; background: var(--signal); font-weight: 600; }
+.nav ul .ext { margin-left: 10px; padding-left: 14px; border-left: 1px solid var(--line); }
+.nav-progress { position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%; background: linear-gradient(90deg, var(--normal), var(--signal)); transform-origin: 0 50%; transform: scaleX(0); transition: transform 0.5s cubic-bezier(.2,.8,.2,1); }
+@media (max-width: 760px) {
+  .nav .shell { height: auto; flex-wrap: wrap; padding-block: 10px 8px; row-gap: 8px; }
+  .nav ul { width: 100%; overflow-x: auto; scrollbar-width: none; font-size: 0.86rem; margin-inline: -4px; }
+  .nav ul::-webkit-scrollbar { display: none; }
+  .nav ul li:not(:last-child) { display: list-item; }
+  .nav ul a { white-space: nowrap; padding: 6px 11px; }
+}
+.page[hidden] { display: none !important; }
+.page.entering { animation: pageIn 0.55s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .page.entering { animation: none; } }
+
+.chapters { padding-block: 8px clamp(56px, 8vw, 96px); }
+.chapter-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1000px) { .chapter-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .chapter-grid { grid-template-columns: minmax(0, 1fr); } }
+.chapter-grid a { height: 100%; box-sizing: border-box; display: grid; align-content: start; gap: 6px; padding: 18px 18px 20px; text-decoration: none; border: 1px solid var(--line); border-radius: var(--r); background: var(--glass); transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease; }
+.chapter-grid a:hover { border-color: rgba(var(--signal-rgb), 0.6); background: rgba(var(--signal-rgb), 0.06); transform: translateY(-2px); }
+.chapter-grid .ch-n { font: 600 0.78rem var(--mono); color: var(--signal); letter-spacing: 0.08em; }
+.chapter-grid b { font: 700 1.05rem var(--display); color: var(--ink); }
+.chapter-grid span:last-child { color: var(--ink-2); font-size: 0.9rem; line-height: 1.45; }
+
+.pager { border-top: 1px solid var(--line); }
+.pager .shell { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; padding-block: 28px 40px; }
+.pager a { display: grid; gap: 4px; padding: 18px 20px; border: 1px solid var(--line); border-radius: var(--r); text-decoration: none; transition: border-color 0.2s ease, background 0.2s ease; }
+.pager a:hover { border-color: rgba(var(--signal-rgb), 0.6); background: rgba(var(--signal-rgb), 0.06); }
+.pager small { font: 600 0.74rem var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.pager b { font: 700 1.2rem var(--display); color: var(--ink); }
+.pager .next { grid-column: 2; text-align: right; }
+.pager .next b::after { content: " →"; color: var(--signal); }
+.pager .prev b::before { content: "← "; color: var(--signal); }
+@media (max-width: 520px) { .pager .shell { grid-template-columns: minmax(0, 1fr); } .pager .next { grid-column: 1; } }
 </style>
 
 <nav class="nav" aria-label="Sections">
   <div class="shell">
-    <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>Ping Gap Detector</a>
+    <a class="brand" href="#home"><span class="brand-mark" aria-hidden="true"><i></i><b></b><i></i><b></b><i></i></span>Ping Gap Detector</a>
     <ul>
-      <li><a href="#background">Why</a></li>
-      <li><a href="#encoding">How it hides</a></li>
-      <li><a href="#testbed">Lab</a></li>
-      <li><a href="#bench">Play</a></li>
-      <li><a href="#findings">Results</a></li>
-      <li><a href="#pipeline">Pipeline</a></li>
-      <li><a href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">Source</a></li>
+      <li><a href="#home" data-nav="home">Home</a></li>
+      <li><a href="#why" data-nav="why">Why</a></li>
+      <li><a href="#lab" data-nav="lab">Lab</a></li>
+      <li><a href="#play" data-nav="play">Play</a></li>
+      <li><a href="#results" data-nav="results">Results</a></li>
+      <li><a href="#team" data-nav="team">Team</a></li>
+      <li class="ext"><a href="https://github.com/AarushShetty346/icmp_traffic_analysis" target="_blank" rel="noopener">Source ↗</a></li>
     </ul>
   </div>
+  <span class="nav-progress" aria-hidden="true"></span>
 </nav>
 
+<main id="pages">
+<div class="page" id="home" data-label="Home">
 <header class="hero" id="top">
   <canvas id="scene" aria-hidden="true"></canvas>
   <div class="shell">
@@ -408,6 +451,21 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
   </div>
 </header>
 
+<section class="chapters" aria-labelledby="ch-h">
+  <div class="shell">
+    <h2 id="ch-h" class="sr-only">Explore</h2>
+    <ol class="chapter-grid">
+      <li><a href="#why"><span class="ch-n">01</span><b>Why it matters</b><span>Timing is a blind spot, and how one letter hides in eight gaps.</span></a></li>
+      <li><a href="#lab"><span class="ch-n">02</span><b>The lab</b><span>Three machines, real ping, netem jitter and loss.</span></a></li>
+      <li><a href="#play"><span class="ch-n">03</span><b>Play</b><span>Tune a covert sender and try to slip past three detectors.</span></a></li>
+      <li><a href="#results"><span class="ch-n">04</span><b>Results</b><span>Detection rates, false alarms, the pipeline and what we learned.</span></a></li>
+      <li><a href="#team"><span class="ch-n">05</span><b>Team and code</b><span>Who built it, and how to run it on your own captures.</span></a></li>
+    </ol>
+  </div>
+</section>
+</div>
+
+<div class="page" id="why" data-label="Why it matters" hidden>
 
 <section id="background" aria-labelledby="bg-h">
   <div class="shell bg-grid">
@@ -445,8 +503,10 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
   </div>
 </section>
 <div class="wave" data-wave="out" aria-hidden="true"></div>
+</div>
 
 
+<div class="page" id="lab" data-label="The lab" hidden>
 <section class="testbed" id="testbed" aria-labelledby="tb-h">
   <div class="shell">
     <div class="encode-intro">
@@ -497,7 +557,9 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
     </div>
   </div>
 </section>
+</div>
 
+<div class="page" id="play" data-label="Play" hidden>
 <section id="bench" aria-labelledby="bench-h">
   <div class="shell">
     <div class="bench-head">
@@ -578,7 +640,9 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
     </div>
   </div>
 </section>
+</div>
 
+<div class="page" id="results" data-label="Results" hidden>
 <div class="wave" data-wave="in" aria-hidden="true"></div>
 <section class="findings" id="findings" aria-labelledby="find-h">
   <div class="shell">
@@ -648,7 +712,9 @@ tbody tr:nth-child(odd) { background: rgba(255, 255, 255, 0.025); }
   </div>
 </section>
 <div class="wave" data-wave="out" aria-hidden="true"></div>
+</div>
 
+<div class="page" id="team" data-label="Team and code" hidden>
 <section class="closing" aria-labelledby="team-h">
   <div class="shell">
     <div class="team">
@@ -678,6 +744,8 @@ python scripts/build_site.py</pre>
     </div>
   </div>
 </section>
+</div>
+</main>
 
 <footer>
   <div class="shell">
@@ -695,6 +763,69 @@ python scripts/build_site.py</pre>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+
+<script>
+// Pages: the site reads as separate pages (Home, Why, Lab, Play, Results, Team) behind the top bar.
+// Any #link resolves to the page that holds its target, so deep links like #bench still work.
+(() => {
+  "use strict";
+  const pages = [...document.querySelectorAll(".page")];
+  const ids = pages.map((p) => p.id);
+  const links = document.querySelectorAll("[data-nav]");
+  const bar = document.querySelector(".nav-progress");
+  pages.forEach((p, i) => {
+    const prev = pages[i - 1], next = pages[i + 1];
+    const nav = document.createElement("nav");
+    nav.className = "pager"; nav.setAttribute("aria-label", "More pages");
+    nav.innerHTML = '<div class="shell">' +
+      (prev ? `<a class="prev" href="#${prev.id}"><small>Previous</small><b>${prev.dataset.label}</b></a>` : "") +
+      (next ? `<a class="next" href="#${next.id}"><small>Next, ${String(i + 1).padStart(2, "0")} of ${String(pages.length - 1).padStart(2, "0")}</small><b>${next.dataset.label}</b></a>` : "") + "</div>";
+    p.appendChild(nav);
+  });
+
+  let current = null;
+  const scrollToY = (y, smooth) => {
+    const lenis = window.__lenis;
+    if (!smooth) { window.scrollTo(0, y); if (lenis) { lenis.resize(); lenis.scrollTo(y, { immediate: true, force: true }); } }
+    else if (lenis) lenis.scrollTo(y, { force: true });
+    else window.scrollTo({ top: y, behavior: "smooth" });
+  };
+  function go(id, push) {
+    const el = id && document.getElementById(id);
+    const page = el ? (el.classList.contains("page") ? el : el.closest(".page")) : null;
+    const target = page || pages[0];
+    if (target !== current) {
+      pages.forEach((p) => { p.hidden = p !== target; });
+      target.classList.remove("entering"); void target.offsetWidth; target.classList.add("entering");
+      current = target;
+      links.forEach((a) => (a.dataset.nav === target.id ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
+      if (bar) bar.style.transform = `scaleX(${(ids.indexOf(target.id) + 1) / ids.length})`;
+      scrollToY(0, false);
+      window.dispatchEvent(new CustomEvent("pagechange", { detail: target.id }));
+    }
+    const inner = el && el !== target && el.id !== "top";
+    if (inner) requestAnimationFrame(() => scrollToY(el.getBoundingClientRect().top + window.scrollY - 70, true));
+    if (push) { try { history.pushState(null, "", "#" + (inner ? el.id : target.id)); } catch (err) { /* sandboxed */ } }
+  }
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    const id = a.getAttribute("href").slice(1);
+    if (!document.getElementById(id)) return;
+    e.preventDefault();
+    go(id, true);
+  });
+  window.addEventListener("popstate", () => go(location.hash.slice(1), false));
+  // arrow keys step through pages, handy when presenting
+  document.addEventListener("keydown", (e) => {
+    if (e.altKey || e.ctrlKey || e.metaKey || /^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName)) return;
+    const i = ids.indexOf(current.id);
+    if (e.key === "ArrowRight" && i < ids.length - 1) go(ids[i + 1], true);
+    if (e.key === "ArrowLeft" && i > 0) go(ids[i - 1], true);
+  });
+  go(location.hash.slice(1), false);
+})();
+</script>
 
 <script>
 // Layered wave dividers between the dark bands (Haikei-style, generated here so they ship with the page).
@@ -1274,12 +1405,7 @@ python scripts/build_site.py</pre>
       lenis.on("scroll", ScrollTrigger.update);
       gsap.ticker.add((t) => lenis.raf(t * 1000));
       gsap.ticker.lagSmoothing(0);
-      document.querySelectorAll('a[href^="#"]').forEach((a) => a.addEventListener("click", (e) => {
-        const target = document.querySelector(a.getAttribute("href"));
-        if (!target) return;
-        e.preventDefault();
-        lenis.scrollTo(target.getBoundingClientRect().top + window.scrollY - 64);
-      }));
+      window.__lenis = lenis;  // the page router scrolls through Lenis so the two stay in sync
     } catch (err) { /* fall back to native scrolling */ }
   }
 
@@ -1307,8 +1433,10 @@ python scripts/build_site.py</pre>
   const topo = document.querySelector(".topo svg");
   if (topo) {
     const lines = topo.querySelectorAll("line");
-    lines.forEach((l) => { const len = l.getTotalLength ? l.getTotalLength() : 80; l.style.strokeDasharray = `${len}`; });
-    gsap.fromTo(lines, { strokeDashoffset: (i, l) => (l.getTotalLength ? l.getTotalLength() : 80) }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", stagger: 0.35, immediateRender: false, scrollTrigger: { trigger: topo, start: "top 75%" } });
+    // measured from the endpoints: getTotalLength throws while the Lab page is hidden
+    const len = (l) => Math.hypot(l.x2.baseVal.value - l.x1.baseVal.value, l.y2.baseVal.value - l.y1.baseVal.value) || 80;
+    lines.forEach((l) => { l.style.strokeDasharray = `${len(l)}`; });
+    gsap.fromTo(lines, { strokeDashoffset: (i, l) => len(l) }, { strokeDashoffset: 0, duration: 0.8, ease: "power2.inOut", stagger: 0.35, immediateRender: false, scrollTrigger: { trigger: topo, start: "top 75%" } });
   }
 
   // findings: headline numbers count up from zero when they come into view
@@ -1338,5 +1466,7 @@ python scripts/build_site.py</pre>
   if (verdicts) new MutationObserver(() => gsap.fromTo("#verdicts .big", { y: 6 }, { y: 0, duration: 0.35, ease: "power2.out", overwrite: true })).observe(verdicts, { childList: true });
 
   window.addEventListener("load", () => ScrollTrigger.refresh());
+  // a newly shown page has real positions now, so recompute every trigger
+  window.addEventListener("pagechange", () => requestAnimationFrame(() => ScrollTrigger.refresh()));
 })();
 </script>

@@ -55,7 +55,7 @@ export function CommandPalette({ open, onOpenChange, commands }: { open: boolean
                 className={`flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-md px-3 text-sm ${i === active ? "bg-accent-soft text-ink" : "text-ink-2"}`}
               >
                 <span>{c.label}</span>
-                {c.hint ? <span className="font-mono text-xs text-ink-3">{c.hint}</span> : null}
+                {c.hint ? <span aria-hidden className="font-mono text-xs text-ink-3">{c.hint}</span> : null}
               </li>
             ))}
           </ul>

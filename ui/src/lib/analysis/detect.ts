@@ -95,16 +95,16 @@ export function classifyBaseline(ipd: number[], baseline: Baseline, features: Fe
   return { suspicious: reasons.length > 0, reasons, features: feats };
 }
 
-export interface FixedRule { nominal: number; meanTol: number; stdTol: number }
-export const DEFAULT_FIXED: FixedRule = { nominal: 1.0, meanTol: 0.1, stdTol: 0.1 };
+export interface FixedRule { nominal: number; meanLimit: number; stdLimit: number }
+export const DEFAULT_FIXED: FixedRule = { nominal: 1.0, meanLimit: 0.1, stdLimit: 0.1 };
 
 export function classifyFixed(ipd: number[], rule: FixedRule = DEFAULT_FIXED): Decision {
   const feats = windowFeatures(ipd) as Features;
   feats.ks = NaN;
   const reasons: string[] = [];
-  if (feats.std > rule.stdTol) reasons.push(`std ${fmt(feats.std)} above fixed ${rule.stdTol}`);
+  if (feats.std > rule.stdLimit) reasons.push(`std ${fmt(feats.std)} above fixed ${rule.stdLimit}`);
   const drift = Math.abs(feats.mean - rule.nominal);
-  if (drift > rule.meanTol) reasons.push(`mean drift ${fmt(drift)} above fixed ${rule.meanTol}`);
+  if (drift > rule.meanLimit) reasons.push(`mean drift ${fmt(drift)} above fixed ${rule.meanLimit}`);
   return { suspicious: reasons.length > 0, reasons, features: feats };
 }
 

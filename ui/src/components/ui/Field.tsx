@@ -5,10 +5,10 @@ import { useId, type ReactNode, type SelectHTMLAttributes } from "react";
 import { cx } from "./cx";
 import { InfoTip } from "./InfoTip";
 
-export function FieldLabel({ id, label, help }: { id?: string; label: string; help?: ReactNode }) {
+export function FieldLabel({ id, label, help, htmlFor }: { id?: string; label: string; help?: ReactNode; htmlFor?: string }) {
   return (
     <div className="flex min-h-6 items-center gap-0.5 text-sm font-medium text-ink-2">
-      <span id={id}>{label}</span>
+      {htmlFor ? <label id={id} htmlFor={htmlFor}>{label}</label> : <span id={id}>{label}</span>}
       {help ? <InfoTip term={label}>{help}</InfoTip> : null}
     </div>
   );
@@ -25,9 +25,7 @@ export function SelectField({ label, help, options, onValueChange, className, ..
   const id = useId();
   return (
     <div className={cx("flex min-w-0 flex-col gap-1", className)}>
-      <label htmlFor={id}>
-        <FieldLabel label={label} help={help} />
-      </label>
+      <FieldLabel label={label} help={help} htmlFor={id} />
       <select
         id={id}
         className="min-h-11 w-full min-w-0 truncate rounded-md border border-line-strong bg-surface px-3 text-sm text-ink"

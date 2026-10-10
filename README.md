@@ -70,7 +70,14 @@ python -m icmp_detector export-ui --out ui/public/data                        # 
 python -m icmp_detector golden --out tests/golden                             # parity fixtures
 ```
 
-Workbench: `cd ui && npm ci && npm run dev` (details in `ui/README.md`).
+Workbench: `cd ui && npm ci && npm run dev` (details in `ui/README.md`). To publish it, set the repository's
+Pages source to GitHub Actions and run the "Deploy Cadence to GitHub Pages" workflow.
+
+The workbench views: **Runs** (add tshark CSVs, label them, packet-field comparison), **Signal** (gap
+timeline, histogram and ECDF), **Detectors** (fixed rule against the baseline with live settings, ROC/PR,
+feature comparison), **Stress matrix** (gap setting × network condition, with run-level intervals and the
+seed spread), **Decode** (sent against decoded bits, fixed or adaptive threshold) and **Evidence** (Review 3
+checklist, limits, exports). Acceptance evidence is in `QA_REPORT.md`.
 
 ## Lab workflow (real data)
 

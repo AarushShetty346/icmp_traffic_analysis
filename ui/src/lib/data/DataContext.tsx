@@ -40,7 +40,9 @@ export function DataProvider({ children, initial }: { children: ReactNode; initi
     if (initial) return;
     let cancelled = false;
     setStatus("loading");
-    fetch(BUNDLE_URL)
+    // Let the shell paint before the (large) bundle download and parse start.
+    const wait = new Promise<void>((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+    wait.then(() => fetch(BUNDLE_URL))
       .then((r) => {
         if (!r.ok) throw new Error(`could not load ${BUNDLE_URL} (HTTP ${r.status})`);
         return r.json();

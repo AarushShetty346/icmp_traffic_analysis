@@ -1,5 +1,7 @@
 import { CommandLineIcon } from "@heroicons/react/20/solid";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import EvidenceView from "./views/EvidenceView";
+import RunsView from "./views/RunsView";
 import { CommandPalette, type Command } from "./components/CommandPalette";
 import { Button } from "./components/ui/Button";
 import { ProvenanceBadge, provenanceOf } from "./components/ui/ProvenanceBadge";
@@ -9,13 +11,14 @@ import { downloadBlob } from "./lib/exporting";
 import { ROUTE_LABEL, ROUTES, useRoute, type Route } from "./lib/state/route";
 import { useTheme, type ThemeChoice } from "./lib/state/theme";
 
-const VIEWS: Record<Route, React.LazyExoticComponent<() => React.JSX.Element>> = {
-  runs: lazy(() => import("./views/RunsView")),
+// Runs (the landing view) and Evidence are bundled eagerly and render before the data arrives.
+const VIEWS: Record<Route, React.ComponentType> = {
+  runs: RunsView,
   signal: lazy(() => import("./views/SignalView")),
   detectors: lazy(() => import("./views/DetectorsView")),
   stress: lazy(() => import("./views/StressView")),
   decode: lazy(() => import("./views/DecodeView")),
-  evidence: lazy(() => import("./views/EvidenceView")),
+  evidence: EvidenceView,
 };
 
 const INTRO: Record<Route, string> = {
@@ -105,7 +108,7 @@ export default function App() {
                 prov === "capture" ? "Numbers come from real captures." :
                 "Simulated and real data are both loaded; each run, cell and chart says which it is."}
             </span>
-            {bundle ? <span className="font-mono text-ink-2">bundle {bundle.schemaVersion} · {bundle.provenance.commit?.slice(0, 7) ?? "no commit"} · {uploads.length} added CSV{uploads.length === 1 ? "" : "s"}</span> : null}
+            <span className="font-mono text-ink-2">{bundle ? `bundle ${bundle.schemaVersion} · ${bundle.provenance.commit?.slice(0, 7) ?? "no commit"}` : "bundle loading · ·······"} · {uploads.length} added CSV{uploads.length === 1 ? "" : "s"}</span>
           </div>
         </div>
       </header>
@@ -116,7 +119,7 @@ export default function App() {
         </div>
         {status === "error" ? (
           <ErrorState title="The data bundle did not load" message={`${error ?? "unknown error"}. Regenerate it with: python -m icmp_detector export-ui --out ui/public/data`} onRetry={retry} />
-        ) : status === "loading" ? (
+        ) : status === "loading" && route !== "evidence" && route !== "runs" ? (
           <div className="grid gap-4 md:grid-cols-2"><ChartSkeleton /><ChartSkeleton /></div>
         ) : (
           <Suspense fallback={<div className="grid gap-4 md:grid-cols-2"><ChartSkeleton /><ChartSkeleton /></div>}>

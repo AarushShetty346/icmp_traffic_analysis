@@ -342,6 +342,7 @@
      "id",
      "label",
      "source",
+     "role",
      "times",
      "seq",
      "condition",
@@ -353,6 +354,14 @@
     "properties": {
      "id": {
       "type": "string"
+     },
+     "role": {
+      "enum": [
+       "baseline-clean",
+       "baseline-matched",
+       "test"
+      ],
+      "description": "baseline runs fit thresholds; test runs are scored"
      },
      "label": {
       "enum": [

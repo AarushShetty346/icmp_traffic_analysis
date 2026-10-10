@@ -109,9 +109,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "label", "source", "times", "seq", "condition", "delayModel", "channel", "seed", "bits"],
+        "required": ["id", "label", "source", "role", "times", "seq", "condition", "delayModel", "channel", "seed", "bits"],
         "properties": {
           "id": {"type": "string"},
+          "role": {"enum": ["baseline-clean", "baseline-matched", "test"], "description": "baseline runs fit thresholds; test runs are scored"},
           "label": {"enum": ["normal", "covert"]},
           "source": {"$ref": "#/$defs/source"},
           "times": {"type": "array", "items": {"type": "number"}, "minItems": 2},

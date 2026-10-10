@@ -23,6 +23,7 @@ from importlib import resources
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 
 from . import fieldcheck
 from .benchmark import CHANNEL_GRID, CONDITION_GRID
@@ -140,7 +141,7 @@ def simulated_part(
     requests: int = 64,
     window_sizes: tuple[int, ...] = (8, 16, 32),
     delay_models: tuple[str, ...] = DELAY_MODELS,
-    example_runs: int = 2,
+    example_runs: int = 5,
     n_boot: int = 300,
     channels: dict = CHANNEL_GRID,
     conditions: tuple = CONDITION_GRID,
@@ -154,6 +155,11 @@ def simulated_part(
         conds = [c.with_model(model) for c in conditions]
         clean_flows = [normal_run(requests, conds[0], rng) for _ in range(runs)]
         clean_b = {w: build_baseline(clean_flows, w) for w in window_sizes}
+        for i, f in enumerate(clean_flows[:example_runs]):
+            out["runs"].append(
+                _run_entry(f"sim-{model}-clean-baseline-{i}", f, "normal", "simulated", role="baseline-clean",
+                           condition=conds[0].name, delayModel=model, channel=None, seed=seed, bits=None)
+            )
         out["baselines"].append(
             _baseline_entry(f"sim-{model}-clean", "clean", conds[0].name, model, clean_b[ref_w], "simulated", True)
         )
@@ -164,12 +170,17 @@ def simulated_part(
             out["baselines"].append(
                 _baseline_entry(f"sim-{model}-{cond.name}-matched", "matched", cond.name, model, matched_b[ref_w], "simulated", False)
             )
+            for i, f in enumerate(matched_flows[:example_runs]):
+                out["runs"].append(
+                    _run_entry(f"sim-{model}-{cond.name}-baseline-{i}", f, "normal", "simulated", role="baseline-matched",
+                               condition=cond.name, delayModel=model, channel=None, seed=seed, bits=None)
+                )
             normal_ids = []
             for i, f in enumerate(test_normal[:example_runs]):
                 rid = f"sim-{model}-{cond.name}-normal-{i}"
                 normal_ids.append(rid)
                 out["runs"].append(
-                    _run_entry(rid, f, "normal", "simulated", condition=cond.name, delayModel=model, channel=None, seed=seed, bits=None)
+                    _run_entry(rid, f, "normal", "simulated", role="test", condition=cond.name, delayModel=model, channel=None, seed=seed, bits=None)
                 )
             for ch_name, sender in channels.items():
                 test_channel, bits = [], []
@@ -183,7 +194,7 @@ def simulated_part(
                     covert_ids.append(rid)
                     out["runs"].append(
                         _run_entry(
-                            rid, f, "covert", "simulated", condition=cond.name, delayModel=model, channel=ch_name,
+                            rid, f, "covert", "simulated", role="test", condition=cond.name, delayModel=model, channel=ch_name,
                             seed=seed, bits="".join(map(str, b)), gap0=sender.gap0, gap1=sender.gap1,
                         )
                     )
@@ -277,6 +288,9 @@ def capture_part(folder: str | Path, window: int = 32, n_boot: int = 300, src: s
     out = {"runs": [], "baselines": [], "matrix": [], "roc": [], "decode": [], "features": [], "fieldcheck": [], "manifests": []}
     groups: dict[str, dict[str, list]] = {}
     for csv in sorted(folder.glob("*.csv")):
+        if "simulated" in pd.read_csv(csv, nrows=0).columns:
+            print(f"skipping {csv.name}: written by 'icmp_detector simulate', not a real capture")
+            continue
         meta = _capture_meta(csv)
         params = meta.get("params", {})
         label = params.get("label") or ("covert" if csv.stem.startswith("covert") else "normal" if csv.stem.startswith("normal") else None)
@@ -287,7 +301,7 @@ def capture_part(folder: str | Path, window: int = 32, n_boot: int = 300, src: s
         rid = f"cap-{csv.stem}"
         bits = params.get("bits")
         out["runs"].append(
-            _run_entry(rid, flow, label, "capture", condition=condition, delayModel=None, channel=params.get("channel"),
+            _run_entry(rid, flow, label, "capture", role="test", condition=condition, delayModel=None, channel=params.get("channel"),
                        seed=None, bits=bits, file=csv.name)
         )
         if meta:

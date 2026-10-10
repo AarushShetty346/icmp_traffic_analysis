@@ -130,9 +130,15 @@ def load_flow(
     return Flow(df["time"].to_numpy(dtype=float), seq, label or path.stem)
 
 
-def save_flow(flow: Flow, path: str | Path) -> None:
-    """Write a flow in the same CSV layout tshark produces."""
+def save_flow(flow: Flow, path: str | Path, simulated: bool = False) -> None:
+    """Write a flow in the same CSV layout tshark produces.
+
+    ``simulated=True`` adds a ``simulated`` column (all 1) so tools that read
+    the file, including the workbench, can label it as simulated.
+    """
     data = {"frame.time_epoch": flow.times}
     if flow.seq is not None:
         data["icmp.seq"] = flow.seq.astype(int)
+    if simulated:
+        data["simulated"] = 1
     pd.DataFrame(data).to_csv(path, index=False, float_format="%.6f")

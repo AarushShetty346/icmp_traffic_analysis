@@ -6,7 +6,7 @@ import { Dialog } from "../components/ui/Dialog";
 import { SelectField } from "../components/ui/Field";
 import { Panel } from "../components/ui/Panel";
 import { ProvenanceBadge } from "../components/ui/ProvenanceBadge";
-import { EmptyState, ErrorState } from "../components/ui/States";
+import { ChartSkeleton, EmptyState, ErrorState } from "../components/ui/States";
 import { useData } from "../lib/data/DataContext";
 import { lostPackets, type Run } from "../lib/data/runs";
 import { compareFields } from "../lib/analysis/fieldcheck";
@@ -16,7 +16,7 @@ import { useRoute } from "../lib/state/route";
 const PAGE = 25;
 
 export default function RunsView() {
-  const { runs, uploads, uploadErrors, parsing, addFiles, updateUpload, removeUpload, bundle } = useData();
+  const { runs, uploads, uploadErrors, parsing, addFiles, updateUpload, removeUpload, bundle, status } = useData();
   const { params, setParams, navigate } = useRoute();
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -102,6 +102,7 @@ export default function RunsView() {
         ) : null}
       </Panel>
 
+      {status === "loading" ? <ChartSkeleton height={320} /> : <>
       <Panel title="Runs" id="runs" provenance={runsProvenance(filtered)} help="Baseline runs fit the detector's thresholds; test runs are scored. Simulated runs carry their seed and delay model.">
         <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <SelectField label="Provenance" value={source} onValueChange={(v) => setParams({ source: v === "all" ? null : v })}
@@ -142,6 +143,8 @@ export default function RunsView() {
           </EmptyState>
         )}
       </Panel>
+
+      </>}
 
       <Dialog open={!!manifestRun} onOpenChange={(o) => !o && setManifestRun(null)} title={manifestRun ? `Manifest: ${manifestRun.name}` : "Manifest"} wide
         description={manifestRun?.source === "simulated" ? "Simulated run: these are the generation parameters, not a capture manifest." : "Run manifest written by the lab scripts."}>

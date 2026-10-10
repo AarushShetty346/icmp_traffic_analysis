@@ -13,7 +13,7 @@ export function Heatmap({ width, rows, cols, cells, metricLabel, onSelect }: {
   const dark = typeof document !== "undefined" && (document.documentElement.dataset.theme === "dark" ||
     (!document.documentElement.dataset.theme && window.matchMedia?.("(prefers-color-scheme: dark)").matches));
   const narrow = width < 640;
-  const m = { top: narrow ? 8 : 70, right: 8, bottom: narrow ? 70 : 8, left: narrow ? 124 : 150 };
+  const m = { top: narrow ? 8 : 70, right: narrow ? 8 : 90, bottom: narrow ? 70 : 8, left: narrow ? 124 : 150 };
   const cw = Math.max(narrow ? 26 : 44, (width - m.left - m.right) / (narrow ? rows.length : cols.length));
   const ch = narrow ? 30 : 36;
   // On narrow screens conditions run down the side, so the grid never scrolls sideways.

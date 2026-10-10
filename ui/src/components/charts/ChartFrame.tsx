@@ -44,7 +44,7 @@ export function ChartFrame({ title, provenance, legend, height, children, fileNa
       <div className="flex flex-wrap items-center gap-2">
         {legend ? <Legend items={legend} /> : null}
         <Button size="sm" variant="ghost" className="no-print ml-auto" loading={busy} onClick={png}
-          icon={<PhotoIcon className="size-4" aria-hidden />}>PNG<span className="sr-only">: {title}</span></Button>
+          icon={<PhotoIcon className="size-4" aria-hidden />} aria-label={`PNG: ${title}`}>PNG</Button>
       </div>
       <div ref={ref} className="w-full min-w-0">
         <div ref={holder}>{children(Math.max(240, width), height)}</div>

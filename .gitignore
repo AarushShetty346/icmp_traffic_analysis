@@ -11,3 +11,4 @@ ui/playwright-report/
 captures/
 *.egg-info/
 ui/tsconfig.tsbuildinfo
+ui/e2e-results.json

@@ -4,6 +4,7 @@ import { DataTable } from "../components/ui/DataTable";
 import { Panel } from "../components/ui/Panel";
 import { ProvenanceBadge } from "../components/ui/ProvenanceBadge";
 import { StatTile } from "../components/ui/StatTile";
+import { Skeleton } from "../components/ui/States";
 import { LIMITS, objectives, STATUS_TEXT, type Status } from "../content/evidence";
 import { useData } from "../lib/data/DataContext";
 import { downloadBlob, downloadText } from "../lib/exporting";
@@ -17,7 +18,8 @@ const STATUS_TONE: Record<Status, string> = {
 };
 
 export default function EvidenceView() {
-  const { bundle, uploads, runs, bundleUrl } = useData();
+  const { bundle, uploads, runs, bundleUrl, status } = useData();
+  const loading = status === "loading";
   const objs = objectives(bundle);
   const count = (pred: (r: (typeof runs)[number]) => boolean) => runs.filter(pred).length;
   const coverage = [
@@ -40,6 +42,7 @@ export default function EvidenceView() {
         </p>
       </Panel>
 
+      {loading ? <Skeleton className="h-24" label="Loading the data bundle" /> : <>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Objectives met with real data" value={`${objs.filter((o) => o.status === "met").length} of ${objs.length}`} />
         <StatTile label="Code ready, waiting for lab data" value={String(objs.filter((o) => o.status === "code-ready").length)} />
@@ -97,6 +100,8 @@ export default function EvidenceView() {
         </Panel>
       </div>
 
+
+
       <Panel title="References" id="refs">
         <p className="max-w-prose text-sm text-ink-2">
           The reference list from the Review 1 report is not in the repository, so none is shown here rather than an invented one.
@@ -115,6 +120,7 @@ export default function EvidenceView() {
         </div>
         <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-3">Printing keeps the provenance banner on every page. <ProvenanceBadge source="simulated" compact /> marks simulated numbers.</p>
       </Panel>
+      </>}
     </div>
   );
 }

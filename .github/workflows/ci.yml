@@ -31,3 +31,36 @@ jobs:
           diff -r /tmp/golden tests/golden
       - name: Exporter runs and validates against the schema
         run: python -m icmp_detector export-ui --out /tmp/ui-data --runs 4 --bootstrap 50 --seeds 1 2
+
+  ui:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit and parity tests (golden fixtures, 1e-9)
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Initial JS budget (300 KB gzipped)
+        run: npm run size
+      - name: Storybook builds
+        run: npm run build-storybook -- --quiet
+      - name: Install Chromium for Playwright
+        run: npx playwright install --with-deps chromium
+      - name: End-to-end (controls manifest, axe, overflow, keyboard)
+        run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-results
+          path: ui/test-results

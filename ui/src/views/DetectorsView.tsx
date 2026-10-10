@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { GroupedBars } from "../components/charts/Bars";
 import { ChartFrame } from "../components/charts/ChartFrame";
 import { RocChart, type Curve } from "../components/charts/RocChart";
-import { VerdictStrip, type StripRow } from "../components/charts/VerdictStrip";
+import { DecisionStrip, type StripRow } from "../components/charts/DecisionStrip";
 import { DataTable } from "../components/ui/DataTable";
 import { FieldLabel, Segmented, SelectField, SliderField } from "../components/ui/Field";
 import { Panel } from "../components/ui/Panel";
@@ -52,15 +52,15 @@ export default function DetectorsView() {
     }
     const perRun = (rs: Run[]) => rs.map((r) => ({ run: r, wins: windows(r.times, w, step || null, r.seq) }));
     const normal = perRun(set.normal), covert = perRun(set.covert);
-    const rule = { nominal: bundle?.settings.nominal ?? 1, meanTol: meanLimit, stdTol: stdLimit };
-    const verdicts = [...normal, ...covert].map(({ run, wins }) => ({
+    const rule = { nominal: bundle?.settings.nominal ?? 1, meanLimit: meanLimit, stdLimit: stdLimit };
+    const rulings = [...normal, ...covert].map(({ run, wins }) => ({
       run,
       fixed: wins.map((ipd) => classifyFixed(ipd, rule).suspicious),
       learned: wins.map((ipd) => classifyBaseline(ipd, baseline, features).suspicious),
     }));
-    const truth = verdicts.flatMap((v) => v.fixed.map(() => v.run.label === "covert"));
-    const fixedRates = confusion(truth, verdicts.flatMap((v) => v.fixed));
-    const baseRates = confusion(truth, verdicts.flatMap((v) => v.learned));
+    const truth = rulings.flatMap((v) => v.fixed.map(() => v.run.label === "covert"));
+    const fixedRates = confusion(truth, rulings.flatMap((v) => v.fixed));
+    const baseRates = confusion(truth, rulings.flatMap((v) => v.learned));
     const nWins = normal.flatMap((r) => r.wins), cWins = covert.flatMap((r) => r.wins);
     if (!nWins.length || !cWins.length) return { error: `no complete windows of ${w} requests in the test runs; lower the window size` } as const;
     const comparison = ALL_FEATURES.filter((f) => baseline.upper[f] !== undefined).map((f) => {
@@ -73,7 +73,7 @@ export default function DetectorsView() {
         precision: (() => { const tp = pos.filter((s) => s > t).length, fp = neg.filter((s) => s > t).length; return tp + fp ? tp / (tp + fp) : null; })(),
       };
     });
-    return { baseline, verdicts, fixedRates, baseRates, comparison, nNormal: nWins.length, nCovert: cWins.length };
+    return { baseline, rulings, fixedRates, baseRates, comparison, nNormal: nWins.length, nCovert: cWins.length };
   }, [set, w, step, percentile, stdLimit, meanLimit, features.join(","), bundle]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const matrixRow = (det: string) => src === "bundle"
@@ -117,7 +117,7 @@ export default function DetectorsView() {
         <SliderField label="Window size" value={w} min={4} max={64} step={1} unit="requests" onValueChange={(v) => setParams({ w: v, step: step > v ? null : step || null })}
           help="Requests per observation window." />
         <SliderField label="Window step" value={step} min={0} max={w} step={1} format={(v) => (v === 0 || v === w ? "no overlap" : `${v} requests`)} onValueChange={(v) => setParams({ step: v === 0 || v === w ? null : v })}
-          help="Smaller than the window size gives overlapping windows (more, correlated verdicts)." />
+          help="Smaller than the window size gives overlapping windows (more, correlated rulings)." />
         <SliderField label="Baseline percentile" value={percentile} min={80} max={99.5} step={0.5} format={(v) => `p${v}`} onValueChange={(v) => setParams({ pct: v === 95 ? null : v })}
           help="The baseline flags a window when a feature passes this percentile of normal windows. Two-sided features use the central band instead." />
         <SliderField label="Fixed rule: std limit" value={stdLimit} min={0.005} max={0.3} step={0.005} format={(v) => `${(v * 1000).toFixed(0)} ms`} onValueChange={(v) => setParams({ std: v === 0.1 ? null : v })}
@@ -154,11 +154,11 @@ export default function DetectorsView() {
   }
   if ("error" in result) return <div className="grid gap-4">{settings}<ErrorState title="Cannot evaluate these settings" message={String(result.error)} /></div>;
 
-  const { fixedRates, baseRates, verdicts, comparison, baseline } = result;
+  const { fixedRates, baseRates, rulings, comparison, baseline } = result;
   const roc = comparison.find((c) => c.feature === rocFeature) ?? comparison[0];
   const curves: Curve[] = [{ key: "live", label: `${roc.feature}, live (${set.normal.length + set.covert.length} runs)`, color: "var(--series-normal)", points: roc.points }];
   if (exportedRoc) curves.push({ key: "exp", label: `${roc.feature}, exported (${bundle?.provenance.runsPerSet ?? "?"} runs per set)`, color: "var(--series-covert)", points: exportedRoc.points, dashed: true });
-  const strip: StripRow[] = verdicts.flatMap((v) => [
+  const strip: StripRow[] = rulings.flatMap((v) => [
     { key: `${v.run.id}-f`, label: `${v.run.label} #${v.run.id.split("-").pop()} · fixed`, flags: v.fixed, truth: v.run.label },
     { key: `${v.run.id}-b`, label: `${v.run.label} #${v.run.id.split("-").pop()} · baseline`, flags: v.learned, truth: v.run.label },
   ]);
@@ -181,11 +181,11 @@ export default function DetectorsView() {
         from {set.baseline.length} runs. Exported intervals resample all {bundle?.provenance.runsPerSet ?? "?"} runs per set.
       </p>
 
-      <Panel title="Verdict per window" id="verdicts" provenance={prov}
+      <Panel title="Verdict per window" id="rulings" provenance={prov}
         help="One row per test run and detector, one cell per window. Filled cells are windows flagged suspicious. Covert rows should be filled, normal rows empty.">
-        <ChartFrame title="Verdict per window" provenance={prov} height={0} fileName="cadence-verdicts"
+        <ChartFrame title="Verdict per window" provenance={prov} height={0} fileName="cadence-rulings"
           legend={[{ label: "flagged suspicious", color: "var(--flag)", shape: "square" }, { label: "judged normal", color: "var(--surface-2)", shape: "square" }]}>
-          {(width) => <VerdictStrip width={width} rows={strip} />}
+          {(width) => <DecisionStrip width={width} rows={strip} />}
         </ChartFrame>
       </Panel>
 
@@ -245,7 +245,7 @@ export default function DetectorsView() {
             { key: "hi", header: "Upper", numeric: true, cell: (f) => baseline.upper[f]!.toFixed(5), csv: (f) => baseline.upper[f]! },
             { key: "s", header: "Score threshold", numeric: true, cell: (f) => scoreThreshold(baseline, f).toFixed(5), csv: (f) => scoreThreshold(baseline, f) },
             { key: "c", header: "Example score (first covert window)", numeric: true, cell: (f) => {
-              const v = verdicts.find((x) => x.run.label === "covert");
+              const v = rulings.find((x) => x.run.label === "covert");
               const win = v ? windows(v.run.times, w, step || null, v.run.seq)[0] : undefined;
               if (!win) return "–";
               const feat = classifyBaseline(win, baseline, [f]).features[f];

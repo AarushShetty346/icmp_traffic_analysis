@@ -22,8 +22,6 @@ It reports detection rate, false-positive rate and decoding accuracy.
 | `icmp_detector/report.py` | Plots and `RESULTS.md` |
 | `icmp_detector/benchmark.py` | Accuracy over 4 gap settings x 10 network conditions, and pipeline speed |
 | `results/` | Output of the simulated study; `results/benchmark/BENCHMARK.md` holds the benchmark |
-| `scripts/site_check.js` | Clicks every button on the site with Playwright and times page load |
-| `docs/index.html` | Interactive dashboard (GitHub Pages ready), built from `site/template.html` |
 | `tests/` | Unit tests |
 
 ## Quick start
@@ -32,9 +30,7 @@ It reports detection rate, false-positive rate and decoding accuracy.
 pip install -r requirements.txt
 python -m unittest                                  # run the tests
 python -m icmp_detector study --out results         # simulated study + plots
-python scripts/build_site.py                        # refresh docs/index.html
 python -m icmp_detector benchmark                   # accuracy grid + speed -> results/benchmark/
-node scripts/site_check.js docs/index.html node_modules results/benchmark/site.json  # site buttons + load time
 ```
 
 ## Using lab captures
@@ -71,9 +67,9 @@ For the jitter/load experiments, capture under each `tc netem` / `iperf3` settin
 
 ## Simulated results
 
-`results/RESULTS.md` has the current numbers and plots. **They come from `simulate.py`, not the lab testbed**; use them to check the pipeline and to know which effects to look for, then replace them with real captures. Headline findings from the simulation:
+`results/RESULTS.md` has the current numbers and plots. **They come from `simulate.py`, not the lab testbed**; use them to check the pipeline and to know which effects to look for, then replace them with real captures. What the simulation shows:
 
-- The planned 0.75 / 1.25 s channel is caught in every window by both detectors (window std ≈ 0.25 s vs a few ms for normal ping).
+- The planned 0.75/1.25 s channel is caught in every window by both detectors (window std ≈ 0.25 s vs a few ms for normal ping).
 - A baseline built on a clean LAN raises false alarms on all normal windows once ≈20 ms of jitter is added; a baseline built under the same conditions keeps FPR ≤ 15 %.
 - The fixed 0.1 s rule is fine up to ≈50 ms of jitter and fails at 150 ms.
 - A subtler 0.95 / 1.05 s channel evades the fixed rule entirely and becomes indistinguishable from normal traffic at ≈100 ms of jitter.

@@ -118,7 +118,7 @@ def _pct(x: float) -> str:
     return f"{x:.0%}"
 
 
-def markdown(acc: dict, speed: dict, site: dict | None = None, window: int = 32) -> str:
+def markdown(acc: dict, speed: dict, window: int = 32) -> str:
     cfg = acc["config"]
     rows = {(r["channel"], r["condition"], r["window"], r["detector"]): r for r in acc["results"]}
     dets = ("fixed", "baseline (clean)", "baseline (matched)")
@@ -189,23 +189,6 @@ def markdown(acc: dict, speed: dict, site: dict | None = None, window: int = 32)
         f"**{speed['realtime_headroom']:,.0f} flows at once**.",
         "",
     ]
-    if site:
-        lines += [
-            "## 4. Website",
-            "",
-            f"Measured in headless Chromium at {site['viewport']}, with the three.js, GSAP and Lenis files served "
-            "locally, so CDN download time is not included.",
-            "",
-            "| metric | value |",
-            "|---|---|",
-            f"| page size (HTML with inline data) | {site['html_kb']:.0f} KB |",
-            f"| first contentful paint | {site['fcp_ms']:.0f} ms |",
-            f"| DOM ready | {site['dom_ready_ms']:.0f} ms |",
-            f"| fully loaded | {site['load_ms']:.0f} ms |",
-            f"| Play page: rerun 30 simulated captures after a slider move | {site['play_update_ms']:.1f} ms |",
-            f"| buttons and controls checked | {site['checks_passed']}/{site['checks']} pass |",
-            "",
-        ]
     lines += ["## Figures", "", "![detection heatmap](benchmark_detection.png)", "",
               "![false positives](benchmark_false_positives.png)", "", "![decoding](benchmark_decoding.png)", ""]
     return "\n".join(lines)

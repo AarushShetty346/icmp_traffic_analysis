@@ -390,7 +390,7 @@ def build_bundle(
         },
         "settings": {
             "nominal": fixed.nominal,
-            "fixedRule": {"meanTol": fixed.mean_tol, "stdTol": fixed.std_tol},
+            "fixedRule": {"meanLimit": fixed.mean_tol, "stdLimit": fixed.std_tol},
             "percentile": 95.0,
             "windowSizes": list(sim_kwargs.get("window_sizes", (8, 16, 32))),
             "defaultWindow": 32,

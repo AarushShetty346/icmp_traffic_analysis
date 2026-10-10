@@ -77,9 +77,9 @@
         "nominal": {"type": "number", "exclusiveMinimum": 0},
         "fixedRule": {
           "type": "object",
-          "required": ["meanTol", "stdTol"],
+          "required": ["meanLimit", "stdLimit"],
           "additionalProperties": false,
-          "properties": {"meanTol": {"type": "number"}, "stdTol": {"type": "number"}}
+          "properties": {"meanLimit": {"type": "number"}, "stdLimit": {"type": "number"}}
         },
         "percentile": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
         "windowSizes": {"type": "array", "items": {"type": "integer", "minimum": 3}, "minItems": 1},

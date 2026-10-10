@@ -250,15 +250,15 @@
     "fixedRule": {
      "type": "object",
      "required": [
-      "meanTol",
-      "stdTol"
+      "meanLimit",
+      "stdLimit"
      ],
      "additionalProperties": false,
      "properties": {
-      "meanTol": {
+      "meanLimit": {
        "type": "number"
       },
-      "stdTol": {
+      "stdLimit": {
        "type": "number"
       }
      }

@@ -1,0 +1,9 @@
+# Exact versions used to develop and test this branch (Python 3.13).
+numpy==2.5.3
+pandas==3.0.5
+matplotlib==3.11.2
+jsonschema==4.26.0
+scipy==1.18.1
+scapy==2.8.0
+ruff==0.16.8
+shellcheck-py==0.11.0.1

@@ -28,7 +28,6 @@ COLUMN_ALIASES = {
     "ip.dst": "dst",
     "icmp.ident": "ident",
     "icmp.seq": "seq",
-    "icmp.seq_le": "seq",
 }
 
 
@@ -44,7 +43,24 @@ class Flow:
         return len(self.times)
 
 
+def parse_int(value) -> int | str:
+    """Parse an identifier tshark may print as ``0x0001``, ``1``, ``01`` or ``1/256``.
+
+    Hex values need the ``0x`` prefix; everything else is read as decimal, so a
+    leading zero does not matter. Values that are not numbers are returned as
+    stripped strings.
+    """
+    text = str(value).strip().split("/")[0].strip()
+    try:
+        return int(text, 16) if text.lower().startswith("0x") else int(text, 10)
+    except ValueError:
+        return text
+
+
 def _normalise(df: pd.DataFrame) -> pd.DataFrame:
+    if "icmp.seq" not in df.columns and "icmp.seq_le" in df.columns:
+        # only fall back to the little-endian field when the big-endian one is missing
+        df = df.rename(columns={"icmp.seq_le": "icmp.seq"})
     df = df.rename(columns={c: COLUMN_ALIASES.get(c, c) for c in df.columns})
     for col in TIME_COLUMNS:
         if col in df.columns:
@@ -56,8 +72,7 @@ def _normalise(df: pd.DataFrame) -> pd.DataFrame:
         # tshark prints "seq (BE)" style values for some builds, e.g. "1/256".
         df["seq"] = pd.to_numeric(df["seq"].astype(str).str.split("/").str[0], errors="coerce")
     if "ident" in df.columns:
-        df["ident"] = df["ident"].astype(str).str.split("/").str[0]
-        df["ident"] = df["ident"].map(lambda v: int(v, 0) if v.startswith("0x") else v)
+        df["ident"] = df["ident"].map(parse_int)
     return df
 
 
@@ -104,7 +119,8 @@ def load_flow(
     if dst is not None and "dst" in df.columns:
         df = df[df["dst"] == dst]
     if ident is not None and "ident" in df.columns:
-        df = df[df["ident"].astype(str) == str(ident)]
+        want = parse_int(ident)
+        df = df[df["ident"].map(lambda v: v == want)]
     df = df.sort_values("time")
     if len(df) < 2:
         raise ValueError(f"{path}: fewer than 2 Echo Requests left after filtering")

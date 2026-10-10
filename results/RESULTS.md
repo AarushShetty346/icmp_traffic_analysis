@@ -6,6 +6,7 @@
 - Runs per set: 10 x 64 Echo Requests
 - Baseline: clean normal runs, p95 of window std (20 windows of 32 requests) = 0.0036 s
 - Fixed rule: std > 0.1 s or |mean - 1.0| > 0.1 s
+- Simulated network delay model: `folded` (see `icmp_detector/simulate.py`)
 
 ## Channel 0.75/1.25 s, 32-request windows
 

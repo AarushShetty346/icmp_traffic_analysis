@@ -1,0 +1,2689 @@
+{
+ "simulated": true,
+ "seeds": [
+  7,
+  8,
+  9,
+  10,
+  11
+ ],
+ "config": {
+  "delay_model": "netem",
+  "step": null,
+  "runs_per_set": 10,
+  "requests_per_run": 64,
+  "window_sizes": [
+   8,
+   16,
+   32
+  ],
+  "percentile": 95.0,
+  "fixed_rule": {
+   "nominal": 1.0,
+   "mean_tol": 0.1,
+   "std_tol": 0.1
+  },
+  "conditions": [
+   {
+    "name": "clean",
+    "net_jitter": 0.0,
+    "loss": 0.0,
+    "delay_model": "netem",
+    "net_delay": 0.001,
+    "net_corr": 0.0
+   },
+   {
+    "name": "jitter 20 ms",
+    "net_jitter": 0.02,
+    "loss": 0.0,
+    "delay_model": "netem",
+    "net_delay": 0.001,
+    "net_corr": 0.0
+   },
+   {
+    "name": "jitter 50 ms",
+    "net_jitter": 0.05,
+    "loss": 0.0,
+    "delay_model": "netem",
+    "net_delay": 0.001,
+    "net_corr": 0.0
+   },
+   {
+    "name": "jitter 100 ms",
+    "net_jitter": 0.1,
+    "loss": 0.0,
+    "delay_model": "netem",
+    "net_delay": 0.001,
+    "net_corr": 0.0
+   },
+   {
+    "name": "jitter 150 ms",
+    "net_jitter": 0.15,
+    "loss": 0.0,
+    "delay_model": "netem",
+    "net_delay": 0.001,
+    "net_corr": 0.0
+   },
+   {
+    "name": "loss 5%",
+    "net_jitter": 0.0,
+    "loss": 0.05,
+    "delay_model": "netem",
+    "net_delay": 0.001,
+    "net_corr": 0.0
+   }
+  ],
+  "channels": {
+   "0.75/1.25 s": {
+    "nominal": 1.0,
+    "gap0": 0.75,
+    "gap1": 1.25,
+    "send_jitter": 0.002,
+    "spike_prob": 0.02,
+    "spike_max": 0.03
+   },
+   "0.95/1.05 s (subtle)": {
+    "nominal": 1.0,
+    "gap0": 0.95,
+    "gap1": 1.05,
+    "send_jitter": 0.002,
+    "spike_prob": 0.02,
+    "spike_max": 0.03
+   }
+  }
+ },
+ "summary": [
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 0.99,
+    "std": 0.01629800601300661,
+    "min": 0.9625,
+    "max": 1.0,
+    "lo": 0.975714167857629,
+    "hi": 1.0042858321423709,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05750000000000001,
+    "std": 0.03491060010942235,
+    "min": 0.025,
+    "max": 0.1,
+    "lo": 0.02689950980784786,
+    "hi": 0.08810049019215216,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.99,
+    "std": 0.01629800601300661,
+    "min": 0.9625,
+    "max": 1.0,
+    "lo": 0.975714167857629,
+    "hi": 1.0042858321423709,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0475,
+    "std": 0.018540496217739157,
+    "min": 0.025,
+    "max": 0.075,
+    "lo": 0.03124853852725854,
+    "hi": 0.06375146147274147,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.08,
+    "std": 0.06708203932499368,
+    "min": 0.025,
+    "max": 0.175,
+    "lo": 0.02120000000000001,
+    "hi": 0.13879999999999998,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05500000000000001,
+    "std": 0.020916500663351885,
+    "min": 0.025,
+    "max": 0.075,
+    "lo": 0.0366658788048077,
+    "hi": 0.07333412119519231,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.14,
+    "std": 0.10246950765959599,
+    "min": 0.05,
+    "max": 0.25,
+    "lo": 0.050181516378865546,
+    "hi": 0.2298184836211345,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "clean",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.09,
+    "std": 0.04183300132670378,
+    "min": 0.05,
+    "max": 0.15,
+    "lo": 0.05333175760961537,
+    "hi": 0.12666824239038463,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 0.9875,
+    "std": 0.015309310892394854,
+    "min": 0.9625,
+    "max": 1.0,
+    "lo": 0.9740807973411235,
+    "hi": 1.0009192026588767,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05750000000000001,
+    "std": 0.03491060010942235,
+    "min": 0.025,
+    "max": 0.1,
+    "lo": 0.02689950980784786,
+    "hi": 0.08810049019215216,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9875,
+    "std": 0.015309310892394854,
+    "min": 0.9625,
+    "max": 1.0,
+    "lo": 0.9740807973411235,
+    "hi": 1.0009192026588767,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0475,
+    "std": 0.018540496217739157,
+    "min": 0.025,
+    "max": 0.075,
+    "lo": 0.03124853852725854,
+    "hi": 0.06375146147274147,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.08,
+    "std": 0.06708203932499368,
+    "min": 0.025,
+    "max": 0.175,
+    "lo": 0.02120000000000001,
+    "hi": 0.13879999999999998,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05500000000000001,
+    "std": 0.020916500663351885,
+    "min": 0.025,
+    "max": 0.075,
+    "lo": 0.0366658788048077,
+    "hi": 0.07333412119519231,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.14,
+    "std": 0.10246950765959599,
+    "min": 0.05,
+    "max": 0.25,
+    "lo": 0.050181516378865546,
+    "hi": 0.2298184836211345,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "clean",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.09,
+    "std": 0.04183300132670378,
+    "min": 0.05,
+    "max": 0.15,
+    "lo": 0.05333175760961537,
+    "hi": 0.12666824239038463,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 0.9974999999999999,
+    "std": 0.005590169943749454,
+    "min": 0.9875,
+    "max": 1.0,
+    "lo": 0.9925999999999999,
+    "hi": 1.0024,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.9400000000000001,
+    "std": 0.03791437722025778,
+    "min": 0.8875,
+    "max": 0.9875,
+    "lo": 0.9067665830826862,
+    "hi": 0.9732334169173139,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9724999999999999,
+    "std": 0.01629800601300661,
+    "min": 0.9625,
+    "max": 1.0,
+    "lo": 0.9582141678576289,
+    "hi": 0.9867858321423709,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0375,
+    "std": 0.0385275875185561,
+    "min": 0.0,
+    "max": 0.0875,
+    "lo": 0.003729080557378958,
+    "hi": 0.07127091944262104,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06,
+    "std": 0.05755432216610669,
+    "min": 0.0,
+    "max": 0.15,
+    "lo": 0.009551412309163697,
+    "hi": 0.11044858769083629,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 20 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06999999999999999,
+    "std": 0.10368220676663858,
+    "min": 0.0,
+    "max": 0.25,
+    "lo": -0.02088146125585788,
+    "hi": 0.16088146125585787,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 0.9974999999999999,
+    "std": 0.005590169943749454,
+    "min": 0.9875,
+    "max": 1.0,
+    "lo": 0.9925999999999999,
+    "hi": 1.0024,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.9400000000000001,
+    "std": 0.03791437722025778,
+    "min": 0.8875,
+    "max": 0.9875,
+    "lo": 0.9067665830826862,
+    "hi": 0.9732334169173139,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9675,
+    "std": 0.020916500663351902,
+    "min": 0.95,
+    "max": 1.0,
+    "lo": 0.9491658788048077,
+    "hi": 0.9858341211951923,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0375,
+    "std": 0.0385275875185561,
+    "min": 0.0,
+    "max": 0.0875,
+    "lo": 0.003729080557378958,
+    "hi": 0.07127091944262104,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06,
+    "std": 0.05755432216610669,
+    "min": 0.0,
+    "max": 0.15,
+    "lo": 0.009551412309163697,
+    "hi": 0.11044858769083629,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 20 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06999999999999999,
+    "std": 0.10368220676663858,
+    "min": 0.0,
+    "max": 0.25,
+    "lo": -0.02088146125585788,
+    "hi": 0.16088146125585787,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0025,
+    "std": 0.005590169943749474,
+    "min": 0.0,
+    "max": 0.0125,
+    "lo": -0.0024,
+    "hi": 0.0074,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.9875,
+    "std": 0.008838834764831853,
+    "min": 0.975,
+    "max": 1.0,
+    "lo": 0.9797524197325875,
+    "hi": 0.9952475802674126,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9924999999999999,
+    "std": 0.0068465319688145515,
+    "min": 0.9875,
+    "max": 1.0,
+    "lo": 0.9864987501301812,
+    "hi": 0.9985012498698187,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05,
+    "std": 0.017677669529663688,
+    "min": 0.0375,
+    "max": 0.075,
+    "lo": 0.03450483946517494,
+    "hi": 0.06549516053482506,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05,
+    "std": 0.053033008588991064,
+    "min": 0.0,
+    "max": 0.125,
+    "lo": 0.0035145183955248294,
+    "hi": 0.09648548160447518,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 50 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.04,
+    "std": 0.041833001326703784,
+    "min": 0.0,
+    "max": 0.1,
+    "lo": 0.0033317576096153698,
+    "hi": 0.07666824239038464,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.042499999999999996,
+    "std": 0.025920551691659646,
+    "min": 0.025,
+    "max": 0.0875,
+    "lo": 0.019779634686035528,
+    "hi": 0.06522036531396447,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0025,
+    "std": 0.005590169943749474,
+    "min": 0.0,
+    "max": 0.0125,
+    "lo": -0.0024,
+    "hi": 0.0074,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.9875,
+    "std": 0.008838834764831853,
+    "min": 0.975,
+    "max": 1.0,
+    "lo": 0.9797524197325875,
+    "hi": 0.9952475802674126,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.3625,
+    "std": 0.04145780987944252,
+    "min": 0.3,
+    "max": 0.4,
+    "lo": 0.3261606274132312,
+    "hi": 0.39883937258676877,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05,
+    "std": 0.017677669529663688,
+    "min": 0.0375,
+    "max": 0.075,
+    "lo": 0.03450483946517494,
+    "hi": 0.06549516053482506,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.6449999999999999,
+    "std": 0.16620770138594662,
+    "min": 0.35,
+    "max": 0.75,
+    "lo": 0.49931252627627853,
+    "hi": 0.7906874737237213,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05,
+    "std": 0.053033008588991064,
+    "min": 0.0,
+    "max": 0.125,
+    "lo": 0.0035145183955248294,
+    "hi": 0.09648548160447518,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 50 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.89,
+    "std": 0.12942179105544785,
+    "min": 0.75,
+    "max": 1.0,
+    "lo": 0.7765567983526558,
+    "hi": 1.0034432016473442,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.04,
+    "std": 0.041833001326703784,
+    "min": 0.0,
+    "max": 0.1,
+    "lo": 0.0033317576096153698,
+    "hi": 0.07666824239038464,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.28500000000000003,
+    "std": 0.05405437077609913,
+    "min": 0.225,
+    "max": 0.3625,
+    "lo": 0.23761925496575642,
+    "hi": 0.33238074503424364,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.9974999999999999,
+    "std": 0.005590169943749454,
+    "min": 0.9875,
+    "max": 1.0,
+    "lo": 0.9925999999999999,
+    "hi": 1.0024,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.99,
+    "std": 0.005590169943749455,
+    "min": 0.9875,
+    "max": 1.0,
+    "lo": 0.9851,
+    "hi": 0.9949,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06999999999999999,
+    "std": 0.06287388169979645,
+    "min": 0.0125,
+    "max": 0.175,
+    "lo": 0.014888612791910241,
+    "hi": 0.12511138720808973,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.24,
+    "std": 0.1257477633995929,
+    "min": 0.075,
+    "max": 0.425,
+    "lo": 0.1297772255838205,
+    "hi": 0.3502227744161795,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.085,
+    "std": 0.07623975340988454,
+    "min": 0.025,
+    "max": 0.2,
+    "lo": 0.01817290968476931,
+    "hi": 0.1518270903152307,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.15000000000000002,
+    "std": 0.14577379737113252,
+    "min": 0.05,
+    "max": 0.4,
+    "lo": 0.022223632858028086,
+    "hi": 0.27777636714197196,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 100 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06000000000000001,
+    "std": 0.0894427190999916,
+    "min": 0.0,
+    "max": 0.2,
+    "lo": -0.0184,
+    "hi": 0.13840000000000002,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.41,
+    "std": 0.06212386819894587,
+    "min": 0.3625,
+    "max": 0.5125,
+    "lo": 0.35554602861131246,
+    "hi": 0.4644539713886875,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.28500000000000003,
+    "std": 0.05405437077609913,
+    "min": 0.225,
+    "max": 0.3625,
+    "lo": 0.23761925496575642,
+    "hi": 0.33238074503424364,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.9974999999999999,
+    "std": 0.005590169943749454,
+    "min": 0.9875,
+    "max": 1.0,
+    "lo": 0.9925999999999999,
+    "hi": 1.0024,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.11750000000000001,
+    "std": 0.006846531968814575,
+    "min": 0.1125,
+    "max": 0.125,
+    "lo": 0.11149875013018122,
+    "hi": 0.1235012498698188,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06999999999999999,
+    "std": 0.06287388169979645,
+    "min": 0.0125,
+    "max": 0.175,
+    "lo": 0.014888612791910241,
+    "hi": 0.12511138720808973,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.445,
+    "std": 0.07373940601876311,
+    "min": 0.4,
+    "max": 0.575,
+    "lo": 0.38036456080446274,
+    "hi": 0.5096354391955373,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.24,
+    "std": 0.1257477633995929,
+    "min": 0.075,
+    "max": 0.425,
+    "lo": 0.1297772255838205,
+    "hi": 0.3502227744161795,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.155,
+    "std": 0.09253377761660873,
+    "min": 0.05,
+    "max": 0.275,
+    "lo": 0.07389056774949045,
+    "hi": 0.23610943225050957,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.085,
+    "std": 0.07623975340988454,
+    "min": 0.025,
+    "max": 0.2,
+    "lo": 0.01817290968476931,
+    "hi": 0.1518270903152307,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.42000000000000004,
+    "std": 0.07582875444051551,
+    "min": 0.3,
+    "max": 0.5,
+    "lo": 0.3535331661653724,
+    "hi": 0.4864668338346277,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.15000000000000002,
+    "std": 0.14577379737113252,
+    "min": 0.05,
+    "max": 0.4,
+    "lo": 0.022223632858028086,
+    "hi": 0.27777636714197196,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 100 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.15000000000000002,
+    "std": 0.12747548783981963,
+    "min": 0.0,
+    "max": 0.3,
+    "lo": 0.038262808340284504,
+    "hi": 0.26173719165971554,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.06000000000000001,
+    "std": 0.0894427190999916,
+    "min": 0.0,
+    "max": 0.2,
+    "lo": -0.0184,
+    "hi": 0.13840000000000002,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.64,
+    "std": 0.06085330722319039,
+    "min": 0.55,
+    "max": 0.7,
+    "lo": 0.5866597244101608,
+    "hi": 0.6933402755898392,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.8400000000000001,
+    "std": 0.08856494791959173,
+    "min": 0.7125,
+    "max": 0.95,
+    "lo": 0.7623694003630013,
+    "hi": 0.9176305996369989,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.075,
+    "std": 0.04592793267718459,
+    "min": 0.025,
+    "max": 0.15,
+    "lo": 0.03474239202337029,
+    "hi": 0.1152576079766297,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.7000000000000001,
+    "std": 0.06373774391990981,
+    "min": 0.6,
+    "max": 0.75,
+    "lo": 0.6441314041701423,
+    "hi": 0.7558685958298579,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9800000000000001,
+    "std": 0.04472135954999578,
+    "min": 0.9,
+    "max": 1.0,
+    "lo": 0.9408000000000001,
+    "hi": 1.0192,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.10500000000000001,
+    "std": 0.059686681931566614,
+    "min": 0.025,
+    "max": 0.175,
+    "lo": 0.052682316565046586,
+    "hi": 0.15731768343495345,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.82,
+    "std": 0.09746794344808962,
+    "min": 0.7,
+    "max": 0.95,
+    "lo": 0.7345655807066027,
+    "hi": 0.9054344192933972,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "jitter 150 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.19,
+    "std": 0.09617692030835673,
+    "min": 0.05,
+    "max": 0.3,
+    "lo": 0.10569721238298226,
+    "hi": 0.27430278761701776,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.6975,
+    "std": 0.06336895927818288,
+    "min": 0.625,
+    "max": 0.7625,
+    "lo": 0.6419546581611023,
+    "hi": 0.7530453418388977,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.64,
+    "std": 0.06085330722319039,
+    "min": 0.55,
+    "max": 0.7,
+    "lo": 0.5866597244101608,
+    "hi": 0.6933402755898392,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.057499999999999996,
+    "std": 0.03601215072721983,
+    "min": 0.0125,
+    "max": 0.1125,
+    "lo": 0.02593395811952344,
+    "hi": 0.08906604188047655,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.075,
+    "std": 0.04592793267718459,
+    "min": 0.025,
+    "max": 0.15,
+    "lo": 0.03474239202337029,
+    "hi": 0.1152576079766297,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.7950000000000002,
+    "std": 0.020916500663351868,
+    "min": 0.775,
+    "max": 0.825,
+    "lo": 0.7766658788048079,
+    "hi": 0.8133341211951924,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.7000000000000001,
+    "std": 0.06373774391990981,
+    "min": 0.6,
+    "max": 0.75,
+    "lo": 0.6441314041701423,
+    "hi": 0.7558685958298579,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.06999999999999999,
+    "std": 0.048088460154178364,
+    "min": 0.0,
+    "max": 0.125,
+    "lo": 0.02784860619149112,
+    "hi": 0.11215139380850886,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.10500000000000001,
+    "std": 0.059686681931566614,
+    "min": 0.025,
+    "max": 0.175,
+    "lo": 0.052682316565046586,
+    "hi": 0.15731768343495345,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.95,
+    "std": 0.03535533905932737,
+    "min": 0.9,
+    "max": 1.0,
+    "lo": 0.9190096789303498,
+    "hi": 0.9809903210696501,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.82,
+    "std": 0.09746794344808962,
+    "min": 0.7,
+    "max": 0.95,
+    "lo": 0.7345655807066027,
+    "hi": 0.9054344192933972,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "jitter 150 ms",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.11000000000000001,
+    "std": 0.05477225575051661,
+    "min": 0.05,
+    "max": 0.2,
+    "lo": 0.06199000104144973,
+    "hi": 0.1580099989585503,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.19,
+    "std": 0.09617692030835673,
+    "min": 0.05,
+    "max": 0.3,
+    "lo": 0.10569721238298226,
+    "hi": 0.27430278761701776,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 0.9715079365079365,
+    "std": 0.01024240096490199,
+    "min": 0.9571428571428572,
+    "max": 0.9861111111111112,
+    "lo": 0.962530076222287,
+    "hi": 0.980485796793586,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.036582830315224676,
+    "std": 0.023438486087237222,
+    "min": 0.014285714285714285,
+    "max": 0.07042253521126761,
+    "lo": 0.016038091428372443,
+    "hi": 0.057127569202076914,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9687301587301587,
+    "std": 0.006486608489429358,
+    "min": 0.9571428571428572,
+    "max": 0.9722222222222222,
+    "lo": 0.9630443957000485,
+    "hi": 0.9744159217602688,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.031068634026380503,
+    "std": 0.01842869990037474,
+    "min": 0.014084507042253521,
+    "max": 0.056338028169014086,
+    "lo": 0.01491516634642135,
+    "hi": 0.047222101706339656,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05830645161290322,
+    "std": 0.014037947390291551,
+    "min": 0.03333333333333333,
+    "max": 0.06666666666666667,
+    "lo": 0.04600164819823421,
+    "hi": 0.07061125502757223,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.04581989247311828,
+    "std": 0.030296560582531443,
+    "min": 0.03125,
+    "max": 0.1,
+    "lo": 0.019263786245901755,
+    "hi": 0.07237599870033481,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.1096969696969697,
+    "std": 0.032169774611127785,
+    "min": 0.09090909090909091,
+    "max": 0.16666666666666666,
+    "lo": 0.0814989189792489,
+    "hi": 0.13789502041469048,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.75/1.25 s",
+   "condition": "loss 5%",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.07303030303030303,
+    "std": 0.04124998260845002,
+    "min": 0.0,
+    "max": 0.1,
+    "lo": 0.036873099078497125,
+    "hi": 0.10918750698210894,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 8,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 8,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 0.9829376257545273,
+    "std": 0.01566796037551087,
+    "min": 0.9571428571428572,
+    "max": 1.0,
+    "lo": 0.9692040529629085,
+    "hi": 0.996671198546146,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.036582830315224676,
+    "std": 0.023438486087237222,
+    "min": 0.014285714285714285,
+    "max": 0.07042253521126761,
+    "lo": 0.016038091428372443,
+    "hi": 0.057127569202076914,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 8,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 0.9829376257545273,
+    "std": 0.01566796037551087,
+    "min": 0.9571428571428572,
+    "max": 1.0,
+    "lo": 0.9692040529629085,
+    "hi": 0.996671198546146,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.031068634026380503,
+    "std": 0.01842869990037474,
+    "min": 0.014084507042253521,
+    "max": 0.056338028169014086,
+    "lo": 0.01491516634642135,
+    "hi": 0.047222101706339656,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 16,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 16,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.05830645161290322,
+    "std": 0.014037947390291551,
+    "min": 0.03333333333333333,
+    "max": 0.06666666666666667,
+    "lo": 0.04600164819823421,
+    "hi": 0.07061125502757223,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 16,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.04581989247311828,
+    "std": 0.030296560582531443,
+    "min": 0.03125,
+    "max": 0.1,
+    "lo": 0.019263786245901755,
+    "hi": 0.07237599870033481,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 32,
+   "detector": "fixed",
+   "detection_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.0,
+    "std": 0.0,
+    "min": 0.0,
+    "max": 0.0,
+    "lo": 0.0,
+    "hi": 0.0,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 32,
+   "detector": "baseline (clean)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.1096969696969697,
+    "std": 0.032169774611127785,
+    "min": 0.09090909090909091,
+    "max": 0.16666666666666666,
+    "lo": 0.0814989189792489,
+    "hi": 0.13789502041469048,
+    "seeds": 5
+   }
+  },
+  {
+   "channel": "0.95/1.05 s (subtle)",
+   "condition": "loss 5%",
+   "window": 32,
+   "detector": "baseline (matched)",
+   "detection_rate": {
+    "mean": 1.0,
+    "std": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "lo": 1.0,
+    "hi": 1.0,
+    "seeds": 5
+   },
+   "false_positive_rate": {
+    "mean": 0.07303030303030303,
+    "std": 0.04124998260845002,
+    "min": 0.0,
+    "max": 0.1,
+    "lo": 0.036873099078497125,
+    "hi": 0.10918750698210894,
+    "seeds": 5
+   }
+  }
+ ]
+}

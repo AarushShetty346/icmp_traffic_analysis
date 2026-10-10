@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-from icmp_detector.capture import Flow, load_flow, save_flow
+from icmp_detector.capture import load_flow, save_flow
 from icmp_detector.detector import Baseline, BaselineDetector, FixedRuleDetector
 from icmp_detector.experiment import build_baseline, simulated_study
 from icmp_detector.features import inter_packet_delays, window_features, windows
@@ -96,6 +96,26 @@ class CaptureTests(unittest.TestCase):
         np.testing.assert_allclose(flow.times, [10, 11, 12])
         np.testing.assert_allclose(flow.seq, [1, 2, 3])
 
+    def test_identifiers_in_any_notation(self):
+        from icmp_detector.capture import parse_int
+
+        self.assertEqual([parse_int(v) for v in ("0x0001", "1", "01", "1/256", " 7 ")], [1, 1, 1, 1, 7])
+        self.assertEqual(parse_int("abc"), "abc")
+        csv = "frame.time_epoch,icmp.ident,icmp.seq\n1.0,01,1\n2.0,0x0001,2\n3.0,2,3\n"
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "cap.csv"
+            p.write_text(csv)
+            flow = load_flow(p, ident=1)
+        np.testing.assert_allclose(flow.times, [1, 2])
+
+    def test_seq_le_only_used_when_seq_missing(self):
+        csv = "frame.time_epoch,icmp.seq,icmp.seq_le\n1.0,1,256\n2.0,2,512\n"
+        with tempfile.TemporaryDirectory() as d:
+            p = Path(d) / "cap.csv"
+            p.write_text(csv)
+            flow = load_flow(p)
+        np.testing.assert_allclose(flow.seq, [1, 2])
+
     def test_save_load(self):
         flow = normal_run(10, Condition("c", 0.01, 0.0), np.random.default_rng(0))
         with tempfile.TemporaryDirectory() as d:
@@ -111,6 +131,16 @@ class StudyTests(unittest.TestCase):
         self.assertTrue(r["simulated"])
         planned = [x for x in r["results"] if x["condition"] == "clean" and x["channel"].startswith("0.75")]
         self.assertTrue(all(x["detection_rate"] == 1.0 for x in planned))
+
+
+class ReportTests(unittest.TestCase):
+    def test_scatter_handles_more_than_two_channels(self):
+        from icmp_detector.benchmark import CHANNEL_GRID
+        from icmp_detector.report import plot_scatter
+
+        r = simulated_study(runs=2, window_sizes=(32,), conditions=CONDITIONS[:1], channels=CHANNEL_GRID)
+        with tempfile.TemporaryDirectory() as d:
+            self.assertTrue(plot_scatter(r, Path(d)).exists())
 
 
 class BenchmarkTests(unittest.TestCase):

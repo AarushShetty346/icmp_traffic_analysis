@@ -1,7 +1,13 @@
 name: Deploy Cadence to GitHub Pages
 
-# Manual on purpose: set Settings → Pages → Source to "GitHub Actions" first, then run this workflow.
+# Needs Settings → Pages → Source set to "GitHub Actions". Deploys on every push to main that touches the
+# workbench or its data, and can be run by hand from the Actions tab.
 on:
+  push:
+    branches: [main]
+    paths:
+      - "ui/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:

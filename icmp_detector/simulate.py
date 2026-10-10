@@ -11,19 +11,33 @@ Model
   scheduling jitter (``send_jitter``), like the OS ping utility.
 * Timing-channel sender: bit 0 -> ``gap0`` seconds, bit 1 -> ``gap1``
   seconds (0.75 s / 1.25 s around a 1 s interval, as planned in Review 1).
-* Network condition: every packet gets an extra one-way delay drawn from
-  N(0, ``net_jitter``) (clipped at 0, like tc netem delay jitter), and is
-  dropped with probability ``loss``. Packets are re-sorted by arrival time,
-  so large jitter can reorder them.
+* Network condition: every packet gets an extra one-way delay and is dropped
+  with probability ``loss``. Packets are re-sorted by arrival time, so large
+  jitter can reorder them. Two delay models are available
+  (``Condition.delay_model``):
+
+  - ``"folded"`` (the original model, still the default so earlier results
+    reproduce): ``1 ms + |N(0, net_jitter)|``. The absolute value folds the
+    normal distribution, which shifts the mean delay up by about
+    0.8 x ``net_jitter``. This is *not* what tc netem does.
+  - ``"netem"``: ``max(0, net_delay + J)`` where ``J`` is normal with standard
+    deviation ``net_jitter`` and optional correlation ``net_corr`` between
+    consecutive packets, mixed the way ``tc qdisc ... netem delay D J C%
+    distribution normal`` mixes it: ``J_i = (1 - c) * z_i + c * J_(i-1)``.
+    Negative delays are truncated at zero, as netem does.
+
+Every result written by the study records which model produced it.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import numpy as np
 
 from .capture import Flow
+
+DELAY_MODELS = ("folded", "netem")
 
 
 @dataclass(frozen=True)
@@ -31,6 +45,14 @@ class Condition:
     name: str
     net_jitter: float = 0.0  # seconds, std-dev of extra per-packet delay
     loss: float = 0.0  # probability a packet is dropped
+    delay_model: str = "folded"  # see module docstring
+    net_delay: float = 0.001  # seconds, base one-way delay
+    net_corr: float = 0.0  # netem model only: correlation between consecutive jitter draws (0..1)
+
+    def with_model(self, delay_model: str) -> Condition:
+        if delay_model not in DELAY_MODELS:
+            raise ValueError(f"unknown delay model {delay_model!r}; choose one of {DELAY_MODELS}")
+        return replace(self, delay_model=delay_model)
 
 
 CONDITIONS = (
@@ -64,10 +86,26 @@ def _send_gaps(n_gaps: int, bits: np.ndarray | None, model: SenderModel, rng: np
     return np.maximum(gaps, 1e-4)
 
 
+def network_delay(n: int, cond: Condition, rng: np.random.Generator) -> np.ndarray:
+    """One-way delay for ``n`` packets under ``cond`` (seconds)."""
+    if cond.delay_model == "folded":
+        return 0.001 + np.abs(rng.normal(0.0, cond.net_jitter, n)) if cond.net_jitter else np.full(n, 0.001)
+    if cond.delay_model == "netem":
+        if not cond.net_jitter:
+            return np.full(n, max(cond.net_delay, 0.0))
+        z = rng.normal(0.0, cond.net_jitter, n)
+        if cond.net_corr:
+            c = float(cond.net_corr)
+            for i in range(1, n):
+                z[i] = (1.0 - c) * z[i] + c * z[i - 1]
+        return np.maximum(cond.net_delay + z, 0.0)
+    raise ValueError(f"unknown delay model {cond.delay_model!r}; choose one of {DELAY_MODELS}")
+
+
 def _through_network(send_times: np.ndarray, cond: Condition, rng: np.random.Generator) -> tuple[np.ndarray, np.ndarray]:
     n = len(send_times)
     seq = np.arange(n)
-    delay = 0.001 + np.abs(rng.normal(0.0, cond.net_jitter, n)) if cond.net_jitter else np.full(n, 0.001)
+    delay = network_delay(n, cond, rng)
     arrive = send_times + delay
     keep = rng.random(n) >= cond.loss
     arrive, seq = arrive[keep], seq[keep]

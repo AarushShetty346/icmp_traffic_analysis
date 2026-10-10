@@ -1,81 +1,138 @@
-# Detection of ICMP-Based Covert Timing Channels
+# Detection of ICMP-Based Covert Timing Channels Using Network Traffic Analysis
 
 BCSE308P Computer Networks lab project (VIT Vellore, Fall 2026–27) by Harsh Jha, Anuj Deshpande and Aarush Shetty.
+Defensive analysis on an authorised, closed lab testbed only.
 
-A covert timing channel hides bits in the gaps between packets. Here the test channel sends ICMP Echo Requests with a short gap (≈0.75 s) for a 0 bit and a long gap (≈1.25 s) for a 1 bit, around the usual 1 s ping interval. This repo holds the detection side: it reads receiver-side captures, computes inter-packet delays (Δtᵢ = tᵢ − tᵢ₋₁), splits them into fixed windows, extracts statistical features, and compares two detectors:
+A covert timing channel hides bits in the gaps between packets: here a sender spaces ICMP Echo Requests by
+`gap0` for a 0 bit and `gap1` for a 1 bit around the usual 1 s ping interval. This repository holds
 
-- **Fixed rule**: suspicious if the window's std of Δt exceeds a preset tolerance (0.1 s) or its mean drifts more than 0.1 s from the nominal interval.
-- **Baseline rule**: suspicious if the window's std exceeds the 95th percentile measured on labelled normal traffic.
+- **the detector** (`icmp_detector/`): reads receiver-side captures, computes inter-packet delays, cuts them
+  into windows, extracts 11 features and compares a fixed-rule detector with a baseline detector learned from
+  normal traffic;
+- **the lab tooling**: a Scapy sender (`generate`), tshark / tc netem / iperf3 scripts (`scripts/lab/`) and a
+  packet-field check (`fieldcheck`);
+- **Cadence**, an analysis workbench (`ui/`) that reads an exported JSON bundle or your own tshark CSVs.
 
-It reports detection rate, false-positive rate and decoding accuracy.
+## What is real and what is simulated
+
+| Output | Source |
+|---|---|
+| `results/RESULTS.md`, `results/*.png` | **SIMULATED** — `simulate.py`, original "folded" delay model, seed 7 |
+| `results/netem/` | **SIMULATED** — netem-style delay model, seed 7, plus a 5-seed spread and bootstrap intervals |
+| `results/benchmark/` | **SIMULATED** — 4 gap settings × 10 network conditions; the speed table is a CPU measurement |
+| `ui/public/data/bundle.json` | **SIMULATED** unless exported with `--captures`; every run, cell and curve is labelled |
+| Real testbed captures | **None yet.** Objectives 1–3 (real normal capture, real generator, real receiver capture) are still open |
+
+Never quote a simulated number as a testbed result. The workbench shows a SIMULATED / REAL CAPTURE badge on
+every number for the same reason.
+
+What the simulation suggests (to be checked on the testbed):
+
+- The informative cases are the subtle channels. A 0.95/1.05 s channel slips past the fixed 0.1 s rule
+  entirely; a baseline built under the same network conditions catches it at 50 ms of jitter but not at 100 ms
+  (`results/netem/RESULTS.md`), and 0.98/1.02 s is hard to catch even at 50 ms (`results/benchmark/BENCHMARK.md`).
+- A baseline learned on a clean LAN raises false alarms on every normal window once ≈20 ms of jitter is added.
+- The planned 0.75/1.25 s channel is trivially separable (window std ≈ 0.25 s against a few ms for ping).
+- With only 20 baseline windows the p95 threshold is noisy: clean-traffic FPR is 15–25 %, not 5 %, and moves
+  between seeds (see the seed-spread table in `results/netem/RESULTS.md`).
 
 ## Layout
 
 | Path | What it is |
 |---|---|
 | `icmp_detector/capture.py` | Load tshark CSV exports or pcap files, filter one Echo Request flow |
-| `icmp_detector/features.py` | Inter-packet delays, observation windows, window features |
-| `icmp_detector/detector.py` | Baseline construction, baseline detector, fixed-rule detector |
-| `icmp_detector/metrics.py` | Detection rate / FPR, bit decoding and decoding accuracy |
-| `icmp_detector/simulate.py` | Offline model of receiver timestamps (sends no packets) |
-| `icmp_detector/experiment.py` | Labelled evaluation and the simulated study |
-| `icmp_detector/report.py` | Plots and `RESULTS.md` |
-| `icmp_detector/benchmark.py` | Accuracy over 4 gap settings x 10 network conditions, and pipeline speed |
-| `results/` | Output of the simulated study; `results/benchmark/BENCHMARK.md` holds the benchmark |
-| `scripts/site_check.js` | Clicks every button on the site with Playwright and times page load |
-| `docs/index.html` | Interactive dashboard (GitHub Pages ready), built from `site/template.html` |
-| `tests/` | Unit tests |
+| `icmp_detector/features.py` | Inter-packet delays, windows (optional overlap), 10 window features, KS distance / ECDF |
+| `icmp_detector/detector.py` | Baseline fit, baseline detector (any feature incl. `ks`), fixed-rule detector |
+| `icmp_detector/metrics.py` | DR / FPR / precision / recall, bit decoding with fixed or 2-means threshold |
+| `icmp_detector/evaluation.py` | ROC / AUC, precision-recall, bootstrap intervals over runs, feature head-to-head, seed summaries |
+| `icmp_detector/simulate.py` | Offline model of receiver timestamps; `folded` and `netem` delay models (sends nothing) |
+| `icmp_detector/experiment.py` | Labelled evaluation, simulated study, multi-seed study |
+| `icmp_detector/benchmark.py` | Accuracy over 4 gap settings × 10 conditions, and pipeline speed |
+| `icmp_detector/generator.py` | Real Scapy sender for the lab (guarded: private destination, explicit flag, root) |
+| `icmp_detector/fieldcheck.py` | TTL / IP id / flags / payload comparison between normal and covert captures |
+| `icmp_detector/export.py`, `schema/` | Versioned JSON bundle for the workbench and its JSON Schema |
+| `icmp_detector/golden.py` | Parity fixtures (`tests/golden/`) the TypeScript port must match to 1e-9 |
+| `scripts/lab/` | Testbed scripts: capture, senders, netem profiles, iperf3 load, tshark export, manifests |
+| `ui/` | Cadence workbench (Vite + React + TypeScript), see `ui/README.md` |
+| `docs-ui/` | Workbench design brief, decisions, screenshots |
+| `AUDIT.md`, `SCRAP_REPORT.md`, `QA_REPORT.md` | Rebuild audit, legacy-site removal evidence, acceptance evidence |
 
 ## Quick start
 
 ```bash
-pip install -r requirements.txt
-python -m unittest                                  # run the tests
-python -m icmp_detector study --out results         # simulated study + plots
-python scripts/build_site.py                        # refresh docs/index.html
-python -m icmp_detector benchmark                   # accuracy grid + speed -> results/benchmark/
-node scripts/site_check.js docs/index.html node_modules results/benchmark/site.json  # site buttons + load time
+pip install -r requirements.txt            # requirements-dev.txt pins exact versions + ruff
+python -m unittest                         # Python tests
+python -m icmp_detector study --out results                                   # simulated study (folded model)
+python -m icmp_detector study --out results/netem --delay-model netem \
+    --seeds 7 8 9 10 11 --bootstrap 500                                       # netem model, CIs, seed spread
+python -m icmp_detector benchmark                                             # stress grid + speed
+python -m icmp_detector export-ui --out ui/public/data                        # workbench data (validated)
+python -m icmp_detector golden --out tests/golden                             # parity fixtures
 ```
 
-## Using lab captures
+Workbench: `cd ui && npm ci && npm run dev` (details in `ui/README.md`). It is published to GitHub Pages
+from `main` by `.github/workflows/pages.yml` once the repository's Pages source is set to GitHub Actions.
 
-Export Echo Request timestamps from each capture with tshark (run on the receiver):
+The workbench views: **Runs** (add tshark CSVs, label them, packet-field comparison), **Signal** (gap
+timeline, histogram and ECDF), **Detectors** (fixed rule against the baseline with live settings, ROC/PR,
+feature comparison), **Stress matrix** (gap setting × network condition, with run-level intervals and the
+seed spread), **Decode** (sent against decoded bits, fixed or adaptive threshold) and **Evidence** (Review 3
+checklist, limits, exports). Acceptance evidence is in `QA_REPORT.md`.
+
+## Lab workflow (real data)
+
+Full runbook: `scripts/lab/README.md`. In short, on the testbed (sender 10.0.0.1, receiver 10.0.0.2):
 
 ```bash
-tshark -r normal1.pcap -Y "icmp.type == 8" -T fields \
+sudo scripts/lab/netem.sh eth1 jitter20                                              # sender/router egress
+sudo scripts/lab/capture.sh eth1 10.0.0.1 captures/normal_j20_r01 270 label=normal netem=jitter20   # receiver
+scripts/lab/send_normal.sh 10.0.0.2 256 captures/normal_j20_r01.sender --i-am-on-the-lab-testbed    # sender
+sudo scripts/lab/send_covert.sh 10.0.0.2 0101... 0.95 1.05 captures/covert_j20_r01.sender --i-am-on-the-lab-testbed
+```
+
+The CSV export used everywhere (the first five fields are what the detector needs):
+
+```bash
+tshark -r capture.pcapng -Y "icmp.type == 8" -T fields \
   -e frame.time_epoch -e ip.src -e ip.dst -e icmp.ident -e icmp.seq \
-  -E header=y -E separator=, > normal1.csv
+  -e ip.ttl -e ip.id -e ip.flags -e ip.dsfield -e ip.len -e icmp.code -e data.len -e data.data \
+  -E header=y -E separator=, > capture.csv
 ```
 
 Then:
 
 ```bash
-# 1. baseline from normal runs only (e.g. 10 runs x 64 requests)
+# 1. baseline from normal runs only (optionally overlapping windows with --step)
 python -m icmp_detector baseline captures/normal_*.csv --window 32 --src 10.0.0.1 --out baseline.json
 
-# 2. classify each window of one capture
-python -m icmp_detector detect captures/test.csv --baseline baseline.json --src 10.0.0.1
+# 2. classify each window of one capture (any features, e.g. std and the KS distance)
+python -m icmp_detector detect captures/test.csv --baseline baseline.json --features std ks --src 10.0.0.1
 
-# 3. score both detectors on labelled test runs (kept separate from the baseline runs)
+# 3. score both detectors on labelled runs kept out of the baseline, with run-level bootstrap intervals
 python -m icmp_detector evaluate --baseline baseline.json \
-  --normal captures/test_normal_*.csv --channel captures/test_channel_*.csv \
-  --bits 0101011001001001... --src 10.0.0.1
+  --normal captures/test_normal_*.csv --channel captures/test_covert_*.csv \
+  --bits 0101... --bootstrap 1000 --compare-features --src 10.0.0.1
 
-# 4. decode one channel capture
-python -m icmp_detector decode captures/test_channel_1.csv --bits 0101011001001001...
+# 4. decode one channel capture (fixed 1.0 s threshold or adaptive 2-means)
+python -m icmp_detector decode captures/test_covert_1.csv --bits 0101... --threshold auto
+
+# 5. document non-timing differences between the senders
+python -m icmp_detector fieldcheck --normal captures/normal_j20_r01.csv --covert captures/covert_j20_r01.csv
+
+# 6. put real runs into the workbench (they are badged REAL CAPTURE)
+python -m icmp_detector export-ui --out ui/public/data --captures captures/ --src 10.0.0.1
 ```
 
-`--src`, `--dst` and `--ident` filter the flow. Pcap files work directly if `scapy` is installed. When ICMP sequence numbers are present, gaps across a lost request are skipped so a lost packet does not look like a deliberate long gap, and decoding places each bit by sequence number.
+`--src`, `--dst` and `--ident` filter the flow (identifiers may be written `0x0001`, `1` or `01`). When ICMP
+sequence numbers are present, gaps across a lost request are skipped, and decoding places each bit by
+sequence number.
 
-For the jitter/load experiments, capture under each `tc netem` / `iperf3` setting, then run steps 1–3 with a baseline from clean runs and again with a baseline from normal runs under the same setting.
+## Known limits
 
-## Simulated results
+See `AUDIT.md` section B. The main validity threats: no real captures yet; a small, correlated baseline
+(20 windows); the simulated delay models are approximations of netem, not measurements; the decoder does
+not model clock drift.
 
-`results/RESULTS.md` has the current numbers and plots. **They come from `simulate.py`, not the lab testbed**; use them to check the pipeline and to know which effects to look for, then replace them with real captures. Headline findings from the simulation:
+## Licence
 
-- The planned 0.75 / 1.25 s channel is caught in every window by both detectors (window std ≈ 0.25 s vs a few ms for normal ping).
-- A baseline built on a clean LAN raises false alarms on all normal windows once ≈20 ms of jitter is added; a baseline built under the same conditions keeps FPR ≤ 15 %.
-- The fixed 0.1 s rule is fine up to ≈50 ms of jitter and fails at 150 ms.
-- A subtler 0.95 / 1.05 s channel evades the fixed rule entirely and becomes indistinguishable from normal traffic at ≈100 ms of jitter.
-
-The work is limited to an authorised closed lab testbed and is intended for defensive analysis.
+MIT, see `LICENSE`.

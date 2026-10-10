@@ -10,7 +10,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
 NORMAL_COLOR = "#2a78c4"
-CHANNEL_COLORS = ("#d9622b", "#8a5cc7")
+CHANNEL_COLORS = ("#d9622b", "#8a5cc7", "#2f9e6e", "#c43b6e", "#b08a1e", "#5b6b7a")
+
+
+def _channel_color(i: int) -> str:
+    return CHANNEL_COLORS[i % len(CHANNEL_COLORS)]
 DETECTOR_STYLES = {"fixed": "-o", "baseline (clean)": "--s", "baseline (matched)": ":^"}
 
 
@@ -56,7 +60,8 @@ def plot_histogram(results: dict, out: Path, condition: str = "clean") -> Path:
 def plot_scatter(results: dict, out: Path, condition: str = "clean") -> Path:
     pts = [p for p in results["scatter"] if p["condition"] == condition]
     labels = list(dict.fromkeys(p["label"] for p in pts))
-    colors = dict(zip(labels, (NORMAL_COLOR,) + CHANNEL_COLORS))
+    channel_labels = [x for x in labels if x != "normal"]
+    colors = {"normal": NORMAL_COLOR, **{x: _channel_color(i) for i, x in enumerate(channel_labels)}}
     fig, ax = plt.subplots(figsize=(6, 4))
     for label in labels:
         sel = [p for p in pts if p["label"] == label]
@@ -143,8 +148,16 @@ def markdown_summary(results: dict, window: int = 32) -> str:
         f"= {results['baseline']['upper']['std']:.4f} s",
         f"- Fixed rule: std > {cfg['fixed_rule']['std_tol']} s or |mean - {cfg['fixed_rule']['nominal']}| > "
         f"{cfg['fixed_rule']['mean_tol']} s",
+        f"- Simulated network delay model: `{cfg.get('delay_model', 'folded')}` (see `icmp_detector/simulate.py`)",
         "",
     ]
+    with_ci = any("ci" in r for r in results["results"])
+    if with_ci:
+        lines += [
+            "Brackets are 95% bootstrap intervals that resample whole runs "
+            f"({results['results'][0]['ci']['detection_rate']['runs']} runs per set).",
+            "",
+        ]
     for channel in cfg["channels"]:
         lines += [
             f"## Channel {channel}, {window}-request windows",
@@ -154,10 +167,12 @@ def markdown_summary(results: dict, window: int = 32) -> str:
         ]
         for r in results["results"]:
             if r["channel"] == channel and r["window"] == window:
-                lines.append(
-                    f"| {r['condition']} | {r['detector']} | {r['detection_rate']:.2f} | "
-                    f"{r['false_positive_rate']:.2f} | {r['tp'] + r['fn']}/{r['fp'] + r['tn']} |"
-                )
+                dr, fpr = f"{r['detection_rate']:.2f}", f"{r['false_positive_rate']:.2f}"
+                if "ci" in r:
+                    c = r["ci"]
+                    dr += f" [{c['detection_rate']['lo']:.2f}, {c['detection_rate']['hi']:.2f}]"
+                    fpr += f" [{c['false_positive_rate']['lo']:.2f}, {c['false_positive_rate']['hi']:.2f}]"
+                lines.append(f"| {r['condition']} | {r['detector']} | {dr} | {fpr} | {r['tp'] + r['fn']}/{r['fp'] + r['tn']} |")
         lines += ["", "Decoding accuracy (bits recovered correctly):", ""]
         for cond, acc in results["decoding_accuracy"][channel].items():
             lines.append(f"- {cond}: {acc:.1%}")
@@ -178,3 +193,25 @@ def write_report(results: dict, out: str | Path) -> list[Path]:
     md = out / "RESULTS.md"
     md.write_text(markdown_summary(results) + "\n## Figures\n\n" + "\n".join(f"![{p.stem}]({p.name})" for p in paths) + "\n")
     return [md, *paths]
+
+
+def seed_section(ms: dict, window: int = 32) -> str:
+    """Markdown table of how much DR / FPR move between seeds."""
+    lines = [
+        "",
+        f"## Spread across seeds ({', '.join(map(str, ms['seeds']))}), {window}-request windows",
+        "",
+        "Mean, and min-max over seeds, of each rate. A wide range means one seed's table above should not be quoted alone.",
+        "",
+        "| channel | condition | detector | DR mean (min-max) | FPR mean (min-max) |",
+        "|---|---|---|---|---|",
+    ]
+    for r in ms["summary"]:
+        if r["window"] != window:
+            continue
+        d, f = r["detection_rate"], r["false_positive_rate"]
+        lines.append(
+            f"| {r['channel']} | {r['condition']} | {r['detector']} | {d['mean']:.2f} ({d['min']:.2f}-{d['max']:.2f}) | "
+            f"{f['mean']:.2f} ({f['min']:.2f}-{f['max']:.2f}) |"
+        )
+    return "\n".join(lines) + "\n"

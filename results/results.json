@@ -2,6 +2,8 @@
  "simulated": true,
  "config": {
   "seed": 7,
+  "delay_model": "folded",
+  "step": null,
   "runs_per_set": 10,
   "requests_per_run": 64,
   "window_sizes": [
@@ -19,32 +21,50 @@
    {
     "name": "clean",
     "net_jitter": 0.0,
-    "loss": 0.0
+    "loss": 0.0,
+    "delay_model": "folded",
+    "net_delay": 0.001,
+    "net_corr": 0.0
    },
    {
     "name": "jitter 20 ms",
     "net_jitter": 0.02,
-    "loss": 0.0
+    "loss": 0.0,
+    "delay_model": "folded",
+    "net_delay": 0.001,
+    "net_corr": 0.0
    },
    {
     "name": "jitter 50 ms",
     "net_jitter": 0.05,
-    "loss": 0.0
+    "loss": 0.0,
+    "delay_model": "folded",
+    "net_delay": 0.001,
+    "net_corr": 0.0
    },
    {
     "name": "jitter 100 ms",
     "net_jitter": 0.1,
-    "loss": 0.0
+    "loss": 0.0,
+    "delay_model": "folded",
+    "net_delay": 0.001,
+    "net_corr": 0.0
    },
    {
     "name": "jitter 150 ms",
     "net_jitter": 0.15,
-    "loss": 0.0
+    "loss": 0.0,
+    "delay_model": "folded",
+    "net_delay": 0.001,
+    "net_corr": 0.0
    },
    {
     "name": "loss 5%",
     "net_jitter": 0.0,
-    "loss": 0.05
+    "loss": 0.05,
+    "delay_model": "folded",
+    "net_delay": 0.001,
+    "net_corr": 0.0
    }
   ],
   "channels": {
@@ -79,7 +99,8 @@
    "min": 0.9968374008579465,
    "max": 1.0169537422937909,
    "entropy": 0.9992492479956565,
-   "off_nominal": 0.0
+   "off_nominal": 0.0,
+   "ks": 0.26714456391875746
   },
   "lower": {
    "mean": 0.99920761537582,
@@ -91,6 +112,7 @@
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 80,
@@ -99,11 +121,15 @@
    "tn": 80,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -112,11 +138,15 @@
    "tn": 73,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0875,
-   "accuracy": 0.95625
+   "accuracy": 0.95625,
+   "precision": 0.9195402298850575,
+   "recall": 1.0,
+   "f1": 0.9580838323353293
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 80,
@@ -125,11 +155,15 @@
    "tn": 74,
    "detection_rate": 1.0,
    "false_positive_rate": 0.075,
-   "accuracy": 0.9625
+   "accuracy": 0.9625,
+   "precision": 0.9302325581395349,
+   "recall": 1.0,
+   "f1": 0.963855421686747
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 40,
@@ -138,11 +172,15 @@
    "tn": 40,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -151,11 +189,15 @@
    "tn": 35,
    "detection_rate": 1.0,
    "false_positive_rate": 0.125,
-   "accuracy": 0.9375
+   "accuracy": 0.9375,
+   "precision": 0.8888888888888888,
+   "recall": 1.0,
+   "f1": 0.9411764705882353
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -164,11 +206,15 @@
    "tn": 37,
    "detection_rate": 1.0,
    "false_positive_rate": 0.075,
-   "accuracy": 0.9625
+   "accuracy": 0.9625,
+   "precision": 0.9302325581395349,
+   "recall": 1.0,
+   "f1": 0.963855421686747
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 20,
@@ -177,11 +223,15 @@
    "tn": 20,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -190,11 +240,15 @@
    "tn": 15,
    "detection_rate": 1.0,
    "false_positive_rate": 0.25,
-   "accuracy": 0.875
+   "accuracy": 0.875,
+   "precision": 0.8,
+   "recall": 1.0,
+   "f1": 0.888888888888889
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -203,11 +257,15 @@
    "tn": 17,
    "detection_rate": 1.0,
    "false_positive_rate": 0.15,
-   "accuracy": 0.925
+   "accuracy": 0.925,
+   "precision": 0.8695652173913043,
+   "recall": 1.0,
+   "f1": 0.9302325581395349
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 0,
@@ -216,11 +274,15 @@
    "tn": 80,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 79,
@@ -229,11 +291,15 @@
    "tn": 73,
    "detection_rate": 0.9875,
    "false_positive_rate": 0.0875,
-   "accuracy": 0.95
+   "accuracy": 0.95,
+   "precision": 0.9186046511627907,
+   "recall": 0.9875,
+   "f1": 0.9518072289156626
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 79,
@@ -242,11 +308,15 @@
    "tn": 74,
    "detection_rate": 0.9875,
    "false_positive_rate": 0.075,
-   "accuracy": 0.95625
+   "accuracy": 0.95625,
+   "precision": 0.9294117647058824,
+   "recall": 0.9875,
+   "f1": 0.9575757575757576
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 0,
@@ -255,11 +325,15 @@
    "tn": 40,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -268,11 +342,15 @@
    "tn": 35,
    "detection_rate": 1.0,
    "false_positive_rate": 0.125,
-   "accuracy": 0.9375
+   "accuracy": 0.9375,
+   "precision": 0.8888888888888888,
+   "recall": 1.0,
+   "f1": 0.9411764705882353
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -281,11 +359,15 @@
    "tn": 37,
    "detection_rate": 1.0,
    "false_positive_rate": 0.075,
-   "accuracy": 0.9625
+   "accuracy": 0.9625,
+   "precision": 0.9302325581395349,
+   "recall": 1.0,
+   "f1": 0.963855421686747
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 0,
@@ -294,11 +376,15 @@
    "tn": 20,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -307,11 +393,15 @@
    "tn": 15,
    "detection_rate": 1.0,
    "false_positive_rate": 0.25,
-   "accuracy": 0.875
+   "accuracy": 0.875,
+   "precision": 0.8,
+   "recall": 1.0,
+   "f1": 0.888888888888889
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "clean",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -320,11 +410,15 @@
    "tn": 17,
    "detection_rate": 1.0,
    "false_positive_rate": 0.15,
-   "accuracy": 0.925
+   "accuracy": 0.925,
+   "precision": 0.8695652173913043,
+   "recall": 1.0,
+   "f1": 0.9302325581395349
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 80,
@@ -333,11 +427,15 @@
    "tn": 80,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -346,11 +444,15 @@
    "tn": 1,
    "detection_rate": 1.0,
    "false_positive_rate": 0.9875,
-   "accuracy": 0.50625
+   "accuracy": 0.50625,
+   "precision": 0.5031446540880503,
+   "recall": 1.0,
+   "f1": 0.6694560669456068
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 77,
@@ -359,11 +461,15 @@
    "tn": 72,
    "detection_rate": 0.9625,
    "false_positive_rate": 0.1,
-   "accuracy": 0.93125
+   "accuracy": 0.93125,
+   "precision": 0.9058823529411765,
+   "recall": 0.9625,
+   "f1": 0.9333333333333333
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 40,
@@ -372,11 +478,15 @@
    "tn": 40,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -385,11 +495,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -398,11 +512,15 @@
    "tn": 35,
    "detection_rate": 1.0,
    "false_positive_rate": 0.125,
-   "accuracy": 0.9375
+   "accuracy": 0.9375,
+   "precision": 0.8888888888888888,
+   "recall": 1.0,
+   "f1": 0.9411764705882353
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 20,
@@ -411,11 +529,15 @@
    "tn": 20,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -424,11 +546,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -437,11 +563,15 @@
    "tn": 18,
    "detection_rate": 1.0,
    "false_positive_rate": 0.1,
-   "accuracy": 0.95
+   "accuracy": 0.95,
+   "precision": 0.9090909090909091,
+   "recall": 1.0,
+   "f1": 0.9523809523809523
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 0,
@@ -450,11 +580,15 @@
    "tn": 80,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -463,11 +597,15 @@
    "tn": 1,
    "detection_rate": 1.0,
    "false_positive_rate": 0.9875,
-   "accuracy": 0.50625
+   "accuracy": 0.50625,
+   "precision": 0.5031446540880503,
+   "recall": 1.0,
+   "f1": 0.6694560669456068
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 77,
@@ -476,11 +614,15 @@
    "tn": 72,
    "detection_rate": 0.9625,
    "false_positive_rate": 0.1,
-   "accuracy": 0.93125
+   "accuracy": 0.93125,
+   "precision": 0.9058823529411765,
+   "recall": 0.9625,
+   "f1": 0.9333333333333333
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 0,
@@ -489,11 +631,15 @@
    "tn": 40,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -502,11 +648,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -515,11 +665,15 @@
    "tn": 35,
    "detection_rate": 1.0,
    "false_positive_rate": 0.125,
-   "accuracy": 0.9375
+   "accuracy": 0.9375,
+   "precision": 0.8888888888888888,
+   "recall": 1.0,
+   "f1": 0.9411764705882353
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 0,
@@ -528,11 +682,15 @@
    "tn": 20,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -541,11 +699,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 20 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -554,11 +716,15 @@
    "tn": 18,
    "detection_rate": 1.0,
    "false_positive_rate": 0.1,
-   "accuracy": 0.95
+   "accuracy": 0.95,
+   "precision": 0.9090909090909091,
+   "recall": 1.0,
+   "f1": 0.9523809523809523
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 80,
@@ -567,11 +733,15 @@
    "tn": 80,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -580,11 +750,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 80,
@@ -593,11 +767,15 @@
    "tn": 75,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0625,
-   "accuracy": 0.96875
+   "accuracy": 0.96875,
+   "precision": 0.9411764705882353,
+   "recall": 1.0,
+   "f1": 0.9696969696969697
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 40,
@@ -606,11 +784,15 @@
    "tn": 40,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -619,11 +801,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -632,11 +818,15 @@
    "tn": 37,
    "detection_rate": 1.0,
    "false_positive_rate": 0.075,
-   "accuracy": 0.9625
+   "accuracy": 0.9625,
+   "precision": 0.9302325581395349,
+   "recall": 1.0,
+   "f1": 0.963855421686747
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 20,
@@ -645,11 +835,15 @@
    "tn": 20,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -658,11 +852,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -671,11 +869,15 @@
    "tn": 20,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 2,
@@ -684,11 +886,15 @@
    "tn": 80,
    "detection_rate": 0.025,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5125
+   "accuracy": 0.5125,
+   "precision": 1.0,
+   "recall": 0.025,
+   "f1": 0.04878048780487806
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -697,11 +903,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 27,
@@ -710,11 +920,15 @@
    "tn": 75,
    "detection_rate": 0.3375,
    "false_positive_rate": 0.0625,
-   "accuracy": 0.6375
+   "accuracy": 0.6375,
+   "precision": 0.84375,
+   "recall": 0.3375,
+   "f1": 0.4821428571428572
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 0,
@@ -723,11 +937,15 @@
    "tn": 40,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -736,11 +954,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 30,
@@ -749,11 +971,15 @@
    "tn": 37,
    "detection_rate": 0.75,
    "false_positive_rate": 0.075,
-   "accuracy": 0.8375
+   "accuracy": 0.8375,
+   "precision": 0.9090909090909091,
+   "recall": 0.75,
+   "f1": 0.821917808219178
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 0,
@@ -762,11 +988,15 @@
    "tn": 20,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -775,11 +1005,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 50 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -788,11 +1022,15 @@
    "tn": 20,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 80,
@@ -801,11 +1039,15 @@
    "tn": 52,
    "detection_rate": 1.0,
    "false_positive_rate": 0.35,
-   "accuracy": 0.825
+   "accuracy": 0.825,
+   "precision": 0.7407407407407407,
+   "recall": 1.0,
+   "f1": 0.851063829787234
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -814,11 +1056,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 79,
@@ -827,11 +1073,15 @@
    "tn": 65,
    "detection_rate": 0.9875,
    "false_positive_rate": 0.1875,
-   "accuracy": 0.9
+   "accuracy": 0.9,
+   "precision": 0.8404255319148937,
+   "recall": 0.9875,
+   "f1": 0.9080459770114943
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 40,
@@ -840,11 +1090,15 @@
    "tn": 29,
    "detection_rate": 1.0,
    "false_positive_rate": 0.275,
-   "accuracy": 0.8625
+   "accuracy": 0.8625,
+   "precision": 0.7843137254901961,
+   "recall": 1.0,
+   "f1": 0.8791208791208792
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -853,11 +1107,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -866,11 +1124,15 @@
    "tn": 36,
    "detection_rate": 1.0,
    "false_positive_rate": 0.1,
-   "accuracy": 0.95
+   "accuracy": 0.95,
+   "precision": 0.9090909090909091,
+   "recall": 1.0,
+   "f1": 0.9523809523809523
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 20,
@@ -879,11 +1141,15 @@
    "tn": 16,
    "detection_rate": 1.0,
    "false_positive_rate": 0.2,
-   "accuracy": 0.9
+   "accuracy": 0.9,
+   "precision": 0.8333333333333334,
+   "recall": 1.0,
+   "f1": 0.9090909090909091
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -892,11 +1158,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -905,11 +1175,15 @@
    "tn": 19,
    "detection_rate": 1.0,
    "false_positive_rate": 0.05,
-   "accuracy": 0.975
+   "accuracy": 0.975,
+   "precision": 0.9523809523809523,
+   "recall": 1.0,
+   "f1": 0.975609756097561
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 30,
@@ -918,11 +1192,15 @@
    "tn": 52,
    "detection_rate": 0.375,
    "false_positive_rate": 0.35,
-   "accuracy": 0.5125
+   "accuracy": 0.5125,
+   "precision": 0.5172413793103449,
+   "recall": 0.375,
+   "f1": 0.4347826086956522
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -931,11 +1209,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 19,
@@ -944,11 +1226,15 @@
    "tn": 65,
    "detection_rate": 0.2375,
    "false_positive_rate": 0.1875,
-   "accuracy": 0.525
+   "accuracy": 0.525,
+   "precision": 0.5588235294117647,
+   "recall": 0.2375,
+   "f1": 0.3333333333333333
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 13,
@@ -957,11 +1243,15 @@
    "tn": 29,
    "detection_rate": 0.325,
    "false_positive_rate": 0.275,
-   "accuracy": 0.525
+   "accuracy": 0.525,
+   "precision": 0.5416666666666666,
+   "recall": 0.325,
+   "f1": 0.40624999999999994
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -970,11 +1260,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 6,
@@ -983,11 +1277,15 @@
    "tn": 36,
    "detection_rate": 0.15,
    "false_positive_rate": 0.1,
-   "accuracy": 0.525
+   "accuracy": 0.525,
+   "precision": 0.6,
+   "recall": 0.15,
+   "f1": 0.24
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 8,
@@ -996,11 +1294,15 @@
    "tn": 16,
    "detection_rate": 0.4,
    "false_positive_rate": 0.2,
-   "accuracy": 0.6
+   "accuracy": 0.6,
+   "precision": 0.6666666666666666,
+   "recall": 0.4,
+   "f1": 0.5
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -1009,11 +1311,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 100 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 2,
@@ -1022,11 +1328,15 @@
    "tn": 19,
    "detection_rate": 0.1,
    "false_positive_rate": 0.05,
-   "accuracy": 0.525
+   "accuracy": 0.525,
+   "precision": 0.6666666666666666,
+   "recall": 0.1,
+   "f1": 0.1739130434782609
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 80,
@@ -1035,11 +1345,15 @@
    "tn": 17,
    "detection_rate": 1.0,
    "false_positive_rate": 0.7875,
-   "accuracy": 0.60625
+   "accuracy": 0.60625,
+   "precision": 0.5594405594405595,
+   "recall": 1.0,
+   "f1": 0.7174887892376681
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -1048,11 +1362,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 70,
@@ -1061,11 +1379,15 @@
    "tn": 74,
    "detection_rate": 0.875,
    "false_positive_rate": 0.075,
-   "accuracy": 0.9
+   "accuracy": 0.9,
+   "precision": 0.9210526315789473,
+   "recall": 0.875,
+   "f1": 0.8974358974358975
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 40,
@@ -1074,11 +1396,15 @@
    "tn": 7,
    "detection_rate": 1.0,
    "false_positive_rate": 0.825,
-   "accuracy": 0.5875
+   "accuracy": 0.5875,
+   "precision": 0.547945205479452,
+   "recall": 1.0,
+   "f1": 0.7079646017699115
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -1087,11 +1413,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 40,
@@ -1100,11 +1430,15 @@
    "tn": 40,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 20,
@@ -1113,11 +1447,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -1126,11 +1464,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 20,
@@ -1139,11 +1481,15 @@
    "tn": 18,
    "detection_rate": 1.0,
    "false_positive_rate": 0.1,
-   "accuracy": 0.95
+   "accuracy": 0.95,
+   "precision": 0.9090909090909091,
+   "recall": 1.0,
+   "f1": 0.9523809523809523
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 62,
@@ -1152,11 +1498,15 @@
    "tn": 17,
    "detection_rate": 0.775,
    "false_positive_rate": 0.7875,
-   "accuracy": 0.49375
+   "accuracy": 0.49375,
+   "precision": 0.496,
+   "recall": 0.775,
+   "f1": 0.6048780487804879
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 80,
@@ -1165,11 +1515,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 1,
@@ -1178,11 +1532,15 @@
    "tn": 74,
    "detection_rate": 0.0125,
    "false_positive_rate": 0.075,
-   "accuracy": 0.46875
+   "accuracy": 0.46875,
+   "precision": 0.14285714285714285,
+   "recall": 0.0125,
+   "f1": 0.022988505747126436
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 32,
@@ -1191,11 +1549,15 @@
    "tn": 7,
    "detection_rate": 0.8,
    "false_positive_rate": 0.825,
-   "accuracy": 0.4875
+   "accuracy": 0.4875,
+   "precision": 0.49230769230769234,
+   "recall": 0.8,
+   "f1": 0.6095238095238096
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 40,
@@ -1204,11 +1566,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 0,
@@ -1217,11 +1583,15 @@
    "tn": 40,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 19,
@@ -1230,11 +1600,15 @@
    "tn": 0,
    "detection_rate": 0.95,
    "false_positive_rate": 1.0,
-   "accuracy": 0.475
+   "accuracy": 0.475,
+   "precision": 0.48717948717948717,
+   "recall": 0.95,
+   "f1": 0.6440677966101694
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 20,
@@ -1243,11 +1617,15 @@
    "tn": 0,
    "detection_rate": 1.0,
    "false_positive_rate": 1.0,
-   "accuracy": 0.5
+   "accuracy": 0.5,
+   "precision": 0.5,
+   "recall": 1.0,
+   "f1": 0.6666666666666666
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "jitter 150 ms",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 1,
@@ -1256,11 +1634,15 @@
    "tn": 18,
    "detection_rate": 0.05,
    "false_positive_rate": 0.1,
-   "accuracy": 0.475
+   "accuracy": 0.475,
+   "precision": 0.3333333333333333,
+   "recall": 0.05,
+   "f1": 0.08695652173913045
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 70,
@@ -1269,11 +1651,15 @@
    "tn": 72,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 68,
@@ -1282,11 +1668,15 @@
    "tn": 69,
    "detection_rate": 0.9714285714285714,
    "false_positive_rate": 0.041666666666666664,
-   "accuracy": 0.9647887323943662
+   "accuracy": 0.9647887323943662,
+   "precision": 0.9577464788732394,
+   "recall": 0.9714285714285714,
+   "f1": 0.9645390070921985
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 68,
@@ -1295,11 +1685,15 @@
    "tn": 70,
    "detection_rate": 0.9714285714285714,
    "false_positive_rate": 0.027777777777777776,
-   "accuracy": 0.971830985915493
+   "accuracy": 0.971830985915493,
+   "precision": 0.9714285714285714,
+   "recall": 0.9714285714285714,
+   "f1": 0.9714285714285714
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 30,
@@ -1308,11 +1702,15 @@
    "tn": 32,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 30,
@@ -1321,11 +1719,15 @@
    "tn": 30,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0625,
-   "accuracy": 0.967741935483871
+   "accuracy": 0.967741935483871,
+   "precision": 0.9375,
+   "recall": 1.0,
+   "f1": 0.967741935483871
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 30,
@@ -1334,11 +1736,15 @@
    "tn": 31,
    "detection_rate": 1.0,
    "false_positive_rate": 0.03125,
-   "accuracy": 0.9838709677419355
+   "accuracy": 0.9838709677419355,
+   "precision": 0.967741935483871,
+   "recall": 1.0,
+   "f1": 0.9836065573770492
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 10,
@@ -1347,11 +1753,15 @@
    "tn": 12,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0,
-   "accuracy": 1.0
+   "accuracy": 1.0,
+   "precision": 1.0,
+   "recall": 1.0,
+   "f1": 1.0
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 10,
@@ -1360,11 +1770,15 @@
    "tn": 10,
    "detection_rate": 1.0,
    "false_positive_rate": 0.16666666666666666,
-   "accuracy": 0.9090909090909091
+   "accuracy": 0.9090909090909091,
+   "precision": 0.8333333333333334,
+   "recall": 1.0,
+   "f1": 0.9090909090909091
   },
   {
    "channel": "0.75/1.25 s",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 10,
@@ -1373,11 +1787,15 @@
    "tn": 11,
    "detection_rate": 1.0,
    "false_positive_rate": 0.08333333333333333,
-   "accuracy": 0.9545454545454546
+   "accuracy": 0.9545454545454546,
+   "precision": 0.9090909090909091,
+   "recall": 1.0,
+   "f1": 0.9523809523809523
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 8,
    "detector": "fixed",
    "tp": 0,
@@ -1386,11 +1804,15 @@
    "tn": 72,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5070422535211268
+   "accuracy": 0.5070422535211268,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (clean)",
    "tp": 69,
@@ -1399,11 +1821,15 @@
    "tn": 69,
    "detection_rate": 0.9857142857142858,
    "false_positive_rate": 0.041666666666666664,
-   "accuracy": 0.971830985915493
+   "accuracy": 0.971830985915493,
+   "precision": 0.9583333333333334,
+   "recall": 0.9857142857142858,
+   "f1": 0.971830985915493
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 8,
    "detector": "baseline (matched)",
    "tp": 69,
@@ -1412,11 +1838,15 @@
    "tn": 70,
    "detection_rate": 0.9857142857142858,
    "false_positive_rate": 0.027777777777777776,
-   "accuracy": 0.9788732394366197
+   "accuracy": 0.9788732394366197,
+   "precision": 0.971830985915493,
+   "recall": 0.9857142857142858,
+   "f1": 0.9787234042553192
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 16,
    "detector": "fixed",
    "tp": 0,
@@ -1425,11 +1855,15 @@
    "tn": 32,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5161290322580645
+   "accuracy": 0.5161290322580645,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (clean)",
    "tp": 30,
@@ -1438,11 +1872,15 @@
    "tn": 30,
    "detection_rate": 1.0,
    "false_positive_rate": 0.0625,
-   "accuracy": 0.967741935483871
+   "accuracy": 0.967741935483871,
+   "precision": 0.9375,
+   "recall": 1.0,
+   "f1": 0.967741935483871
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 16,
    "detector": "baseline (matched)",
    "tp": 30,
@@ -1451,11 +1889,15 @@
    "tn": 31,
    "detection_rate": 1.0,
    "false_positive_rate": 0.03125,
-   "accuracy": 0.9838709677419355
+   "accuracy": 0.9838709677419355,
+   "precision": 0.967741935483871,
+   "recall": 1.0,
+   "f1": 0.9836065573770492
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 32,
    "detector": "fixed",
    "tp": 0,
@@ -1464,11 +1906,15 @@
    "tn": 12,
    "detection_rate": 0.0,
    "false_positive_rate": 0.0,
-   "accuracy": 0.5454545454545454
+   "accuracy": 0.5454545454545454,
+   "precision": NaN,
+   "recall": 0.0,
+   "f1": 0.0
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (clean)",
    "tp": 10,
@@ -1477,11 +1923,15 @@
    "tn": 10,
    "detection_rate": 1.0,
    "false_positive_rate": 0.16666666666666666,
-   "accuracy": 0.9090909090909091
+   "accuracy": 0.9090909090909091,
+   "precision": 0.8333333333333334,
+   "recall": 1.0,
+   "f1": 0.9090909090909091
   },
   {
    "channel": "0.95/1.05 s (subtle)",
    "condition": "loss 5%",
+   "delay_model": "folded",
    "window": 32,
    "detector": "baseline (matched)",
    "tp": 10,
@@ -1490,7 +1940,10 @@
    "tn": 11,
    "detection_rate": 1.0,
    "false_positive_rate": 0.08333333333333333,
-   "accuracy": 0.9545454545454546
+   "accuracy": 0.9545454545454546,
+   "precision": 0.9090909090909091,
+   "recall": 1.0,
+   "f1": 0.9523809523809523
   }
  ],
  "decoding_accuracy": {

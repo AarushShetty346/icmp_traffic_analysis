@@ -74,27 +74,14 @@ One capture of 100,000 Echo Requests (3,125 windows of 32), best of 3 runs on x8
 
 | stage | time | per window |
 |---|---|---|
-| load tshark CSV | 304 ms | 97 µs |
-| split into 32-request windows | 25 ms | 8 µs |
-| features + baseline decision | 404 ms | 129 µs |
-| features + fixed-rule decision | 383 ms | 123 µs |
-| decode bits | 82 ms | 26 µs |
+| load tshark CSV | 226 ms | 72 µs |
+| split into 32-request windows | 28 ms | 9 µs |
+| features + baseline decision | 414 ms | 132 µs |
+| features + fixed-rule decision | 313 ms | 100 µs |
+| decode bits | 69 ms | 22 µs |
 
-- End to end (load, window, baseline decision): **136,248 packets/s**.
-- A 32-request window takes 31 s to fill at one ping per second and 129 µs to judge, so one core keeps up with about **239,520 flows at once**.
-
-## 4. Website
-
-Measured in headless Chromium at 1440x900, with the three.js, GSAP and Lenis files served locally, so CDN download time is not included.
-
-| metric | value |
-|---|---|
-| page size (HTML with inline data) | 117 KB |
-| first contentful paint | 428 ms |
-| DOM ready | 911 ms |
-| fully loaded | 1050 ms |
-| Play page: rerun 30 simulated captures after a slider move | 3.7 ms |
-| buttons and controls checked | 50/50 pass |
+- End to end (load, window, baseline decision): **149,634 packets/s**.
+- A 32-request window takes 31 s to fill at one ping per second and 132 µs to judge, so one core keeps up with about **234,238 flows at once**.
 
 ## Figures
 

@@ -4864,16 +4864,16 @@
   "flagged": 3125,
   "repeats": 3,
   "stages_s": {
-   "load tshark CSV": 0.3044969729999707,
-   "split into 32-request windows": 0.02500129600002765,
-   "features + baseline decision": 0.40445516500000167,
-   "features + fixed-rule decision": 0.38349874800002226,
-   "decode bits": 0.08188817000001336
+   "load tshark CSV": 0.22634188299997504,
+   "split into 32-request windows": 0.02837889099998847,
+   "features + baseline decision": 0.4135758730000134,
+   "features + fixed-rule decision": 0.312960449000002,
+   "decode bits": 0.06920554700002413
   },
-  "end_to_end_s": 0.733953434,
-  "packets_per_s": 136248.42580953168,
-  "us_per_window": 129.42565280000053,
-  "realtime_headroom": 239519.74998267012,
+  "end_to_end_s": 0.6682966469999769,
+  "packets_per_s": 149634.14892010292,
+  "us_per_window": 132.3442793600043,
+  "realtime_headroom": 234237.55186027705,
   "machine": "x86_64, Python 3.13.16"
  }
 }

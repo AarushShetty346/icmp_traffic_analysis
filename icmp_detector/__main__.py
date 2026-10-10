@@ -140,11 +140,9 @@ def cmd_benchmark(args) -> None:
     out.mkdir(parents=True, exist_ok=True)
     acc = accuracy_benchmark(seed=args.seed, runs=args.runs)
     speed = speed_benchmark(packets=args.packets)
-    site_path = out / "site.json"
-    site = json.loads(site_path.read_text()) if site_path.exists() else None
     (out / "benchmark.json").write_text(json.dumps({"accuracy": acc, "speed": speed}, indent=1))
     written = plots(acc, out)
-    (out / "BENCHMARK.md").write_text(markdown(acc, speed, site))
+    (out / "BENCHMARK.md").write_text(markdown(acc, speed))
     for p in [out / "benchmark.json", out / "BENCHMARK.md", *written]:
         print(f"wrote {p}")
     print(f"{speed['packets_per_s']:,.0f} packets/s end to end, {speed['us_per_window']:.0f} us per window")
@@ -158,7 +156,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--out", default="results")
     p.add_argument("--seed", type=int, default=7)
     p.add_argument("--runs", type=int, default=10, help="runs per labelled set (default 10)")
-    p.add_argument("--requests", type=int, default=64, help="Echo Requests per run (default 64)")
+    p.add_argument("--requests", type=int, default=64, help="requests in each run (default 64)")
     p.add_argument("--windows", type=int, nargs="+", default=[8, 16, 32])
     p.add_argument("--percentile", type=float, default=95.0)
     _fixed_args(p)

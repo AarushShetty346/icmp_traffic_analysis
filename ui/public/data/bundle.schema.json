@@ -1,0 +1,943 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://github.com/AarushShetty346/icmp_traffic_analysis/icmp_detector/schema/bundle.schema.json",
+ "title": "ICMP timing analysis bundle",
+ "description": "Data written by `python -m icmp_detector export-ui` and read by the analysis workbench in ui/.",
+ "type": "object",
+ "required": [
+  "schemaVersion",
+  "generatedAt",
+  "provenance",
+  "settings",
+  "runs",
+  "baselines",
+  "matrix",
+  "features",
+  "roc",
+  "decode",
+  "fieldcheck",
+  "multiSeed"
+ ],
+ "additionalProperties": false,
+ "$defs": {
+  "source": {
+   "enum": [
+    "simulated",
+    "capture"
+   ]
+  },
+  "rate": {
+   "type": [
+    "number",
+    "null"
+   ],
+   "minimum": 0,
+   "maximum": 1
+  },
+  "interval": {
+   "type": "object",
+   "required": [
+    "estimate",
+    "lo",
+    "hi",
+    "runs"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "estimate": {
+     "$ref": "#/$defs/rate"
+    },
+    "lo": {
+     "$ref": "#/$defs/rate"
+    },
+    "hi": {
+     "$ref": "#/$defs/rate"
+    },
+    "runs": {
+     "type": "integer",
+     "minimum": 0
+    }
+   }
+  },
+  "ci": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "required": [
+    "detection_rate",
+    "false_positive_rate"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "detection_rate": {
+     "$ref": "#/$defs/interval"
+    },
+    "false_positive_rate": {
+     "$ref": "#/$defs/interval"
+    }
+   }
+  },
+  "thresholds": {
+   "type": "object",
+   "additionalProperties": {
+    "type": [
+     "number",
+     "null"
+    ]
+   }
+  },
+  "seedStat": {
+   "type": "object",
+   "required": [
+    "mean",
+    "std",
+    "min",
+    "max",
+    "lo",
+    "hi",
+    "seeds"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "mean": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "std": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "min": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "max": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "lo": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "hi": {
+     "type": [
+      "number",
+      "null"
+     ]
+    },
+    "seeds": {
+     "type": "integer"
+    }
+   }
+  },
+  "bitString": {
+   "type": "string",
+   "pattern": "^[01?]*$"
+  }
+ },
+ "properties": {
+  "schemaVersion": {
+   "type": "string",
+   "pattern": "^1\\.\\d+\\.\\d+$"
+  },
+  "generatedAt": {
+   "type": "string"
+  },
+  "provenance": {
+   "type": "object",
+   "required": [
+    "simulated",
+    "hasSimulated",
+    "hasCapture",
+    "commit",
+    "seed",
+    "runsPerSet",
+    "bootstrapResamples",
+    "delayModels",
+    "captureManifests",
+    "note"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "simulated": {
+     "type": "boolean",
+     "description": "true when no real capture is in the bundle"
+    },
+    "hasSimulated": {
+     "type": "boolean"
+    },
+    "hasCapture": {
+     "type": "boolean"
+    },
+    "commit": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "seed": {
+     "type": "integer"
+    },
+    "runsPerSet": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "bootstrapResamples": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "delayModels": {
+     "type": "array",
+     "items": {
+      "enum": [
+       "folded",
+       "netem"
+      ]
+     }
+    },
+    "captureManifests": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "runId",
+       "manifest"
+      ],
+      "properties": {
+       "runId": {
+        "type": "string"
+       },
+       "manifest": {
+        "type": "object"
+       }
+      }
+     }
+    },
+    "note": {
+     "type": "string"
+    }
+   }
+  },
+  "settings": {
+   "type": "object",
+   "required": [
+    "nominal",
+    "fixedRule",
+    "percentile",
+    "windowSizes",
+    "defaultWindow",
+    "features",
+    "channels",
+    "conditions"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "nominal": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "fixedRule": {
+     "type": "object",
+     "required": [
+      "meanTol",
+      "stdTol"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "meanTol": {
+       "type": "number"
+      },
+      "stdTol": {
+       "type": "number"
+      }
+     }
+    },
+    "percentile": {
+     "type": "number",
+     "exclusiveMinimum": 0,
+     "maximum": 100
+    },
+    "windowSizes": {
+     "type": "array",
+     "items": {
+      "type": "integer",
+      "minimum": 3
+     },
+     "minItems": 1
+    },
+    "defaultWindow": {
+     "type": "integer",
+     "minimum": 3
+    },
+    "features": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "channels": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "gap0",
+       "gap1"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "name": {
+        "type": "string"
+       },
+       "gap0": {
+        "type": "number"
+       },
+       "gap1": {
+        "type": "number"
+       }
+      }
+     }
+    },
+    "conditions": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "name",
+       "netJitter",
+       "loss"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "name": {
+        "type": "string"
+       },
+       "netJitter": {
+        "type": "number"
+       },
+       "loss": {
+        "type": "number"
+       }
+      }
+     }
+    }
+   }
+  },
+  "runs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "label",
+     "source",
+     "times",
+     "seq",
+     "condition",
+     "delayModel",
+     "channel",
+     "seed",
+     "bits"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "label": {
+      "enum": [
+       "normal",
+       "covert"
+      ]
+     },
+     "source": {
+      "$ref": "#/$defs/source"
+     },
+     "times": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 2
+     },
+     "seq": {
+      "type": [
+       "array",
+       "null"
+      ],
+      "items": {
+       "type": "integer"
+      }
+     },
+     "condition": {
+      "type": "string"
+     },
+     "delayModel": {
+      "enum": [
+       "folded",
+       "netem",
+       null
+      ]
+     },
+     "channel": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "seed": {
+      "type": [
+       "integer",
+       "null"
+      ]
+     },
+     "bits": {
+      "anyOf": [
+       {
+        "$ref": "#/$defs/bitString"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "gap0": {
+      "type": "number"
+     },
+     "gap1": {
+      "type": "number"
+     },
+     "file": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "baselines": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "kind",
+     "condition",
+     "delayModel",
+     "source",
+     "window",
+     "step",
+     "percentile",
+     "nWindows",
+     "lower",
+     "upper",
+     "reference"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "kind": {
+      "enum": [
+       "clean",
+       "matched"
+      ]
+     },
+     "condition": {
+      "type": "string"
+     },
+     "delayModel": {
+      "enum": [
+       "folded",
+       "netem",
+       null
+      ]
+     },
+     "source": {
+      "$ref": "#/$defs/source"
+     },
+     "window": {
+      "type": "integer"
+     },
+     "step": {
+      "type": "integer"
+     },
+     "percentile": {
+      "type": "number"
+     },
+     "nWindows": {
+      "type": "integer"
+     },
+     "lower": {
+      "$ref": "#/$defs/thresholds"
+     },
+     "upper": {
+      "$ref": "#/$defs/thresholds"
+     },
+     "reference": {
+      "type": [
+       "array",
+       "null"
+      ],
+      "items": {
+       "type": "number"
+      }
+     }
+    }
+   }
+  },
+  "matrix": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "source",
+     "channel",
+     "condition",
+     "delayModel",
+     "window",
+     "detector",
+     "detectionRate",
+     "falsePositiveRate",
+     "precision",
+     "nCovertWindows",
+     "nNormalWindows",
+     "runsPerSet",
+     "ci",
+     "decodeFixed",
+     "decodeAdaptive",
+     "runIds"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "$ref": "#/$defs/source"
+     },
+     "channel": {
+      "type": "string"
+     },
+     "condition": {
+      "type": "string"
+     },
+     "delayModel": {
+      "enum": [
+       "folded",
+       "netem",
+       null
+      ]
+     },
+     "window": {
+      "type": "integer"
+     },
+     "detector": {
+      "enum": [
+       "fixed",
+       "baseline (clean)",
+       "baseline (matched)"
+      ]
+     },
+     "detectionRate": {
+      "$ref": "#/$defs/rate"
+     },
+     "falsePositiveRate": {
+      "$ref": "#/$defs/rate"
+     },
+     "precision": {
+      "$ref": "#/$defs/rate"
+     },
+     "nCovertWindows": {
+      "type": "integer"
+     },
+     "nNormalWindows": {
+      "type": "integer"
+     },
+     "runsPerSet": {
+      "type": "integer"
+     },
+     "ci": {
+      "$ref": "#/$defs/ci"
+     },
+     "decodeFixed": {
+      "$ref": "#/$defs/rate"
+     },
+     "decodeAdaptive": {
+      "$ref": "#/$defs/rate"
+     },
+     "runIds": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     }
+    }
+   }
+  },
+  "features": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "source",
+     "channel",
+     "condition",
+     "delayModel",
+     "window",
+     "baseline",
+     "rows"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "$ref": "#/$defs/source"
+     },
+     "channel": {
+      "type": "string"
+     },
+     "condition": {
+      "type": "string"
+     },
+     "delayModel": {
+      "enum": [
+       "folded",
+       "netem",
+       null
+      ]
+     },
+     "window": {
+      "type": "integer"
+     },
+     "baseline": {
+      "enum": [
+       "clean",
+       "matched"
+      ]
+     },
+     "rows": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "feature",
+        "auc",
+        "detectionRate",
+        "falsePositiveRate",
+        "ci"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "feature": {
+         "type": "string"
+        },
+        "auc": {
+         "$ref": "#/$defs/rate"
+        },
+        "detectionRate": {
+         "$ref": "#/$defs/rate"
+        },
+        "falsePositiveRate": {
+         "$ref": "#/$defs/rate"
+        },
+        "ci": {
+         "$ref": "#/$defs/ci"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "roc": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "source",
+     "channel",
+     "condition",
+     "delayModel",
+     "window",
+     "feature",
+     "auc",
+     "operatingThreshold",
+     "points"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "source": {
+      "$ref": "#/$defs/source"
+     },
+     "channel": {
+      "type": "string"
+     },
+     "condition": {
+      "type": "string"
+     },
+     "delayModel": {
+      "enum": [
+       "folded",
+       "netem",
+       null
+      ]
+     },
+     "window": {
+      "type": "integer"
+     },
+     "feature": {
+      "type": "string"
+     },
+     "auc": {
+      "$ref": "#/$defs/rate"
+     },
+     "operatingThreshold": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "points": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+       "type": "object",
+       "required": [
+        "threshold",
+        "fpr",
+        "tpr",
+        "precision"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "threshold": {
+         "type": [
+          "number",
+          "null"
+         ]
+        },
+        "fpr": {
+         "$ref": "#/$defs/rate"
+        },
+        "tpr": {
+         "$ref": "#/$defs/rate"
+        },
+        "precision": {
+         "$ref": "#/$defs/rate"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "decode": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "runId",
+     "source",
+     "sent",
+     "fixedThreshold",
+     "adaptiveThreshold",
+     "decodedFixed",
+     "decodedAdaptive",
+     "accuracyFixed",
+     "accuracyAdaptive",
+     "channel",
+     "condition",
+     "delayModel"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "runId": {
+      "type": "string"
+     },
+     "source": {
+      "$ref": "#/$defs/source"
+     },
+     "sent": {
+      "$ref": "#/$defs/bitString"
+     },
+     "fixedThreshold": {
+      "type": "number"
+     },
+     "adaptiveThreshold": {
+      "type": [
+       "number",
+       "null"
+      ]
+     },
+     "decodedFixed": {
+      "$ref": "#/$defs/bitString"
+     },
+     "decodedAdaptive": {
+      "$ref": "#/$defs/bitString"
+     },
+     "accuracyFixed": {
+      "$ref": "#/$defs/rate"
+     },
+     "accuracyAdaptive": {
+      "$ref": "#/$defs/rate"
+     },
+     "channel": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "condition": {
+      "type": "string"
+     },
+     "delayModel": {
+      "enum": [
+       "folded",
+       "netem",
+       null
+      ]
+     }
+    }
+   }
+  },
+  "fieldcheck": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "condition",
+     "normalFile",
+     "covertFile",
+     "rows"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "condition": {
+      "type": "string"
+     },
+     "normalFile": {
+      "type": "string"
+     },
+     "covertFile": {
+      "type": "string"
+     },
+     "rows": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "field",
+        "normal",
+        "covert",
+        "differs",
+        "note"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "field": {
+         "type": "string"
+        },
+        "normal": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "covert": {
+         "type": [
+          "string",
+          "null"
+         ]
+        },
+        "differs": {
+         "type": [
+          "boolean",
+          "null"
+         ]
+        },
+        "note": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "multiSeed": {
+   "type": [
+    "object",
+    "null"
+   ],
+   "required": [
+    "source",
+    "seeds",
+    "delayModel",
+    "runsPerSet",
+    "rows"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "source": {
+     "const": "simulated"
+    },
+    "seeds": {
+     "type": "array",
+     "items": {
+      "type": "integer"
+     }
+    },
+    "delayModel": {
+     "enum": [
+      "folded",
+      "netem"
+     ]
+    },
+    "runsPerSet": {
+     "type": "integer"
+    },
+    "rows": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "channel",
+       "condition",
+       "window",
+       "detector",
+       "detectionRate",
+       "falsePositiveRate"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "channel": {
+        "type": "string"
+       },
+       "condition": {
+        "type": "string"
+       },
+       "window": {
+        "type": "integer"
+       },
+       "detector": {
+        "type": "string"
+       },
+       "detectionRate": {
+        "$ref": "#/$defs/seedStat"
+       },
+       "falsePositiveRate": {
+        "$ref": "#/$defs/seedStat"
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

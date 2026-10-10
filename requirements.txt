@@ -1,5 +1,8 @@
 numpy>=1.24
 pandas>=2.0
 matplotlib>=3.7
-# optional: read .pcap files directly instead of tshark CSV exports
-# scapy>=2.5
+jsonschema>=4.18    # validates the export-ui bundle
+# optional: KS / Mann-Whitney p-values (the KS distance itself needs only numpy)
+scipy>=1.10
+# optional on the receiver, required on the sender: pcap reading and the lab generator
+scapy>=2.5

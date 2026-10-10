@@ -74,14 +74,14 @@ One capture of 100,000 Echo Requests (3,125 windows of 32), best of 3 runs on x8
 
 | stage | time | per window |
 |---|---|---|
-| load tshark CSV | 226 ms | 72 µs |
-| split into 32-request windows | 28 ms | 9 µs |
-| features + baseline decision | 414 ms | 132 µs |
-| features + fixed-rule decision | 313 ms | 100 µs |
+| load tshark CSV | 208 ms | 67 µs |
+| split into 32-request windows | 19 ms | 6 µs |
+| features + baseline decision | 546 ms | 175 µs |
+| features + fixed-rule decision | 359 ms | 115 µs |
 | decode bits | 69 ms | 22 µs |
 
-- End to end (load, window, baseline decision): **149,634 packets/s**.
-- A 32-request window takes 31 s to fill at one ping per second and 132 µs to judge, so one core keeps up with about **234,238 flows at once**.
+- End to end (load, window, baseline decision): **129,265 packets/s** on one core, from a CSV already on disk.
+- Judging one 32-request window costs 175 µs of CPU, while the window takes 31 s to fill at one ping per second. This is a CPU-cost figure only: it leaves out live capture, demultiplexing packets into flows, per-flow state and memory, so it does not say how many flows one machine can monitor.
 
 ## Figures
 

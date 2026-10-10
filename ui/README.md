@@ -44,5 +44,7 @@ The bundle is validated with Zod (`src/lib/data/schema.ts`) before any view sees
 
 ## Deploying to GitHub Pages
 
-Set Settings → Pages → Source to **GitHub Actions**, then run the "Deploy Cadence to GitHub Pages"
-workflow. The old Pages site served from `docs/` no longer exists.
+Set Settings → Pages → Build and deployment → Source to **GitHub Actions**. After that, every push to
+`main` that touches `ui/` deploys the site (workflow "Deploy Cadence to GitHub Pages"; it can also be run by
+hand from the Actions tab). The site is at `https://aarushshetty346.github.io/icmp_traffic_analysis/`.
+The old Pages site served from `docs/` no longer exists.

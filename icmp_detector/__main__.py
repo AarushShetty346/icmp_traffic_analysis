@@ -95,7 +95,7 @@ def cmd_simulate(args) -> None:
         bits = _bits(args.bits)
         flow, sent = channel_run(args.requests, cond, rng, np.array(bits) if bits else None, model)
         print("bits:", "".join(map(str, sent)))
-    save_flow(flow, args.out)
+    save_flow(flow, args.out, simulated=True)
     print(f"wrote {args.out} ({len(flow)} Echo Requests, simulated)")
 
 

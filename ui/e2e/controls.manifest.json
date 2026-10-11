@@ -185,6 +185,18 @@
    "all": true
   },
   {
+   "route": "*",
+   "role": "button",
+   "name": "^(Show|Hide) .+",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "textChange": true
+   },
+   "effect": "Shows or hides a reference table",
+   "all": true
+  },
+  {
    "route": "runs",
    "role": "button",
    "name": "Choose CSV files",
@@ -194,6 +206,17 @@
     "filechooser": true
    },
    "effect": "Opens the file picker for tshark CSV files"
+  },
+  {
+   "route": "runs",
+   "role": "searchbox",
+   "name": "Search runs",
+   "regex": false,
+   "action": "fill",
+   "expect": {
+    "hash": "q="
+   },
+   "effect": "Filters runs by name, condition, channel, delay model or bits"
   },
   {
    "route": "runs",
@@ -347,6 +370,25 @@
    "effect": "Removes an added file",
    "before": [
     "upload"
+   ]
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "Undo",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "textChange": true
+   },
+   "effect": "Puts back the file just removed",
+   "before": [
+    "upload",
+    {
+     "role": "button",
+     "name": "^Remove .+",
+     "regex": true
+    }
    ]
   },
   {

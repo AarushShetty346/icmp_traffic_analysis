@@ -74,7 +74,7 @@ def speed_benchmark(seed: int = 3, packets: int = 100_000, window: int = 32, rep
     """Time each pipeline stage on one long capture of ``packets`` Echo Requests."""
     rng = np.random.default_rng(seed)
     cond = Condition("jitter 20 ms", net_jitter=0.020)
-    normal = normal_run(packets, cond, rng)
+    normal_run(packets, cond, rng)  # unused, but keeps the random stream (and the timed capture) as before
     channel, _ = channel_run(packets, cond, rng)
     baseline = BaselineDetector(build_baseline([normal_run(640, cond, rng)], window))
     fixed = FixedRuleDetector()
@@ -118,7 +118,7 @@ def _pct(x: float) -> str:
     return f"{x:.0%}"
 
 
-def markdown(acc: dict, speed: dict, site: dict | None = None, window: int = 32) -> str:
+def markdown(acc: dict, speed: dict, window: int = 32) -> str:
     cfg = acc["config"]
     rows = {(r["channel"], r["condition"], r["window"], r["detector"]): r for r in acc["results"]}
     dets = ("fixed", "baseline (clean)", "baseline (matched)")
@@ -183,29 +183,14 @@ def markdown(acc: dict, speed: dict, site: dict | None = None, window: int = 32)
         lines.append(f"| {name} | {t * 1000:.0f} ms | {t / speed['windows'] * 1e6:.0f} µs |")
     lines += [
         "",
-        f"- End to end (load, window, baseline decision): **{speed['packets_per_s']:,.0f} packets/s**.",
-        f"- A {speed['window']}-request window takes {speed['window'] - 1} s to fill at one ping per second and "
-        f"{speed['us_per_window']:.0f} µs to judge, so one core keeps up with about "
-        f"**{speed['realtime_headroom']:,.0f} flows at once**.",
+        f"- End to end (load, window, baseline decision): **{speed['packets_per_s']:,.0f} packets/s** on one core, "
+        "from a CSV already on disk.",
+        f"- Judging one {speed['window']}-request window costs {speed['us_per_window']:.0f} µs of CPU, while the window "
+        f"takes {speed['window'] - 1} s to fill at one ping per second. This is a CPU-cost figure only: it leaves out "
+        "live capture, demultiplexing packets into flows, per-flow state and memory, so it does not say how many "
+        "flows one machine can monitor.",
         "",
     ]
-    if site:
-        lines += [
-            "## 4. Website",
-            "",
-            f"Measured in headless Chromium at {site['viewport']}, with the three.js, GSAP and Lenis files served "
-            "locally, so CDN download time is not included.",
-            "",
-            "| metric | value |",
-            "|---|---|",
-            f"| page size (HTML with inline data) | {site['html_kb']:.0f} KB |",
-            f"| first contentful paint | {site['fcp_ms']:.0f} ms |",
-            f"| DOM ready | {site['dom_ready_ms']:.0f} ms |",
-            f"| fully loaded | {site['load_ms']:.0f} ms |",
-            f"| Play page: rerun 30 simulated captures after a slider move | {site['play_update_ms']:.1f} ms |",
-            f"| buttons and controls checked | {site['checks_passed']}/{site['checks']} pass |",
-            "",
-        ]
     lines += ["## Figures", "", "![detection heatmap](benchmark_detection.png)", "",
               "![false positives](benchmark_false_positives.png)", "", "![decoding](benchmark_decoding.png)", ""]
     return "\n".join(lines)

@@ -1,0 +1,1015 @@
+{
+ "$comment": "Every interactive control in Cadence, by route. e2e/controls.spec.ts fails if the page shows a control that matches no entry here, and runs each entry's action and expectation at 390x844 and 1440x900. route '*' applies everywhere; 'palette' is the open command palette.",
+ "scans": {
+  "runs": [
+   "#/runs",
+   "upload"
+  ],
+  "signal": [
+   "#/signal"
+  ],
+  "detectors": [
+   "#/detectors"
+  ],
+  "stress": [
+   "#/stress",
+   "#/stress?cell=0.95%2F1.05%20s%7Cjitter%2050%20ms"
+  ],
+  "decode": [
+   "#/decode",
+   "#/decode?mode=manual"
+  ],
+  "evidence": [
+   "#/evidence"
+  ],
+  "palette": [
+   "#/stress"
+  ]
+ },
+ "controls": [
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Skip to content",
+   "regex": false,
+   "action": "focus-enter",
+   "expect": {
+    "focusMain": true
+   },
+   "effect": "Moves keyboard focus to the main content"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Cadence, go to Runs",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/runs"
+   },
+   "effect": "Opens the Runs view"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Runs",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/runs"
+   },
+   "effect": "Opens the Runs view"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Signal",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/signal"
+   },
+   "effect": "Opens the Signal view"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Detectors",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/detectors"
+   },
+   "effect": "Opens the Detectors view"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Stress matrix",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/stress"
+   },
+   "effect": "Opens the Stress matrix view"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Decode",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/decode"
+   },
+   "effect": "Opens the Decode view"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "Evidence",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/evidence"
+   },
+   "effect": "Opens the Evidence view"
+  },
+  {
+   "route": "*",
+   "role": "button",
+   "name": "^Commands",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "dialog": true
+   },
+   "effect": "Opens the command palette"
+  },
+  {
+   "route": "*",
+   "role": "combobox",
+   "name": "Theme",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "theme": true
+   },
+   "effect": "Switches between system, light and dark theme"
+  },
+  {
+   "route": "*",
+   "role": "link",
+   "name": "About this project",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/evidence"
+   },
+   "effect": "Opens Evidence, where the About section is"
+  },
+  {
+   "route": "*",
+   "role": "button",
+   "name": "^What is .+\\?$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "dialog": true
+   },
+   "effect": "Opens a plain-language explanation; Escape closes it",
+   "all": true
+  },
+  {
+   "route": "*",
+   "role": "button",
+   "name": "^CSV: .+",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "download": true
+   },
+   "effect": "Downloads the table as CSV with a provenance line",
+   "all": true
+  },
+  {
+   "route": "*",
+   "role": "button",
+   "name": "^PNG: .+",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "download": true
+   },
+   "effect": "Downloads the chart as PNG with a provenance footer",
+   "all": true
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "Choose CSV files",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "filechooser": true
+   },
+   "effect": "Opens the file picker for tshark CSV files"
+  },
+  {
+   "route": "runs",
+   "role": "combobox",
+   "name": "Provenance",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "source="
+   },
+   "effect": "Filters runs by provenance"
+  },
+  {
+   "route": "runs",
+   "role": "combobox",
+   "name": "Label",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "label="
+   },
+   "effect": "Filters runs by normal / covert"
+  },
+  {
+   "route": "runs",
+   "role": "combobox",
+   "name": "Used as",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "role="
+   },
+   "effect": "Shows test runs, baseline runs or all"
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "^Open .+ in Signal$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "hash": "^#/signal\\?a="
+   },
+   "effect": "Opens that run in the Signal view"
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "^Manifest of .+$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "dialog": true
+   },
+   "effect": "Shows the run's manifest or generation parameters"
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "Close dialog",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "dialogClosed": true
+   },
+   "effect": "Closes the manifest dialog",
+   "before": [
+    {
+     "role": "button",
+     "name": "^Manifest of .+$",
+     "regex": true
+    }
+   ]
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "^Show \\d+ more runs$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "textChange": true
+   },
+   "effect": "Shows the next page of runs"
+  },
+  {
+   "route": "runs",
+   "role": "combobox",
+   "name": "^Provenance of .+",
+   "regex": true,
+   "action": "select",
+   "expect": {
+    "valueChange": true
+   },
+   "effect": "Marks an added file as real capture or simulated",
+   "before": [
+    "upload"
+   ]
+  },
+  {
+   "route": "runs",
+   "role": "combobox",
+   "name": "^Label of .+",
+   "regex": true,
+   "action": "select",
+   "expect": {
+    "valueChange": true
+   },
+   "effect": "Labels an added file normal or covert",
+   "before": [
+    "upload"
+   ]
+  },
+  {
+   "route": "runs",
+   "role": "combobox",
+   "name": "^Use of .+",
+   "regex": true,
+   "action": "select",
+   "expect": {
+    "textChange": true
+   },
+   "effect": "Moves an added file between test and baseline runs (it leaves the test-run list)",
+   "before": [
+    "upload"
+   ]
+  },
+  {
+   "route": "runs",
+   "role": "textbox",
+   "name": "^Bits sent in .+",
+   "regex": true,
+   "action": "fill",
+   "expect": {
+    "valueChange": true
+   },
+   "effect": "Records the bits a covert file carried, for decoding",
+   "before": [
+    "upload"
+   ]
+  },
+  {
+   "route": "runs",
+   "role": "button",
+   "name": "^Remove .+",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "textChange": true
+   },
+   "effect": "Removes an added file",
+   "before": [
+    "upload"
+   ]
+  },
+  {
+   "route": "signal",
+   "role": "combobox",
+   "name": "Delay model",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "model="
+   },
+   "effect": "Changes delay model and redraws every chart"
+  },
+  {
+   "route": "signal",
+   "role": "combobox",
+   "name": "Network condition",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "cond="
+   },
+   "effect": "Changes network condition and redraws every chart"
+  },
+  {
+   "route": "signal",
+   "role": "combobox",
+   "name": "Run A",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "a="
+   },
+   "effect": "Changes run a and redraws every chart"
+  },
+  {
+   "route": "signal",
+   "role": "combobox",
+   "name": "Run B (compare)",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "b="
+   },
+   "effect": "Changes run b (compare) and redraws every chart"
+  },
+  {
+   "route": "signal",
+   "role": "button",
+   "name": "Reset zoom",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hashNot": "from="
+   },
+   "effect": "Shows all gaps again",
+   "start": "#/signal?from=5&to=30"
+  },
+  {
+   "route": "signal",
+   "role": "slider",
+   "name": "Gaps shown start",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "from="
+   },
+   "effect": "Zooms the timeline from the left",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "signal",
+   "role": "slider",
+   "name": "Gaps shown end",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "to="
+   },
+   "effect": "Zooms the timeline from the right",
+   "key": "ArrowLeft"
+  },
+  {
+   "route": "signal",
+   "role": "slider",
+   "name": "Window size",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "w="
+   },
+   "effect": "Changes the window size and the window boundaries",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "signal",
+   "role": "slider",
+   "name": "Window step",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "step="
+   },
+   "effect": "Makes windows overlap",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "detectors",
+   "role": "radio",
+   "name": "My CSV files",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "src=uploads"
+   },
+   "effect": "Evaluates the files added on Runs"
+  },
+  {
+   "route": "detectors",
+   "role": "radio",
+   "name": "Exported runs",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hashNot": "src="
+   },
+   "effect": "Evaluates the exported runs",
+   "start": "#/detectors?src=uploads"
+  },
+  {
+   "route": "detectors",
+   "role": "combobox",
+   "name": "Delay model",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "model="
+   },
+   "effect": "Changes delay model and recomputes every verdict"
+  },
+  {
+   "route": "detectors",
+   "role": "combobox",
+   "name": "Network condition",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "cond="
+   },
+   "effect": "Changes network condition and recomputes every verdict"
+  },
+  {
+   "route": "detectors",
+   "role": "combobox",
+   "name": "Covert channel",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "chan="
+   },
+   "effect": "Changes covert channel and recomputes every verdict"
+  },
+  {
+   "route": "detectors",
+   "role": "combobox",
+   "name": "Feature",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "roc="
+   },
+   "effect": "Changes feature and recomputes every verdict"
+  },
+  {
+   "route": "detectors",
+   "role": "radio",
+   "name": "Clean LAN",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "base=clean"
+   },
+   "effect": "Learns the baseline on clean-LAN runs"
+  },
+  {
+   "route": "detectors",
+   "role": "radio",
+   "name": "Same conditions",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hashNot": "base="
+   },
+   "effect": "Learns the baseline under the tested condition",
+   "start": "#/detectors?base=clean"
+  },
+  {
+   "route": "detectors",
+   "role": "radio",
+   "name": "PR",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "mode=pr"
+   },
+   "effect": "Shows precision against recall"
+  },
+  {
+   "route": "detectors",
+   "role": "radio",
+   "name": "ROC",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hashNot": "mode="
+   },
+   "effect": "Shows the ROC curve",
+   "start": "#/detectors?mode=pr"
+  },
+  {
+   "route": "detectors",
+   "role": "slider",
+   "name": "Window size",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "w="
+   },
+   "effect": "Moves window size; detection and false-positive rates update live",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "detectors",
+   "role": "slider",
+   "name": "Window step",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "step="
+   },
+   "effect": "Moves window step; detection and false-positive rates update live",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "detectors",
+   "role": "slider",
+   "name": "Baseline percentile",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "pct="
+   },
+   "effect": "Moves baseline percentile; detection and false-positive rates update live",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "detectors",
+   "role": "slider",
+   "name": "Fixed rule: std limit",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "std="
+   },
+   "effect": "Moves fixed rule: std limit; detection and false-positive rates update live",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "detectors",
+   "role": "slider",
+   "name": "Fixed rule: mean limit",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "mean="
+   },
+   "effect": "Moves fixed rule: mean limit; detection and false-positive rates update live",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "detectors",
+   "role": "checkbox",
+   "name": "^(mean|var|std|cv|median|iqr|min|max|entropy|off_nominal|ks)$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "valueChange": true
+   },
+   "effect": "Adds or removes a feature from the baseline detector",
+   "start": "#/detectors?feat=entropy,ks",
+   "all": true
+  },
+  {
+   "route": "stress",
+   "role": "combobox",
+   "name": "Metric",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "metric="
+   },
+   "effect": "Changes metric shown in the matrix"
+  },
+  {
+   "route": "stress",
+   "role": "combobox",
+   "name": "Detector",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "det="
+   },
+   "effect": "Changes detector shown in the matrix"
+  },
+  {
+   "route": "stress",
+   "role": "combobox",
+   "name": "Delay model",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "model="
+   },
+   "effect": "Changes delay model shown in the matrix"
+  },
+  {
+   "route": "stress",
+   "role": "radio",
+   "name": "^(8|16)$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "hash": "w="
+   },
+   "effect": "Shows the matrix for another window size",
+   "all": true
+  },
+  {
+   "route": "stress",
+   "role": "radio",
+   "name": "32",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "w=32"
+   },
+   "effect": "Shows the matrix for window 32",
+   "start": "#/stress?w=8"
+  },
+  {
+   "route": "stress",
+   "role": "button",
+   "name": "^\\d\\.\\d\\d/\\d\\.\\d\\d s, .+",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "hash": "cell="
+   },
+   "effect": "Selects a cell and shows its runs and intervals"
+  },
+  {
+   "route": "stress",
+   "role": "button",
+   "name": "Open in Detectors",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/detectors\\?"
+   },
+   "effect": "Opens the selected cell's settings in Detectors",
+   "start": "#/stress?cell=0.95%2F1.05%20s%7Cjitter%2050%20ms"
+  },
+  {
+   "route": "stress",
+   "role": "link",
+   "name": "^(folded|netem)-.+",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "hash": "^#/signal\\?a="
+   },
+   "effect": "Opens one of the cell's runs in Signal",
+   "start": "#/stress?cell=0.95%2F1.05%20s%7Cjitter%2050%20ms"
+  },
+  {
+   "route": "decode",
+   "role": "combobox",
+   "name": "Delay model",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "model="
+   },
+   "effect": "Changes delay model and decodes again"
+  },
+  {
+   "route": "decode",
+   "role": "combobox",
+   "name": "Network condition",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "cond="
+   },
+   "effect": "Changes network condition and decodes again"
+  },
+  {
+   "route": "decode",
+   "role": "combobox",
+   "name": "Covert channel",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "chan="
+   },
+   "effect": "Changes covert channel and decodes again"
+  },
+  {
+   "route": "decode",
+   "role": "combobox",
+   "name": "Run",
+   "regex": false,
+   "action": "select",
+   "expect": {
+    "hash": "run="
+   },
+   "effect": "Changes run and decodes again"
+  },
+  {
+   "route": "decode",
+   "role": "radio",
+   "name": "Adaptive",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "mode=adaptive"
+   },
+   "effect": "Decodes with the 2-means threshold"
+  },
+  {
+   "route": "decode",
+   "role": "radio",
+   "name": "Manual",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "mode=manual"
+   },
+   "effect": "Decodes with the manual threshold"
+  },
+  {
+   "route": "decode",
+   "role": "radio",
+   "name": "Fixed 1 s",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hashNot": "mode="
+   },
+   "effect": "Decodes with the fixed 1 s threshold",
+   "start": "#/decode?mode=adaptive"
+  },
+  {
+   "route": "decode",
+   "role": "slider",
+   "name": "Manual threshold",
+   "regex": false,
+   "action": "key",
+   "expect": {
+    "hash": "th="
+   },
+   "effect": "Moves the manual threshold; decoded bits update",
+   "start": "#/decode?mode=manual",
+   "key": "ArrowRight"
+  },
+  {
+   "route": "evidence",
+   "role": "link",
+   "name": "^(scripts|icmp_detector)/.+",
+   "regex": true,
+   "action": "inspect",
+   "expect": {
+    "href": "^https://github\\.com/AarushShetty346/icmp_traffic_analysis/"
+   },
+   "effect": "Links the artefact on GitHub",
+   "all": true
+  },
+  {
+   "route": "evidence",
+   "role": "button",
+   "name": "Markdown report",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "download": true
+   },
+   "effect": "Downloads the evidence report as Markdown"
+  },
+  {
+   "route": "evidence",
+   "role": "button",
+   "name": "Print or save as PDF",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "print": true
+   },
+   "effect": "Opens the print dialog (print stylesheet)"
+  },
+  {
+   "route": "evidence",
+   "role": "button",
+   "name": "JSON bundle",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "download": true
+   },
+   "effect": "Downloads the data bundle"
+  },
+  {
+   "route": "evidence",
+   "role": "button",
+   "name": "JSON Schema",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "download": true
+   },
+   "effect": "Downloads the bundle's JSON Schema"
+  },
+  {
+   "route": "palette",
+   "role": "combobox",
+   "name": "Search commands",
+   "regex": false,
+   "action": "fill-enter",
+   "expect": {
+    "hash": "^#/evidence"
+   },
+   "effect": "Filters commands; Enter runs the first match",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Go to Runs",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/runs"
+   },
+   "effect": "Opens Runs",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Go to Signal",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/signal"
+   },
+   "effect": "Opens Signal",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Go to Detectors",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/detectors"
+   },
+   "effect": "Opens Detectors",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Go to Stress matrix",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/stress"
+   },
+   "effect": "Opens Stress matrix",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Go to Decode",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/decode"
+   },
+   "effect": "Opens Decode",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Go to Evidence",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "hash": "^#/evidence"
+   },
+   "effect": "Opens Evidence",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "^Theme: (system|light|dark)$",
+   "regex": true,
+   "action": "click",
+   "expect": {
+    "themeAny": true
+   },
+   "effect": "Sets the theme",
+   "start": "#/stress",
+   "all": true
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Add tshark CSV files",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "filechooser": true
+   },
+   "effect": "Opens Runs and the file picker",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Download the JSON bundle",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "download": true
+   },
+   "effect": "Downloads the data bundle",
+   "start": "#/stress"
+  },
+  {
+   "route": "palette",
+   "role": "option",
+   "name": "Print or save the Evidence report as PDF",
+   "regex": false,
+   "action": "click",
+   "expect": {
+    "print": true
+   },
+   "effect": "Opens Evidence and the print dialog",
+   "start": "#/stress"
+  }
+ ]
+}

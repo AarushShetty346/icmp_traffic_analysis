@@ -1,0 +1,171 @@
+@import "tailwindcss";
+@import "@fontsource-variable/ibm-plex-sans";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+/* ---------------------------------------------------------------
+   Cadence tokens. Scales come from scripts/palette.mjs (one brand hue,
+   OKLCH, contrast-checked). Semantic tokens are what components use.
+   --------------------------------------------------------------- */
+:root {
+  --brand-50: #f2f8f9; --brand-100: #e2f0f1; --brand-200: #c3dfe3; --brand-300: #9bcbd0;
+  --brand-400: #63b0b8; --brand-500: #00929e; --brand-600: #007481; --brand-700: #005c69;
+  --brand-800: #004650; --brand-900: #003138; --brand-950: #001d21;
+  --neutral-50: #f9f6f2; --neutral-100: #efece8; --neutral-200: #dbd9d5; --neutral-300: #c3c1bd;
+  --neutral-400: #a4a19c; --neutral-500: #838079; --neutral-600: #66635c; --neutral-700: #504d46;
+  --neutral-800: #3d3a35; --neutral-900: #2a2925; --neutral-950: #1a1815;
+  --sim-50: #faf6f1; --sim-100: #f5ebe1; --sim-200: #e9d6c0; --sim-300: #dabb98; --sim-400: #c69861;
+  --sim-500: #af7112; --sim-600: #915200; --sim-700: #783b00; --sim-800: #5b2d00; --sim-900: #3f2000; --sim-950: #251400;
+
+  /* motion tokens: motion only explains a data change */
+  --dur-fast: 120ms;
+  --dur-base: 200ms;
+  --dur-slow: 320ms;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
+
+  color-scheme: light;
+  --bg: var(--neutral-50);
+  --surface: #fdfcfa;
+  --surface-2: var(--neutral-100);
+  --ink: var(--neutral-950);
+  --ink-2: var(--neutral-700);
+  --ink-3: var(--neutral-600);
+  --line: var(--neutral-200);
+  --line-strong: var(--neutral-300);
+  --accent: var(--brand-700);
+  --accent-ink: #ffffff;
+  --accent-soft: var(--brand-100);
+  --focus: var(--brand-600);
+  --sim-bg: var(--sim-100);
+  --sim-ink: var(--sim-800);
+  --sim-line: var(--sim-400);
+  --real-bg: var(--brand-100);
+  --real-ink: var(--brand-800);
+  --real-line: var(--brand-500);
+  --danger: #b4231f;
+  --danger-bg: #fbeceb;
+  --ok: #2b6b1f;
+
+  /* chart roles (dataviz reference palette, validated on --surface) */
+  --chart-grid: #e6e3dd;
+  --chart-axis: var(--neutral-300);
+  --series-normal: #2a78d6;
+  --series-covert: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --series-5: #e87ba4;
+  --flag: #d03b3b;
+  --seq-0: #f3f7fc; --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5;
+  --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b;
+  --seq-ink-lo: #1a1815; --seq-ink-hi: #ffffff; /* text on steps 0-4 / 5-7 */
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --bg: var(--neutral-950); --surface: var(--neutral-900); --surface-2: #33312d;
+    --ink: var(--neutral-50); --ink-2: var(--neutral-300); --ink-3: var(--neutral-400);
+    --line: #3d3a35; --line-strong: #4f4d48;
+    --accent: var(--brand-300); --accent-ink: var(--neutral-950); --accent-soft: var(--brand-900); --focus: var(--brand-300);
+    --sim-bg: var(--sim-900); --sim-ink: var(--sim-200); --sim-line: var(--sim-500);
+    --real-bg: var(--brand-900); --real-ink: var(--brand-200); --real-line: var(--brand-400);
+    --danger: #f0807d; --danger-bg: #3a1a19; --ok: #7fcf6d;
+    --chart-grid: #383632; --chart-axis: #4f4d48;
+    --series-normal: #3987e5; --series-covert: #d95926; --series-3: #199e70; --series-4: #c98500; --series-5: #d55181;
+    --flag: #e66767;
+    --seq-0: #24303d; --seq-1: #184f95; --seq-2: #1c5cab; --seq-3: #256abf; --seq-4: #3987e5;
+    --seq-5: #6da7ec; --seq-6: #9ec5f4; --seq-7: #cde2fb;
+    --seq-ink-lo: #f9f6f2; --seq-ink-hi: #1a1815;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: var(--neutral-950); --surface: var(--neutral-900); --surface-2: #33312d;
+  --ink: var(--neutral-50); --ink-2: var(--neutral-300); --ink-3: var(--neutral-400);
+  --line: #3d3a35; --line-strong: #4f4d48;
+  --accent: var(--brand-300); --accent-ink: var(--neutral-950); --accent-soft: var(--brand-900); --focus: var(--brand-300);
+  --sim-bg: var(--sim-900); --sim-ink: var(--sim-200); --sim-line: var(--sim-500);
+  --real-bg: var(--brand-900); --real-ink: var(--brand-200); --real-line: var(--brand-400);
+  --danger: #f0807d; --danger-bg: #3a1a19; --ok: #7fcf6d;
+  --chart-grid: #383632; --chart-axis: #4f4d48;
+  --series-normal: #3987e5; --series-covert: #d95926; --series-3: #199e70; --series-4: #c98500; --series-5: #d55181;
+  --flag: #e66767;
+  --seq-0: #24303d; --seq-1: #184f95; --seq-2: #1c5cab; --seq-3: #256abf; --seq-4: #3987e5;
+  --seq-5: #6da7ec; --seq-6: #9ec5f4; --seq-7: #cde2fb;
+  --seq-ink-lo: #f9f6f2; --seq-ink-hi: #1a1815;
+}
+
+/* Tailwind theme: utilities read the semantic tokens, so dark mode is one variable swap. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-sim-bg: var(--sim-bg);
+  --color-sim-ink: var(--sim-ink);
+  --color-sim-line: var(--sim-line);
+  --color-real-bg: var(--real-bg);
+  --color-real-ink: var(--real-ink);
+  --color-real-line: var(--real-line);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-ok: var(--ok);
+  --font-sans: "IBM Plex Sans Variable", "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* fluid type scale, ratio ~1.2 at 360px to ~1.25 at 1440px */
+  --text-xs: clamp(0.75rem, 0.73rem + 0.08vw, 0.8rem);
+  --text-xs--line-height: 1.45;
+  --text-sm: clamp(0.84rem, 0.82rem + 0.1vw, 0.9rem);
+  --text-sm--line-height: 1.5;
+  --text-base: clamp(0.95rem, 0.92rem + 0.15vw, 1.03rem);
+  --text-base--line-height: 1.6;
+  --text-lg: clamp(1.1rem, 1.04rem + 0.28vw, 1.28rem);
+  --text-lg--line-height: 1.4;
+  --text-xl: clamp(1.3rem, 1.2rem + 0.45vw, 1.6rem);
+  --text-xl--line-height: 1.3;
+  --text-2xl: clamp(1.55rem, 1.38rem + 0.75vw, 2rem);
+  --text-2xl--line-height: 1.2;
+  --text-hero: clamp(2.2rem, 1.8rem + 1.8vw, 3.2rem);
+  --text-hero--line-height: 1.05;
+}
+
+html { background: var(--bg); }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.tabular { font-variant-numeric: tabular-nums; }
+.skeleton {
+  background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s var(--ease-in-out) infinite;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.fade-data { transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+/* print: the Evidence report prints as a plain document */
+@media print {
+  :root { --bg: #fff; --surface: #fff; --ink: #000; --ink-2: #222; --ink-3: #333; --line: #bbb; }
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+  body { font-size: 10.5pt; }
+  section, figure, table { break-inside: avoid; }
+}
+.print-only { display: none; }

@@ -8,8 +8,9 @@ import numpy as np
 
 from .capture import Flow
 from .detector import Baseline, BaselineDetector, FixedRuleDetector
-from .features import windows
-from .metrics import confusion, decode_bits, decoding_accuracy
+from .evaluation import detector_with_ci, run_windows, summarise_seeds
+from .features import ks_distance, windows
+from .metrics import confusion, consecutive_gaps, decode_bits, decoding_accuracy
 from .simulate import CONDITIONS, Condition, SenderModel, channel_run, normal_run
 
 CHANNELS = {
@@ -25,22 +26,67 @@ class LabelledSet:
     sent_bits: list[np.ndarray | None] = field(default_factory=list)
 
 
-def build_baseline(normal_flows: list[Flow], window_size: int, percentile: float = 95.0) -> Baseline:
-    wins = [w for f in normal_flows for w in windows(f.times, window_size, seq=f.seq)]
-    return Baseline.fit(wins, percentile, window_size)
+def flow_gaps(flow: Flow) -> np.ndarray:
+    """Gaps between consecutively numbered requests of one flow."""
+    return consecutive_gaps(flow.times, flow.seq)
 
 
-def evaluate(data: LabelledSet, window_size: int, detectors: dict) -> dict:
-    """Classify every window of every flow and score each detector."""
-    labelled = [(w, False) for f in data.normal for w in windows(f.times, window_size, seq=f.seq)]
-    labelled += [(w, True) for f in data.channel for w in windows(f.times, window_size, seq=f.seq)]
+def build_baseline(
+    normal_flows: list[Flow], window_size: int, percentile: float = 95.0, step: int | None = None
+) -> Baseline:
+    """Fit a baseline from normal runs.
+
+    Thresholds for the ten window features are unchanged from the original
+    method. The KS-distance threshold is fitted out of sample: each run's
+    windows are compared with a reference pooled from the *other* runs, so the
+    threshold is not biased low by comparing windows with themselves. With a
+    single run the in-sample distances are used.
+    """
+    per_run = [windows(f.times, window_size, step, seq=f.seq) for f in normal_flows]
+    wins = [w for ws in per_run for w in ws]
+    gaps = [flow_gaps(f) for f in normal_flows]
+    reference = np.concatenate(gaps) if gaps else np.array([])
+    ks_values = None
+    if len(normal_flows) > 1:
+        ks_values = []
+        for i, ws in enumerate(per_run):
+            others = np.concatenate([g for j, g in enumerate(gaps) if j != i])
+            ks_values += [ks_distance(w, others) for w in ws]
+    return Baseline.fit(wins, percentile, window_size, reference, ks_values, step or 0)
+
+
+def evaluate(
+    data: LabelledSet,
+    window_size: int,
+    detectors: dict,
+    step: int | None = None,
+    n_boot: int = 0,
+    seed: int = 0,
+    decode_threshold: float | str = 1.0,
+) -> dict:
+    """Classify every window of every flow and score each detector.
+
+    With ``n_boot > 0`` each detector also gets bootstrap intervals for its
+    detection and false-positive rates, resampling whole runs.
+    """
+    normal = run_windows(data.normal, window_size, step)
+    channel = run_windows(data.channel, window_size, step)
+    labelled = [(w, False) for r in normal for w in r.windows] + [(w, True) for r in channel for w in r.windows]
     truth = [t for _, t in labelled]
-    out = {"window_size": window_size, "n_normal_windows": truth.count(False), "n_channel_windows": truth.count(True)}
-    out["detectors"] = {
-        name: confusion(truth, [det.classify(w).suspicious for w, _ in labelled]) for name, det in detectors.items()
+    out = {
+        "window_size": window_size,
+        "step": step or window_size,
+        "n_normal_windows": truth.count(False),
+        "n_channel_windows": truth.count(True),
     }
+    out["detectors"] = {}
+    for name, det in detectors.items():
+        result = confusion(truth, [det.classify(w).suspicious for w, _ in labelled])
+        if n_boot:
+            result["ci"] = detector_with_ci(normal, channel, lambda w, d=det: d.classify(w).suspicious, n_boot, seed)
+        out["detectors"][name] = result
     accs = [
-        decoding_accuracy(list(bits), decode_bits(f.times, f.seq))
+        decoding_accuracy(list(bits), decode_bits(f.times, f.seq, decode_threshold))
         for f, bits in zip(data.channel, data.sent_bits)
         if bits is not None
     ]
@@ -57,6 +103,9 @@ def simulated_study(
     percentile: float = 95.0,
     fixed: FixedRuleDetector | None = None,
     channels: dict[str, SenderModel] = CHANNELS,
+    step: int | None = None,
+    delay_model: str = "folded",
+    n_boot: int = 0,
 ) -> dict:
     """Run the Review-1 experiment plan on simulated traces.
 
@@ -66,9 +115,14 @@ def simulated_study(
     false-positive rise is caused by a stale baseline. Each channel model in
     ``channels`` (planned 0.75/1.25 s gaps, plus a subtler variant) is
     evaluated against the same normal test runs.
+
+    ``delay_model`` picks the simulator's network delay model for every
+    condition (``"folded"`` reproduces the original results); ``step`` makes
+    windows overlap; ``n_boot > 0`` adds bootstrap intervals over runs.
     """
     rng = np.random.default_rng(seed)
     fixed = fixed or FixedRuleDetector()
+    conditions = tuple(c.with_model(delay_model) for c in conditions)
     clean_baseline_flows = [normal_run(requests, CONDITIONS[0], rng) for _ in range(runs)]
 
     rows, decoding, scatter, traces, scatter_sets = [], {}, [], {}, {}
@@ -87,13 +141,22 @@ def simulated_study(
             for w in window_sizes:
                 detectors = {
                     "fixed": fixed,
-                    "baseline (clean)": BaselineDetector(build_baseline(clean_baseline_flows, w, percentile)),
-                    "baseline (matched)": BaselineDetector(build_baseline(matched_flows, w, percentile)),
+                    "baseline (clean)": BaselineDetector(build_baseline(clean_baseline_flows, w, percentile, step)),
+                    "baseline (matched)": BaselineDetector(build_baseline(matched_flows, w, percentile, step)),
                 }
-                result = evaluate(data, w, detectors)
+                result = evaluate(data, w, detectors, step, n_boot, seed)
                 decoding.setdefault(ch_name, {})[cond.name] = result["decoding_accuracy"]
                 for name, m in result["detectors"].items():
-                    rows.append({"channel": ch_name, "condition": cond.name, "window": w, "detector": name, **m})
+                    rows.append(
+                        {
+                            "channel": ch_name,
+                            "condition": cond.name,
+                            "delay_model": cond.delay_model,
+                            "window": w,
+                            "detector": name,
+                            **m,
+                        }
+                    )
             all_channel = scatter_sets.setdefault(cond.name, [("normal", test_normal)])
             all_channel.append((ch_name, test_channel))
         w = 32 if 32 in window_sizes else window_sizes[-1]
@@ -110,11 +173,13 @@ def simulated_study(
                     )
 
     ref_w = 32 if 32 in window_sizes else window_sizes[-1]
-    baseline = build_baseline(clean_baseline_flows, ref_w, percentile)
+    baseline = build_baseline(clean_baseline_flows, ref_w, percentile, step)
     return {
         "simulated": True,
         "config": {
             "seed": seed,
+            "delay_model": delay_model,
+            "step": step,
             "runs_per_set": runs,
             "requests_per_run": requests,
             "window_sizes": list(window_sizes),
@@ -133,4 +198,18 @@ def simulated_study(
         "decoding_accuracy": decoding,
         "scatter": scatter,
         "traces": traces,
+    }
+
+
+def multi_seed_study(seeds: tuple[int, ...], **kwargs) -> dict:
+    """Run ``simulated_study`` once per seed and summarise how much DR / FPR move between seeds."""
+    if len(seeds) < 2:
+        raise ValueError("give at least two seeds")
+    per_seed = {s: simulated_study(seed=s, **kwargs) for s in seeds}
+    first = per_seed[seeds[0]]
+    return {
+        "simulated": True,
+        "seeds": list(seeds),
+        "config": {k: v for k, v in first["config"].items() if k != "seed"},
+        "summary": summarise_seeds({s: r["results"] for s, r in per_seed.items()}),
     }

@@ -10,6 +10,9 @@ ENTROPY_BIN = 0.02
 OFF_NOMINAL = 0.1
 
 FEATURES = ("mean", "var", "std", "cv", "median", "iqr", "min", "max", "entropy", "off_nominal")
+# Features that need a reference sample of normal gaps (stored in the baseline).
+REFERENCE_FEATURES = ("ks",)
+ALL_FEATURES = FEATURES + REFERENCE_FEATURES
 
 
 def inter_packet_delays(times: np.ndarray) -> np.ndarray:
@@ -71,3 +74,41 @@ def window_features(ipd: np.ndarray) -> dict[str, float]:
         "entropy": _entropy(ipd),
         "off_nominal": float(np.mean(np.abs(ipd - median) > OFF_NOMINAL)),
     }
+
+
+def ecdf(values: np.ndarray, at: np.ndarray) -> np.ndarray:
+    """Empirical CDF of ``values`` evaluated at the points ``at`` (P[X <= x])."""
+    v = np.sort(np.asarray(values, dtype=float))
+    return np.searchsorted(v, np.asarray(at, dtype=float), side="right") / len(v)
+
+
+def ks_distance(sample: np.ndarray, reference: np.ndarray) -> float:
+    """Two-sample Kolmogorov-Smirnov statistic: the largest gap between two ECDFs.
+
+    Computed exactly with NumPy (no SciPy needed) so the browser can reproduce
+    it bit for bit. ``ks_pvalue`` adds a p-value when SciPy is installed.
+    """
+    a = np.asarray(sample, dtype=float)
+    b = np.asarray(reference, dtype=float)
+    if len(a) == 0 or len(b) == 0:
+        return float("nan")
+    points = np.concatenate([a, b])
+    return float(np.max(np.abs(ecdf(a, points) - ecdf(b, points))))
+
+
+def ks_pvalue(sample: np.ndarray, reference: np.ndarray) -> float | None:
+    """Two-sided KS p-value from SciPy, or ``None`` when SciPy is not installed."""
+    try:
+        from scipy.stats import ks_2samp  # type: ignore
+    except ImportError:  # pragma: no cover - depends on environment
+        return None
+    return float(ks_2samp(sample, reference).pvalue)
+
+
+def mann_whitney_pvalue(a: np.ndarray, b: np.ndarray) -> float | None:
+    """Two-sided Mann-Whitney U p-value from SciPy, or ``None`` without SciPy."""
+    try:
+        from scipy.stats import mannwhitneyu  # type: ignore
+    except ImportError:  # pragma: no cover - depends on environment
+        return None
+    return float(mannwhitneyu(a, b, alternative="two-sided").pvalue)

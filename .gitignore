@@ -3,3 +3,12 @@ __pycache__/
 .venv/
 *.pcap
 *.pcapng
+node_modules/
+ui/dist/
+ui/storybook-static/
+ui/test-results/
+ui/playwright-report/
+captures/
+*.egg-info/
+ui/tsconfig.tsbuildinfo
+ui/e2e-results.json

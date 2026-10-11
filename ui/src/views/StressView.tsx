@@ -11,7 +11,7 @@ import { EmptyState } from "../components/ui/States";
 import { useData } from "../lib/data/DataContext";
 import type { MatrixRow } from "../lib/data/schema";
 import { useRoute } from "../lib/state/route";
-import { DETECTOR_HELP, DETECTOR_NAME, DETECTOR_OPTIONS, MODEL_HELP, modelOptions, pct, pick, type DetectorKey } from "../lib/view/select";
+import { detectionTone, DR_TEXT, falsePositiveTone, FP_TEXT, DETECTOR_HELP, DETECTOR_NAME, DETECTOR_OPTIONS, MODEL_HELP, modelOptions, pct, pick, type DetectorKey } from "../lib/view/select";
 
 const METRICS = ["dr", "fpr", "decodeFixed", "decodeAdaptive"] as const;
 type Metric = (typeof METRICS)[number];
@@ -88,9 +88,9 @@ export default function StressView() {
             onClick={() => navigate("detectors", { model: sel.delayModel ?? null, cond: sel.condition, chan: sel.channel, w: String(sel.window), base: det === "clean" ? "clean" : null })}>
             Open in Detectors</Button>}>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <StatTile label="Detection rate" value={pct(sel.detectionRate)} provenance={prov}
+            <StatTile label="Detection rate" value={pct(sel.detectionRate)} tone={detectionTone(sel.detectionRate)} toneText={DR_TEXT[detectionTone(sel.detectionRate) ?? "good"]} provenance={prov}
               detail={sel.ci ? `95% CI ${pct(sel.ci.detection_rate.lo)}–${pct(sel.ci.detection_rate.hi)} over ${sel.ci.detection_rate.runs} runs` : `${sel.nCovertWindows} windows`} />
-            <StatTile label="False-positive rate" value={pct(sel.falsePositiveRate)} provenance={prov}
+            <StatTile label="False-positive rate" value={pct(sel.falsePositiveRate)} tone={falsePositiveTone(sel.falsePositiveRate)} toneText={FP_TEXT[falsePositiveTone(sel.falsePositiveRate) ?? "good"]} provenance={prov}
               detail={sel.ci ? `95% CI ${pct(sel.ci.false_positive_rate.lo)}–${pct(sel.ci.false_positive_rate.hi)} over ${sel.ci.false_positive_rate.runs} runs` : `${sel.nNormalWindows} windows`} />
             <StatTile label="Precision" value={pct(sel.precision)} provenance={prov} help="Of the windows flagged, the share that really were covert." />
             <StatTile label="Bits decoded" value={`${pct(sel.decodeFixed)} / ${pct(sel.decodeAdaptive)}`} detail="fixed / adaptive threshold" provenance={prov} />
@@ -108,7 +108,7 @@ export default function StressView() {
         </Panel>
       ) : null}
 
-      <Panel title="All cells as a table" id="table" provenance={prov}>
+      <Panel title="All cells as a table" id="table" provenance={prov} collapsible defaultOpen={false}>
         <DataTable caption="Stress matrix" csvName="cadence-stress" maxHeight={420}
           provenanceNote={`${prov.toUpperCase()} · ${source === "simulated" ? `delay model ${model} · seed ${bundle?.provenance.seed}` : "real captures"} · window ${w} · ${DETECTOR_NAME[det]}`}
           rows={rows} rowKey={(r) => `${r.channel}|${r.condition}`}
@@ -125,7 +125,7 @@ export default function StressView() {
       </Panel>
 
       {bundle?.multiSeed ? (
-        <Panel title="Spread across seeds" id="seeds" provenance="simulated"
+        <Panel title="Spread across seeds" id="seeds" provenance="simulated" collapsible defaultOpen={false}
           help="The same study repeated with different random seeds. A wide spread means one seed's number should not be quoted on its own.">
           <p className="mb-2 text-sm text-ink-2">
             {bundle.multiSeed.seeds.length} seeds ({bundle.multiSeed.seeds.join(", ")}), {bundle.multiSeed.delayModel} delay model, {bundle.multiSeed.runsPerSet} runs per set

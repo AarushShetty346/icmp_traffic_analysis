@@ -1,10 +1,11 @@
-import { ArrowUpTrayIcon, ChartBarIcon, DocumentTextIcon, TrashIcon } from "@heroicons/react/20/solid";
+import { ArrowUpTrayIcon, ArrowUturnLeftIcon, ChartBarIcon, DocumentTextIcon, MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { Button } from "../components/ui/Button";
 import { DataTable, type Column } from "../components/ui/DataTable";
 import { Dialog } from "../components/ui/Dialog";
 import { SelectField } from "../components/ui/Field";
 import { Panel } from "../components/ui/Panel";
+import { StatTile } from "../components/ui/StatTile";
 import { ProvenanceBadge } from "../components/ui/ProvenanceBadge";
 import { ChartSkeleton, EmptyState, ErrorState } from "../components/ui/States";
 import { useData } from "../lib/data/DataContext";
@@ -16,7 +17,7 @@ import { useRoute } from "../lib/state/route";
 const PAGE = 25;
 
 export default function RunsView() {
-  const { runs, uploads, uploadErrors, parsing, addFiles, updateUpload, removeUpload, bundle, status } = useData();
+  const { runs, uploads, uploadErrors, parsing, addFiles, updateUpload, removeUpload, restoreUpload, bundle, status } = useData();
   const { params, setParams, navigate } = useRoute();
   const input = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -25,15 +26,27 @@ export default function RunsView() {
   const source = params.get("source") ?? "all";
   const label = params.get("label") ?? "all";
   const role = params.get("role") ?? "test";
+  const query = params.get("q") ?? "";
+  const [removed, setRemoved] = useState<Run | null>(null);
 
   useEffect(() => {
     if (params.get("add") === "1") { input.current?.click(); setParams({ add: null }); }
   }, [params, setParams]);
 
-  const filtered = useMemo(() => runs.filter((r) =>
-    (source === "all" || r.source === source) && (label === "all" || r.label === label) && (role === "all" || r.role === role || (role === "baseline" && r.role !== "test"))),
-  [runs, source, label, role]);
-  useEffect(() => setLimit(PAGE), [source, label, role]);
+  const filtered = useMemo(() => {
+    const terms = query.toLowerCase().split(/\s+/).filter(Boolean);
+    return runs.filter((r) =>
+      (source === "all" || r.source === source) && (label === "all" || r.label === label) && (role === "all" || r.role === role || (role === "baseline" && r.role !== "test")) &&
+      terms.every((t) => `${r.name} ${r.condition} ${r.channel ?? ""} ${r.delayModel ?? ""} ${r.bits ?? ""}`.toLowerCase().includes(t)));
+  }, [runs, source, label, role, query]);
+  useEffect(() => setLimit(PAGE), [source, label, role, query]);
+  const totals = useMemo(() => ({
+    covert: runs.filter((r) => r.label === "covert").length,
+    capture: runs.filter((r) => r.source === "capture").length,
+    lost: runs.reduce((n, r) => n + (r.seq ? lostPackets(r) : 0), 0),
+    requests: runs.reduce((n, r) => n + r.times.length, 0),
+  }), [runs]);
+  const remove = (r: Run) => { removeUpload(r.id); setRemoved(r); };
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
@@ -53,7 +66,7 @@ export default function RunsView() {
       <select aria-label={`Label of ${r.name}`} value={r.label} onChange={(e) => updateUpload(r.id, { label: e.target.value as Run["label"] })}
         className="min-h-11 rounded-md border border-line-strong bg-surface px-2 text-xs text-ink">
         <option value="normal">normal</option><option value="covert">covert</option>
-      </select>) : r.label, csv: (r) => r.label },
+      </select>) : <LabelChip label={r.label} />, csv: (r) => r.label },
     { key: "role", header: "Used as", cell: (r) => r.origin === "upload" ? (
       <select aria-label={`Use of ${r.name}`} value={r.role} onChange={(e) => updateUpload(r.id, { role: e.target.value as Run["role"] })}
         className="min-h-11 rounded-md border border-line-strong bg-surface px-2 text-xs text-ink">
@@ -73,7 +86,7 @@ export default function RunsView() {
       <div className="flex gap-1">
         <Button size="sm" variant="ghost" icon={<ChartBarIcon className="size-4" aria-hidden />} onClick={() => navigate("signal", { a: r.id })} aria-label={`Open ${r.name} in Signal`} />
         <Button size="sm" variant="ghost" icon={<DocumentTextIcon className="size-4" aria-hidden />} onClick={() => setManifestRun(r)} aria-label={`Manifest of ${r.name}`} />
-        {r.origin === "upload" ? <Button size="sm" variant="ghost" icon={<TrashIcon className="size-4" aria-hidden />} onClick={() => removeUpload(r.id)} aria-label={`Remove ${r.name}`} /> : null}
+        {r.origin === "upload" ? <Button size="sm" variant="ghost" icon={<TrashIcon className="size-4" aria-hidden />} onClick={() => remove(r)} aria-label={`Remove ${r.name}`} /> : null}
       </div>), csv: () => null },
   ];
 
@@ -100,10 +113,33 @@ export default function RunsView() {
         {uploadErrors.length ? (
           <div className="mt-3"><ErrorState title="Some files could not be read" message={uploadErrors.map((e) => `${e.name}: ${e.error}`).join(" · ")} /></div>
         ) : null}
+        {removed ? (
+          <div role="status" className="mt-3 flex flex-wrap items-center gap-2 rounded-md border border-line bg-surface-2 px-3 py-1 text-sm text-ink">
+            <span>Removed <span className="font-mono">{removed.name}</span>.</span>
+            <Button size="sm" variant="ghost" icon={<ArrowUturnLeftIcon className="size-4" aria-hidden />} onClick={() => { restoreUpload(removed); setRemoved(null); }}>Undo</Button>
+          </div>
+        ) : null}
       </Panel>
 
       {status === "loading" ? <ChartSkeleton height={320} /> : <>
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatTile label="Runs loaded" value={String(runs.length)} provenance={runsProvenance(runs)} detail={`${runs.length - totals.covert} normal · ${totals.covert} covert`} />
+        <StatTile label="Echo Requests" value={totals.requests.toLocaleString("en")} provenance={runsProvenance(runs)} detail="across every run" />
+        <StatTile label="Real captures" value={String(totals.capture)} tone={totals.capture ? "good" : undefined}
+          detail={totals.capture ? "from the lab testbed" : "none yet; every number here is simulated"} />
+        <StatTile label="Requests lost" value={String(totals.lost)} provenance={runsProvenance(runs)} tone={totals.lost ? "alert" : undefined} toneText="Gaps will include losses"
+          detail="counted from ICMP sequence numbers" />
+      </div>
       <Panel title="Runs" id="runs" provenance={runsProvenance(filtered)} help="Baseline runs fit the detector's thresholds; test runs are scored. Simulated runs carry their seed and delay model.">
+        <div className="mb-3 flex min-w-0 flex-col gap-1">
+          <label htmlFor="run-search" className="text-sm font-medium text-ink-2">Search runs</label>
+          <div className="relative">
+            <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3" aria-hidden />
+            <input id="run-search" type="search" value={query} placeholder="Name, condition, channel or bits, e.g. jitter covert"
+              onChange={(e) => setParams({ q: e.target.value || null })}
+              className="min-h-11 w-full min-w-0 rounded-md border border-line-strong bg-surface pl-9 pr-3 text-sm text-ink placeholder:text-ink-3" />
+          </div>
+        </div>
         <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <SelectField label="Provenance" value={source} onValueChange={(v) => setParams({ source: v === "all" ? null : v })}
             options={[{ value: "all", label: "All" }, { value: "simulated", label: "Simulated" }, { value: "capture", label: "Real capture" }]} />
@@ -113,7 +149,7 @@ export default function RunsView() {
             options={[{ value: "test", label: "Test runs" }, { value: "baseline", label: "Baseline runs" }, { value: "all", label: "All" }]} />
         </div>
         {filtered.length === 0 ? (
-          <EmptyState title="No runs match these filters">Change a filter above, or add tshark CSV files.</EmptyState>
+          <EmptyState title="No runs match these filters">Change the search or a filter above, or add tshark CSV files.</EmptyState>
         ) : (
           <>
             <p className="mb-2 text-xs text-ink-3" aria-live="polite">Showing {Math.min(limit, filtered.length)} of {filtered.length} runs.</p>
@@ -171,5 +207,14 @@ function FieldTable({ rows }: { rows: { field: string; normal: string | null; co
         { key: "d", header: "Differs", cell: (r) => r.differs === null ? "not exported" : r.differs ? <strong className="text-danger">yes</strong> : "no", csv: (r) => (r.differs === null ? "unknown" : r.differs ? "yes" : "no") },
         { key: "note", header: "Note", cell: (r) => r.note },
       ]} />
+  );
+}
+
+function LabelChip({ label }: { label: Run["label"] }) {
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <span aria-hidden className="inline-block size-2 rounded-full" style={{ background: label === "covert" ? "var(--series-covert)" : "var(--series-normal)" }} />
+      {label}
+    </span>
   );
 }

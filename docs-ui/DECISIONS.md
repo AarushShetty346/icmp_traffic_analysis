@@ -86,3 +86,15 @@ Each missing skill's procedure was followed by hand:
   `experiment.build_baseline`, `evaluation.roc_curve` and `metrics.decode_bits`, and is checked against
   Python-generated golden fixtures to 1e-9 (`ui/src/lib/analysis/parity.test.ts`). Defaults (window 32,
   p95, 0.1 s fixed limits, std feature) match the Python CLI.
+
+## UI/UX review (2026-10-11)
+
+Applied from "UI/UX Review of the ICMP Traffic Analysis Dashboard": icons beside every nav label; a
+search box and summary cards on Runs; green/red status accents (with words, not colour alone) on detection,
+false-positive and decoding tiles; raw reference tables (learned baseline, stress table, seed spread)
+collapsed by default; a breadcrumb back to Runs when a view is pinned to one run; a load-status dot in the
+provenance strip; Undo after removing an added CSV. Thresholds for the accents live in `ui/src/lib/view/select.ts`.
+
+Not applied: a hamburger menu (the six views fit a 3×2 grid on phones and stay one tap away), progress bars
+for detection (it recomputes synchronously in milliseconds; CSV parsing already shows a spinner), and
+Start/Stop capture buttons (captures happen on the lab testbed, not in this static site).

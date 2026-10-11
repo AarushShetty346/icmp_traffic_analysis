@@ -16,6 +16,8 @@ interface DataState {
   addFiles: (files: File[]) => void;
   updateUpload: (id: string, patch: Partial<Run>) => void;
   removeUpload: (id: string) => void;
+  /** Put back a file removed with removeUpload (undo). */
+  restoreUpload: (run: Run) => void;
   retry: () => void;
   bundleUrl: string;
 }
@@ -83,10 +85,11 @@ export function DataProvider({ children, initial }: { children: ReactNode; initi
 
   const updateUpload = useCallback((id: string, patch: Partial<Run>) => setUploads((u) => u.map((r) => (r.id === id ? { ...r, ...patch } : r))), []);
   const removeUpload = useCallback((id: string) => setUploads((u) => u.filter((r) => r.id !== id)), []);
+  const restoreUpload = useCallback((run: Run) => setUploads((u) => (u.some((r) => r.id === run.id) ? u : [run, ...u])), []);
   const runs = useMemo(() => [...uploads, ...(bundle?.runs.map(fromBundle) ?? [])], [bundle, uploads]);
 
   const value: DataState = {
-    status, error, bundle, runs, uploads, uploadErrors, parsing, addFiles, updateUpload, removeUpload,
+    status, error, bundle, runs, uploads, uploadErrors, parsing, addFiles, updateUpload, removeUpload, restoreUpload,
     retry: () => setAttempt((a) => a + 1), bundleUrl: BUNDLE_URL,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

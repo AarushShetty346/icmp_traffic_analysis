@@ -1,4 +1,6 @@
-import { CommandLineIcon } from "@heroicons/react/20/solid";
+import {
+  ChevronRightIcon, ClipboardDocumentCheckIcon, CommandLineIcon, LockOpenIcon, ShieldExclamationIcon, SignalIcon, Squares2X2Icon, TableCellsIcon,
+} from "@heroicons/react/20/solid";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import EvidenceView from "./views/EvidenceView";
 import RunsView from "./views/RunsView";
@@ -21,6 +23,18 @@ const VIEWS: Record<Route, React.ComponentType> = {
   evidence: EvidenceView,
 };
 
+const ICON: Record<Route, React.ComponentType<React.SVGProps<SVGSVGElement>>> = {
+  runs: TableCellsIcon,
+  signal: SignalIcon,
+  detectors: ShieldExclamationIcon,
+  stress: Squares2X2Icon,
+  decode: LockOpenIcon,
+  evidence: ClipboardDocumentCheckIcon,
+};
+
+// The URL parameter that pins one run in a view; when set, a breadcrumb leads back to Runs.
+const RUN_PARAM: Partial<Record<Route, string>> = { signal: "a", decode: "run" };
+
 const INTRO: Record<Route, string> = {
   runs: "Every run in the workbench: exported runs and the tshark CSVs you add. Label them and check their provenance here.",
   signal: "Gaps between Echo Requests over time, and how their distribution differs between two runs.",
@@ -31,8 +45,9 @@ const INTRO: Record<Route, string> = {
 };
 
 export default function App() {
-  const { route, navigate } = useRoute();
-  const { status, error, bundle, uploads, retry, bundleUrl } = useData();
+  const { route, params, navigate } = useRoute();
+  const { status, error, bundle, uploads, runs, retry, bundleUrl } = useData();
+  const pinnedRun = RUN_PARAM[route] ? runs.find((r) => r.id === params.get(RUN_PARAM[route]!)) : undefined;
   const { theme, setTheme } = useTheme();
   const [paletteOpen, setPaletteOpen] = useState(false);
   const View = VIEWS[route];
@@ -76,14 +91,18 @@ export default function App() {
           </a>
           <nav aria-label="Views" className="order-3 w-full md:order-none md:w-auto md:flex-1">
             <ul className="grid grid-cols-3 gap-1 md:flex md:flex-wrap">
-              {ROUTES.map((r) => (
-                <li key={r}>
-                  <a href={`#/${r}`} aria-current={route === r ? "page" : undefined}
-                    className={`flex min-h-11 items-center justify-center rounded-md px-3 text-sm ${route === r ? "bg-accent text-accent-ink" : "text-ink-2 hover:bg-surface-2 hover:text-ink"}`}>
-                    {ROUTE_LABEL[r]}
-                  </a>
-                </li>
-              ))}
+              {ROUTES.map((r) => {
+                const Icon = ICON[r];
+                return (
+                  <li key={r}>
+                    <a href={`#/${r}`} aria-current={route === r ? "page" : undefined}
+                      className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-2 py-1 text-xs md:flex-row md:gap-1.5 md:px-3 md:py-0 md:text-sm ${route === r ? "bg-accent text-accent-ink" : "text-ink-2 hover:bg-surface-2 hover:text-ink"}`}>
+                      <Icon className="size-4 shrink-0" aria-hidden />
+                      {ROUTE_LABEL[r]}
+                    </a>
+                  </li>
+                );
+              })}
             </ul>
           </nav>
           <div className="ml-auto flex items-center gap-1">
@@ -108,12 +127,26 @@ export default function App() {
                 prov === "capture" ? "Numbers come from real captures." :
                 "Simulated and real data are both loaded; each run, cell and chart says which it is."}
             </span>
-            <span className="font-mono text-ink-2">{bundle ? `bundle ${bundle.schemaVersion} · ${bundle.provenance.commit?.slice(0, 7) ?? "no commit"}` : "bundle loading · ·······"} · {uploads.length} added CSV{uploads.length === 1 ? "" : "s"}</span>
+            <span className="inline-flex items-center gap-1.5 font-mono text-ink-2">
+              <span aria-hidden className={`inline-block size-2 rounded-full ${status === "error" ? "bg-danger" : status === "loading" ? "animate-pulse bg-ink-3" : "bg-ok"}`} />
+              {status === "error" ? "bundle failed to load · " : null}{bundle ? `bundle ${bundle.schemaVersion} · ${bundle.provenance.commit?.slice(0, 7) ?? "no commit"}` : "bundle loading · ·······"} · {uploads.length} added CSV{uploads.length === 1 ? "" : "s"}
+            </span>
           </div>
         </div>
       </header>
       <main id="main" tabIndex={-1} className="mx-auto max-w-[1400px] px-4 pb-16 pt-4 outline-none">
         <div className="mb-4">
+          {pinnedRun ? (
+            <nav aria-label="Breadcrumb" className="mb-1 text-sm text-ink-3">
+              <ol className="flex flex-wrap items-center gap-1">
+                <li><a href="#/runs" className="inline-flex min-h-11 items-center underline hover:text-ink">Runs</a></li>
+                <li aria-hidden><ChevronRightIcon className="size-4" /></li>
+                <li>{ROUTE_LABEL[route]}</li>
+                <li aria-hidden><ChevronRightIcon className="size-4" /></li>
+                <li aria-current="page" className="truncate font-mono text-ink-2">{pinnedRun.name}</li>
+              </ol>
+            </nav>
+          ) : null}
           <h1 className="text-2xl font-semibold text-ink">{ROUTE_LABEL[route]}</h1>
           <p className="max-w-prose text-sm text-ink-2">{INTRO[route]}</p>
         </div>

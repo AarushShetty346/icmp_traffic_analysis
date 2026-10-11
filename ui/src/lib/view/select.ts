@@ -71,3 +71,10 @@ export function runGaps(r: Run) {
 }
 
 export const seriesColor = (label: "normal" | "covert") => (label === "covert" ? "var(--series-covert)" : "var(--series-normal)");
+
+// Status accents for headline numbers. Between the two limits a tile stays neutral.
+export const detectionTone = (v: number | null | undefined) => (v == null || Number.isNaN(v) ? undefined : v >= 0.9 ? "good" as const : v < 0.5 ? "alert" as const : undefined);
+export const falsePositiveTone = (v: number | null | undefined) => (v == null || Number.isNaN(v) ? undefined : v <= 0.05 ? "good" as const : v > 0.15 ? "alert" as const : undefined);
+export const accuracyTone = (v: number | null | undefined) => (v == null || Number.isNaN(v) ? undefined : v >= 0.95 ? "good" as const : v < 0.8 ? "alert" as const : undefined);
+export const DR_TEXT = { good: "Catches covert windows", alert: "Misses most covert windows" } as const;
+export const FP_TEXT = { good: "Few false alarms", alert: "High false alarms" } as const;

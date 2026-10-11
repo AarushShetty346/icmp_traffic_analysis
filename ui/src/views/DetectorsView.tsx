@@ -17,6 +17,7 @@ import { runLabel, type Run } from "../lib/data/runs";
 import { numParam, useRoute } from "../lib/state/route";
 import {
   bundleSet, channelOptions, conditionOptions, MODEL_HELP, modelOptions, pct, pick, runsProvenance, uploadSet,
+  detectionTone, DR_TEXT, falsePositiveTone, FP_TEXT,
 } from "../lib/view/select";
 
 const SOURCES = ["bundle", "uploads"] as const;
@@ -167,13 +168,13 @@ export default function DetectorsView() {
     <div className="grid gap-4">
       {settings}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Fixed rule: detection rate" value={pct(fixedRates.detectionRate)} detail={ciText("fixed", "detection_rate")} provenance={prov}
+        <StatTile label="Fixed rule: detection rate" value={pct(fixedRates.detectionRate)} tone={detectionTone(fixedRates.detectionRate)} toneText={DR_TEXT[detectionTone(fixedRates.detectionRate) ?? "good"]} detail={ciText("fixed", "detection_rate")} provenance={prov}
           help="Share of covert windows the fixed rule flags." />
-        <StatTile label="Fixed rule: false positives" value={pct(fixedRates.falsePositiveRate)} detail={ciText("fixed", "false_positive_rate")} provenance={prov}
+        <StatTile label="Fixed rule: false positives" value={pct(fixedRates.falsePositiveRate)} tone={falsePositiveTone(fixedRates.falsePositiveRate)} toneText={FP_TEXT[falsePositiveTone(fixedRates.falsePositiveRate) ?? "good"]} detail={ciText("fixed", "false_positive_rate")} provenance={prov}
           help="Share of normal windows the fixed rule flags by mistake." />
-        <StatTile label="Baseline: detection rate" value={pct(baseRates.detectionRate)} detail={ciText(base === "matched" ? "baseline (matched)" : "baseline (clean)", "detection_rate")} provenance={prov}
+        <StatTile label="Baseline: detection rate" value={pct(baseRates.detectionRate)} tone={detectionTone(baseRates.detectionRate)} toneText={DR_TEXT[detectionTone(baseRates.detectionRate) ?? "good"]} detail={ciText(base === "matched" ? "baseline (matched)" : "baseline (clean)", "detection_rate")} provenance={prov}
           help="Share of covert windows the learned baseline flags." />
-        <StatTile label="Baseline: false positives" value={pct(baseRates.falsePositiveRate)} detail={ciText(base === "matched" ? "baseline (matched)" : "baseline (clean)", "false_positive_rate")} provenance={prov}
+        <StatTile label="Baseline: false positives" value={pct(baseRates.falsePositiveRate)} tone={falsePositiveTone(baseRates.falsePositiveRate)} toneText={FP_TEXT[falsePositiveTone(baseRates.falsePositiveRate) ?? "good"]} detail={ciText(base === "matched" ? "baseline (matched)" : "baseline (clean)", "false_positive_rate")} provenance={prov}
           help="Share of normal windows the baseline flags. Its target is 100 minus the percentile, but a small baseline overshoots it." />
       </div>
       <p className="text-xs text-ink-3">
@@ -235,7 +236,7 @@ export default function DetectorsView() {
         </Panel>
       </div>
 
-      <Panel title="Learned baseline" id="baseline" provenance={runsProvenance(set.baseline)}
+      <Panel title="Learned baseline" id="baseline" provenance={runsProvenance(set.baseline)} collapsible defaultOpen={false}
         help="The normal range of each feature, learned from the baseline runs. The KS threshold is fitted leave-one-run-out so a run is never compared with itself.">
         <DataTable caption="Learned baseline" csvName="cadence-baseline" provenanceNote={`${runsProvenance(set.baseline).toUpperCase()} · ${set.baseline.map(runLabel).join("; ")}`}
           rows={ALL_FEATURES.filter((f) => baseline.upper[f] !== undefined)} rowKey={(f) => f}

@@ -12,7 +12,7 @@ import { adaptiveThreshold, bitsText, decodeBits, decodingAccuracy } from "../li
 import { useData } from "../lib/data/DataContext";
 import { runLabel } from "../lib/data/runs";
 import { numParam, useRoute } from "../lib/state/route";
-import { channelOptions, conditionOptions, MODEL_HELP, modelOptions, ms, pct, pick, runsProvenance } from "../lib/view/select";
+import { accuracyTone, channelOptions, conditionOptions, MODEL_HELP, modelOptions, ms, pct, pick, runsProvenance } from "../lib/view/select";
 
 const MODES = ["fixed", "adaptive", "manual"] as const;
 
@@ -92,7 +92,7 @@ export default function DecodeView() {
         </div>
       </Panel>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Bits recovered" value={pct(acc, 1)} detail={`threshold ${ms(threshold, 2)}`} provenance={prov} help="Share of sent bits decoded correctly. Bits lost with a dropped request count as wrong." />
+        <StatTile label="Bits recovered" value={pct(acc, 1)} tone={accuracyTone(acc)} toneText={accuracyTone(acc) === "alert" ? "Many bits wrong" : "Recovered cleanly"} detail={`threshold ${ms(threshold, 2)}`} provenance={prov} help="Share of sent bits decoded correctly. Bits lost with a dropped request count as wrong." />
         <StatTile label="Fixed 1 s threshold" value={pct(accFixed, 1)} provenance={prov} detail={bundleEntry ? `exported: ${pct(bundleEntry.accuracyFixed, 1)}` : undefined} />
         <StatTile label="Adaptive threshold" value={pct(accAuto, 1)} detail={`${ms(auto, 2)}${bundleEntry ? ` · exported: ${pct(bundleEntry.accuracyAdaptive, 1)}` : ""}`} provenance={prov} />
         <StatTile label="Bits missing" value={String(missing)} detail={`of ${sent.length}; a lost request costs the bits beside it`} provenance={prov} />

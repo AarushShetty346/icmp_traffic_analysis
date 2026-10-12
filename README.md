@@ -13,6 +13,24 @@ A covert timing channel hides bits in the gaps between packets: here a sender sp
   packet-field check (`fieldcheck`);
 - **Cadence**, an analysis workbench (`ui/`) that reads an exported JSON bundle or your own tshark CSVs.
 
+## Start here
+
+Imagine two ping requests sent one second apart. A sender can deliberately shorten or lengthen that gap to
+represent 0 or 1. This project asks whether a receiver can spot the timing pattern and recover the bits.
+The current graphs use generated data; real lab captures are still needed.
+
+To try the website locally, open a terminal in this repository and run:
+
+```text
+cd ui
+npm ci
+npm run dev
+```
+
+Open the local address printed by Vite. The **Runs** page explains the workflow, and **Decode** lets you type
+your own message to see its simulated bit and gap pattern. You can stop the server with Ctrl+C. The app runs
+in the browser and does not transmit ICMP packets.
+
 ## What is real and what is simulated
 
 | Output | Source |

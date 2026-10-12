@@ -73,7 +73,7 @@ class RunTests(unittest.TestCase):
             now[0] += 0.0005
             return now[0]
 
-        with mock.patch("os.geteuid", return_value=0):
+        with mock.patch("os.geteuid", return_value=0, create=True):
             m = run(
                 GeneratorConfig("10.0.0.2", bits="01", ident=7),
                 lab_confirmed=True,

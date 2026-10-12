@@ -36,11 +36,11 @@ const ICON: Record<Route, React.ComponentType<React.SVGProps<SVGSVGElement>>> = 
 const RUN_PARAM: Partial<Record<Route, string>> = { signal: "a", decode: "run" };
 
 const INTRO: Record<Route, string> = {
-  runs: "Every run in the workbench: exported runs and the tshark CSVs you add. Label them and check their provenance here.",
+  runs: "See how the project works, then explore simulated runs or add a lab capture.",
   signal: "Gaps between Echo Requests over time, and how their distribution differs between two runs.",
   detectors: "Fixed rule against the learned baseline, live. Move the settings and watch every window's verdict change.",
   stress: "How detection holds up across gap settings and network conditions. Select a cell for its runs.",
-  decode: "What the receiver recovers from a covert run, bit by bit, with a fixed or an adaptive threshold.",
+  decode: "Try a message of your own, then inspect what the receiver recovers from prepared runs.",
   evidence: "Review 3 checklist, data coverage, limits, and exports.",
 };
 

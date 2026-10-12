@@ -1,5 +1,33 @@
 # QA report: Phase 5 acceptance
 
+## Refinement audit — 2026-10-12
+
+The landing page now explains the timing-channel workflow, and Decode has a browser-only message example.
+The example converts UTF-8 bytes to bits, maps 0/1 to ideal 0.75/1.25 s gaps, then uses the same TypeScript
+decoder as the prepared runs. It explicitly says the gaps have no jitter or loss and are not lab captures.
+The Runs introduction changes its provenance wording when a real-capture run is loaded.
+
+Checks on the refinement branch:
+
+| Check | Result |
+|---|---|
+| `python -m unittest` on Windows | 62 tests, 2 platform/dependency skips, pass after making the injected-sender test portable |
+| `ruff check .` | Pass |
+| `npm test` | 70 unit and parity tests pass |
+| `npm run build` and `npm run size` | Pass; initial JS 146.5 KB gzipped against a 300 KB budget |
+| `npm run build-storybook -- --quiet` | Pass |
+| `npm run e2e` in local Edge | 264 pass, 4 expected skips (duplicate width/keyboard checks and optional screenshot recording) |
+| Visual review | Runs and Decode checked at 390 and 1440 px; no layout issue found |
+| GitHub CI | Python and UI jobs pass on the refinement branch in Linux/Chromium |
+
+The new browser test checks ASCII and multibyte UTF-8 round trips and the 32-byte input limit at both
+viewports. Existing browser checks cover the control manifest, accessibility, keyboard operation, and
+horizontal overflow across six widths. The remaining project gaps are real testbed captures and the
+original Review 1 document for objective wording and references; no simulated result is treated as a
+real capture.
+
+---
+
 Run on 2026-10-10 against the production build (`npm run build && npm run preview`) in the cloud container,
 Chromium 141 (Playwright build 1194), Node 22. All commands are in the repository; CI repeats every check
 except Lighthouse and the screenshots.

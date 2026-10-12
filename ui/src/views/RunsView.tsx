@@ -96,6 +96,23 @@ export default function RunsView() {
 
   return (
     <div className="grid gap-4">
+      <Panel title="What this project does" id="intro">
+        <p className="max-w-prose text-sm text-ink-2">
+          A normal computer sends ping requests at roughly regular intervals. A hidden message can change
+          the time between requests: a short gap can stand for 0 and a long gap for 1. This project checks
+          those gaps to see whether the traffic looks normal or carries a message.
+        </p>
+        <ol className="mt-3 grid gap-2 text-sm text-ink-2 sm:grid-cols-3">
+          <li><strong className="text-ink">1. Collect</strong><br />Record the arrival times of ping requests.</li>
+          <li><strong className="text-ink">2. Detect</strong><br />Compare gap patterns with normal traffic.</li>
+          <li><strong className="text-ink">3. Decode</strong><br />Read short and long gaps as 0s and 1s.</li>
+        </ol>
+        <p className="mt-3 text-sm text-ink-2">
+          The results below currently come from a simulator. No real lab captures have been added yet.
+          Try the message example in <a href="#/decode" className="text-accent underline">Decode</a>,
+          then see what evidence is still needed in <a href="#/evidence" className="text-accent underline">Evidence</a>.
+        </p>
+      </Panel>
       <Panel title="Add captures" id="add" help="Drop tshark CSV exports (scripts/lab/export_csv.sh). They are parsed in a background thread in this browser and never uploaded anywhere.">
         <div
           onDragOver={(e) => { e.preventDefault(); setDragging(true); }}

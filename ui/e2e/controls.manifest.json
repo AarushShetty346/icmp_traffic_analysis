@@ -775,6 +775,18 @@
   },
   {
    "route": "decode",
+   "role": "textbox",
+   "name": "Message to encode",
+   "regex": false,
+   "action": "fill",
+   "expect": {
+    "textChange": true,
+    "valueChange": true
+   },
+   "effect": "Encodes a typed message into simulated packet gaps and recovers it"
+  },
+  {
+   "route": "decode",
    "role": "combobox",
    "name": "Delay model",
    "regex": false,

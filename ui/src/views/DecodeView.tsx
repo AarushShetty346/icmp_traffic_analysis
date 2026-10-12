@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import OwnMessageDemo from "../components/OwnMessageDemo";
 import { GroupedBars } from "../components/charts/Bars";
 import { BitGrid } from "../components/charts/BitGrid";
 import { ChartFrame } from "../components/charts/ChartFrame";
@@ -57,7 +58,7 @@ export default function DecodeView() {
     </Panel>
   );
   if (!run) {
-    return <div className="grid gap-4">{pickers}<EmptyState title="No covert run with known bits">Covert CSV files need the bits that were sent; type them in the Runs table.</EmptyState></div>;
+    return <div className="grid gap-4"><OwnMessageDemo />{pickers}<EmptyState title="No covert run with known bits">Covert CSV files need the bits that were sent; type them in the Runs table.</EmptyState></div>;
   }
 
   const sent = run.bits!;
@@ -82,6 +83,7 @@ export default function DecodeView() {
 
   return (
     <div className="grid gap-4">
+      <OwnMessageDemo />
       {pickers}
       <Panel title="Threshold" id="threshold" help="A gap shorter than the threshold decodes as 0, otherwise 1. The fixed threshold is the nominal 1 s; the adaptive one splits this run's gaps into two groups (2-means), so it follows a shifted network delay.">
         <div className="grid gap-3 md:grid-cols-2">

@@ -108,7 +108,9 @@ export default function RunsView() {
           <li><strong className="text-ink">3. Decode</strong><br />Read short and long gaps as 0s and 1s.</li>
         </ol>
         <p className="mt-3 text-sm text-ink-2">
-          The results below currently come from a simulator. No real lab captures have been added yet.
+          {totals.capture === 0
+            ? "Only simulated runs are loaded right now; real lab captures are still needed."
+            : `${totals.capture} run${totals.capture === 1 ? " is" : "s are"} marked Real capture. Check each run's source before using its results.`}{" "}
           Try the message example in <a href="#/decode" className="text-accent underline">Decode</a>,
           then see what evidence is still needed in <a href="#/evidence" className="text-accent underline">Evidence</a>.
         </p>

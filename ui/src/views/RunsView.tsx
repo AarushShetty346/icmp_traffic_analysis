@@ -98,7 +98,7 @@ export default function RunsView() {
     <div className="grid gap-4">
       <Panel title="What this project does" id="intro">
         <p className="max-w-prose text-sm text-ink-2">
-          A normal computer sends ping requests at roughly regular intervals. A hidden message can change
+          A regular ping test sends requests at roughly even intervals. A hidden message can change
           the time between requests: a short gap can stand for 0 and a long gap for 1. This project checks
           those gaps to see whether the traffic looks normal or carries a message.
         </p>

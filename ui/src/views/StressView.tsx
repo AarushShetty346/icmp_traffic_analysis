@@ -99,7 +99,7 @@ export default function StressView() {
           <ul className="mt-2 flex flex-wrap gap-1">
             {sel.runIds.map((id) => (
               <li key={id}>
-                <a href={`#/signal?a=${encodeURIComponent(id)}`} className="inline-flex min-h-11 items-center rounded-md border border-line-strong px-3 font-mono text-xs text-ink hover:bg-surface-2">
+                <a href={`#/signal?a=${encodeURIComponent(id)}`} className="pressable inline-flex min-h-11 items-center rounded-md border border-line-strong px-3 font-mono text-xs text-ink hover:bg-surface-2">
                   {id.replace(/^sim-/, "")}
                 </a>
               </li>

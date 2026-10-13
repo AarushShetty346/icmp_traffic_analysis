@@ -29,7 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       className={cx(
-        "inline-flex min-h-11 items-center justify-center gap-2 rounded-md font-medium transition-colors duration-[var(--dur-fast)]",
+        "inline-flex min-h-11 items-center justify-center gap-2 pressable rounded-md font-medium",
         "disabled:cursor-not-allowed disabled:opacity-50",
         size === "md" ? "px-4 text-sm" : "min-w-11 px-3 text-sm",
         styles[variant],

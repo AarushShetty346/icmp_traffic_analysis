@@ -96,7 +96,7 @@ export default function App() {
                 return (
                   <li key={r}>
                     <a href={`#/${r}`} aria-current={route === r ? "page" : undefined}
-                      className={`flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-2 py-1 text-xs md:flex-row md:gap-1.5 md:px-3 md:py-0 md:text-sm ${route === r ? "bg-accent text-accent-ink" : "text-ink-2 hover:bg-surface-2 hover:text-ink"}`}>
+                      className={`pressable flex min-h-11 flex-col items-center justify-center gap-0.5 rounded-md px-2 py-1 text-xs md:flex-row md:gap-1.5 md:px-3 md:py-0 md:text-sm ${route === r ? "bg-accent text-accent-ink" : "text-ink-2 hover:bg-surface-2 hover:text-ink"}`}>
                       <Icon className="size-4 shrink-0" aria-hidden />
                       {ROUTE_LABEL[r]}
                     </a>
@@ -112,7 +112,7 @@ export default function App() {
             </Button>
             <label className="sr-only" htmlFor="theme">Theme</label>
             <select id="theme" value={theme} onChange={(e) => setTheme(e.target.value as ThemeChoice)}
-              className="min-h-11 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink">
+              className="hover-fade min-h-11 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink hover:bg-surface-2">
               <option value="system">System theme</option>
               <option value="light">Light</option>
               <option value="dark">Dark</option>
@@ -139,7 +139,7 @@ export default function App() {
           {pinnedRun ? (
             <nav aria-label="Breadcrumb" className="mb-1 text-sm text-ink-3">
               <ol className="flex flex-wrap items-center gap-1">
-                <li><a href="#/runs" className="inline-flex min-h-11 items-center underline hover:text-ink">Runs</a></li>
+                <li><a href="#/runs" className="hover-fade inline-flex min-h-11 items-center underline hover:text-ink">Runs</a></li>
                 <li aria-hidden><ChevronRightIcon className="size-4" /></li>
                 <li>{ROUTE_LABEL[route]}</li>
                 <li aria-hidden><ChevronRightIcon className="size-4" /></li>
@@ -156,7 +156,7 @@ export default function App() {
           <div className="grid gap-4 md:grid-cols-2"><ChartSkeleton /><ChartSkeleton /></div>
         ) : (
           <Suspense fallback={<div className="grid gap-4 md:grid-cols-2"><ChartSkeleton /><ChartSkeleton /></div>}>
-            <View />
+            <div key={route} className="view-enter"><View /></div>
           </Suspense>
         )}
       </main>

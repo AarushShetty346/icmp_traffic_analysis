@@ -17,6 +17,13 @@ export async function open(page: Page, hash: string) {
   await page.goto(`/${hash}`);
   await expect(page.locator("main h1")).toBeVisible();
   await expect(page.getByRole("status", { name: /Loading/ })).toHaveCount(0, { timeout: 15_000 });
+  await settled(page);
+}
+
+/** Wait for finite animations (a view's panels rising in) to finish, so checks see the resting page. */
+export async function settled(page: Page) {
+  await page.waitForFunction(() => document.getAnimations().every((a) =>
+    a.playState !== "running" || a.effect?.getComputedTiming().iterations === Infinity));
 }
 
 export async function upload(page: Page) {

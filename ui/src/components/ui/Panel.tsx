@@ -23,15 +23,15 @@ export function Panel({ title, help, provenance, actions, children, className, i
             {actions}
             {collapsible ? (
               <button type="button" aria-expanded={open} aria-controls={bodyId} onClick={() => setOpen((o) => !o)}
-                className="inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm text-ink-2 hover:bg-surface-2 hover:text-ink">
+                className="inline-flex min-h-11 items-center gap-1 pressable rounded-md px-2 text-sm text-ink-2 hover:bg-surface-2 hover:text-ink">
                 {open ? "Hide" : "Show"}<span className="sr-only"> {title.toLowerCase()}</span>
-                <ChevronDownIcon className={cx("size-4 transition-transform", open && "rotate-180")} aria-hidden />
+                <ChevronDownIcon className={cx("size-4 transition-transform duration-[var(--dur-base)] ease-[var(--ease-in-out)]", open && "rotate-180")} aria-hidden />
               </button>
             ) : null}
           </div>
         ) : null}
       </header>
-      <div id={bodyId} hidden={!shown} className="min-w-0 p-4">{shown ? children : null}</div>
+      <div id={bodyId} hidden={!shown} className={cx("min-w-0 p-4", collapsible && "reveal")}>{shown ? children : null}</div>
     </section>
   );
 }

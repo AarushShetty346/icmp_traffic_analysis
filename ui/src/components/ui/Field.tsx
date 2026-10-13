@@ -74,7 +74,7 @@ export function SliderField({ label, help, value, min, max, step, unit = "", for
         <RSlider.Track className="relative h-1.5 grow rounded-full bg-surface-2 ring-1 ring-line">
           <RSlider.Range className="absolute h-full rounded-full bg-accent" />
         </RSlider.Track>
-        <RSlider.Thumb aria-labelledby={id} aria-valuetext={shown} className="block size-5 rounded-full border-2 border-accent bg-surface shadow" />
+        <RSlider.Thumb aria-labelledby={id} aria-valuetext={shown} className="block size-5 rounded-full border-2 border-accent bg-surface shadow transition-transform duration-[var(--dur-press)] ease-[var(--ease-out)] active:scale-110" />
       </RSlider.Root>
     </div>
   );
@@ -103,8 +103,8 @@ export function RangeField({ label, help, value, min, max, step, format, onValue
         <RSlider.Track className="relative h-1.5 grow rounded-full bg-surface-2 ring-1 ring-line">
           <RSlider.Range className="absolute h-full rounded-full bg-accent" />
         </RSlider.Track>
-        <RSlider.Thumb aria-label={`${label} start`} aria-valuetext={format(value[0])} className="block size-5 rounded-full border-2 border-accent bg-surface shadow" />
-        <RSlider.Thumb aria-label={`${label} end`} aria-valuetext={format(value[1])} className="block size-5 rounded-full border-2 border-accent bg-surface shadow" />
+        <RSlider.Thumb aria-label={`${label} start`} aria-valuetext={format(value[0])} className="block size-5 rounded-full border-2 border-accent bg-surface shadow transition-transform duration-[var(--dur-press)] ease-[var(--ease-out)] active:scale-110" />
+        <RSlider.Thumb aria-label={`${label} end`} aria-valuetext={format(value[1])} className="block size-5 rounded-full border-2 border-accent bg-surface shadow transition-transform duration-[var(--dur-press)] ease-[var(--ease-out)] active:scale-110" />
       </RSlider.Root>
     </div>
   );
@@ -118,9 +118,9 @@ export function SwitchField({ label, checked, onCheckedChange, help }: { label: 
         id={id}
         checked={checked}
         onCheckedChange={onCheckedChange}
-        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-line-strong bg-surface-2 transition-colors data-[state=checked]:border-accent data-[state=checked]:bg-accent"
+        className="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border border-line-strong pressable bg-surface-2 data-[state=checked]:border-accent data-[state=checked]:bg-accent"
       >
-        <RSwitch.Thumb className="block size-4 translate-x-1 rounded-full bg-ink-3 transition-transform duration-[var(--dur-fast)] data-[state=checked]:translate-x-6 data-[state=checked]:bg-accent-ink" />
+        <RSwitch.Thumb className="block size-4 translate-x-1 rounded-full bg-ink-3 transition-[translate,background-color] duration-[var(--dur-base)] ease-[var(--ease-out)] data-[state=checked]:translate-x-6 data-[state=checked]:bg-accent-ink" />
       </RSwitch.Root>
       <label htmlFor={id} className="text-sm text-ink-2">{label}</label>
       {help ? <InfoTip term={label}>{help}</InfoTip> : null}
@@ -146,7 +146,7 @@ export function Segmented<T extends string>({ label, value, options, onValueChan
           <ToggleGroup.Item
             key={o.value}
             value={o.value}
-            className="min-h-10 flex-1 rounded-[5px] px-3 text-sm text-ink-2 hover:text-ink data-[state=on]:bg-accent data-[state=on]:text-accent-ink"
+            className="pressable min-h-10 flex-1 rounded-[5px] px-3 text-sm text-ink-2 hover:text-ink data-[state=on]:bg-accent data-[state=on]:text-accent-ink"
           >
             {o.label}
           </ToggleGroup.Item>

@@ -17,12 +17,18 @@
   --sim-50: #faf6f1; --sim-100: #f5ebe1; --sim-200: #e9d6c0; --sim-300: #dabb98; --sim-400: #c69861;
   --sim-500: #af7112; --sim-600: #915200; --sim-700: #783b00; --sim-800: #5b2d00; --sim-900: #3f2000; --sim-950: #251400;
 
-  /* motion tokens: motion only explains a data change */
-  --dur-fast: 120ms;
+  /* motion tokens. Strong custom curves (the built-in CSS easings are too weak):
+     ease-out for anything entering or responding to a press, ease-in-out for
+     things moving on screen. UI motion stays under 300ms. */
+  --dur-press: 160ms;
+  --dur-fast: 150ms;
   --dur-base: 200ms;
-  --dur-slow: 320ms;
-  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
+  --dur-slow: 280ms;
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --press-scale: 0.97;
+  --enter-y: 6px;
+  --enter-scale: 0.96;
 
   color-scheme: light;
   --bg: var(--neutral-50);
@@ -152,12 +158,60 @@ body {
 .skeleton {
   background: linear-gradient(90deg, var(--surface-2), var(--line), var(--surface-2));
   background-size: 200% 100%;
-  animation: shimmer 1.4s var(--ease-in-out) infinite;
+  animation: shimmer 1.4s linear infinite; /* constant motion: linear */
 }
 @keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 .fade-data { transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+
+/* ---------------------------------------------------------------
+   Motion. Every rule answers "why does this move?":
+   press feedback, an overlay entering or leaving, or a view arriving.
+   --------------------------------------------------------------- */
+
+/* Press feedback: anything pressable shrinks a touch so the UI feels like it heard you. */
+.pressable {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: var(--dur-press);
+  transition-timing-function: var(--ease-out);
+}
+.pressable:active:not(:disabled) { transform: scale(var(--press-scale)); }
+
+/* Hover colour changes use plain ease, never a pop. */
+.hover-fade { transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+
+/* Modal: fades and grows from 96% around its centre (modals are not anchored to a trigger).
+   Exit is faster than enter. Radix waits for the exit animation before unmounting. */
+@keyframes overlay-in { from { opacity: 0; } }
+@keyframes overlay-out { to { opacity: 0; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(var(--enter-scale)); } }
+@keyframes pop-out { to { opacity: 0; transform: scale(var(--enter-scale)); } }
+.dialog-overlay[data-state="open"] { animation: overlay-in var(--dur-base) var(--ease-out); }
+.dialog-overlay[data-state="closed"] { animation: overlay-out var(--dur-fast) var(--ease-out); }
+.dialog-content { transform-origin: center; }
+.dialog-content[data-state="open"] { animation: pop-in var(--dur-base) var(--ease-out); }
+.dialog-content[data-state="closed"] { animation: pop-out var(--dur-fast) var(--ease-out); }
+
+/* Popover: grows out of the button that opened it, not from its own centre. */
+.popover { transform-origin: var(--radix-popover-content-transform-origin); }
+.popover[data-state="open"] { animation: pop-in var(--dur-fast) var(--ease-out); }
+.popover[data-state="closed"] { animation: pop-out 120ms var(--ease-out); }
+
+/* A view arriving: its panels rise in, 50ms apart. Decorative, so it never blocks input. */
+@keyframes rise-in { from { opacity: 0; transform: translateY(var(--enter-y)); } }
+.view-enter > * > * { animation: rise-in var(--dur-slow) var(--ease-out) both; animation-delay: 200ms; }
+.view-enter > * > :nth-child(1) { animation-delay: 0ms; }
+.view-enter > * > :nth-child(2) { animation-delay: 50ms; }
+.view-enter > * > :nth-child(3) { animation-delay: 100ms; }
+.view-enter > * > :nth-child(4) { animation-delay: 150ms; }
+
+/* A collapsed panel opening: its body settles in rather than snapping. */
+.reveal { animation: rise-in var(--dur-base) var(--ease-out); }
+
+/* Reduced motion means gentler, not none: keep fades that explain a change, drop movement and decoration. */
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+  :root { --press-scale: 1; --enter-y: 0px; --enter-scale: 1; }
+  .view-enter > * > * { animation: none; }
+  .skeleton, .animate-pulse { animation: none; }
 }
 
 /* print: the Evidence report prints as a plain document */

@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 
 export interface Command { id: string; label: string; hint?: string; run: () => void }
 
-/** Ctrl/Cmd-K command list: type to filter, arrows to move, Enter to run. */
+/** Ctrl/Cmd-K command list: type to filter, arrows to move, Enter to run.
+ *  Deliberately not animated: it is opened from the keyboard, often, and must feel instant. */
 export function CommandPalette({ open, onOpenChange, commands }: { open: boolean; onOpenChange: (o: boolean) => void; commands: Command[] }) {
   const [q, setQ] = useState("");
   const [active, setActive] = useState(0);

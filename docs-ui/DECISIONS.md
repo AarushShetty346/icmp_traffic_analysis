@@ -73,7 +73,7 @@ Each missing skill's procedure was followed by hand:
 | Frontend Design | `DESIGN_BRIEF.md` written first |
 | Color System Builder, Theme Factory | `ui/scripts/palette.mjs`: OKLCH 50–950 scales, semantic tokens, contrast checks (all pass, AAA for body text) |
 | Typography Scale Builder | Fluid `clamp()` scale in `index.css`; IBM Plex Sans + Mono |
-| Design System Builder, UI Component Generator, Storybook Generator | `ui/src/components/ui` primitives, `ui/src/stories` (default, disabled, loading, error, empty, light/dark toolbar) |
+| Design System Builder, UI Component Generator, Storybook Generator | `ui/src/components/ui` primitives, `ui/src/stories` (default, disabled, loading, error, empty) |
 | Animation Library, Motion Design System | Motion tokens in `index.css`, reduced-motion respected |
 | Responsive Design Helper / Tester, Accessibility Checker, Site Audit | Playwright overflow checks at six widths, axe on every route, Lighthouse, console-error checks (`QA_REPORT.md`) |
 

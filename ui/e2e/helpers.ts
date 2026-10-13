@@ -34,13 +34,13 @@ export async function upload(page: Page) {
 export const ROLE_LINE = /^\s*- '?(button|link|combobox|slider|checkbox|radio|switch|textbox|searchbox|spinbutton|menuitem|tab|option)(?: "((?:[^"\\]|\\.)*)")?(?=[\s:'[]|$)/;
 
 /** Interactive controls on the page as [role, accessible name], from the accessibility tree. */
-export async function controls(page: Page, withOptions: boolean): Promise<[string, string][]> {
+export async function controls(page: Page): Promise<[string, string][]> {
   const snap = await page.locator("body").ariaSnapshot();
   const out: [string, string][] = [];
   for (const line of snap.split("\n")) {
     const m = line.match(ROLE_LINE);
     if (!m) continue;
-    if (m[1] === "option" && !withOptions) continue;
+    if (m[1] === "option") continue;
     out.push([m[1], (m[2] ?? "").replace(/\\"/g, '"')]);
   }
   return out;

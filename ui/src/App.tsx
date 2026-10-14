@@ -1,17 +1,13 @@
 import {
-  ChevronRightIcon, ClipboardDocumentCheckIcon, CommandLineIcon, LockOpenIcon, ShieldExclamationIcon, SignalIcon, Squares2X2Icon, TableCellsIcon,
+  ChevronRightIcon, ClipboardDocumentCheckIcon, LockOpenIcon, ShieldExclamationIcon, SignalIcon, Squares2X2Icon, TableCellsIcon,
 } from "@heroicons/react/20/solid";
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo } from "react";
 import EvidenceView from "./views/EvidenceView";
 import RunsView from "./views/RunsView";
-import { CommandPalette, type Command } from "./components/CommandPalette";
-import { Button } from "./components/ui/Button";
 import { ProvenanceBadge, provenanceOf } from "./components/ui/ProvenanceBadge";
 import { ChartSkeleton, ErrorState } from "./components/ui/States";
 import { useData } from "./lib/data/DataContext";
-import { downloadBlob } from "./lib/exporting";
 import { ROUTE_LABEL, ROUTES, useRoute, type Route } from "./lib/state/route";
-import { useTheme, type ThemeChoice } from "./lib/state/theme";
 
 // Runs (the landing view) and Evidence are bundled eagerly and render before the data arrives.
 const VIEWS: Record<Route, React.ComponentType> = {
@@ -45,20 +41,11 @@ const INTRO: Record<Route, string> = {
 };
 
 export default function App() {
-  const { route, params, navigate } = useRoute();
-  const { status, error, bundle, uploads, runs, retry, bundleUrl } = useData();
+  const { route, params } = useRoute();
+  const { status, error, bundle, uploads, runs, retry } = useData();
   const pinnedRun = RUN_PARAM[route] ? runs.find((r) => r.id === params.get(RUN_PARAM[route]!)) : undefined;
-  const { theme, setTheme } = useTheme();
-  const [paletteOpen, setPaletteOpen] = useState(false);
   const View = VIEWS[route];
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") { e.preventDefault(); setPaletteOpen((o) => !o); }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
   useEffect(() => { document.title = `${ROUTE_LABEL[route]} · Cadence`; }, [route]);
 
   const sources = useMemo(() => {
@@ -69,14 +56,6 @@ export default function App() {
     return s.length ? s : (["simulated"] as const);
   }, [bundle, uploads]);
   const prov = provenanceOf(sources);
-
-  const commands: Command[] = useMemo(() => [
-    ...ROUTES.map((r) => ({ id: `go-${r}`, label: `Go to ${ROUTE_LABEL[r]}`, hint: "view", run: () => navigate(r) })),
-    ...(["system", "light", "dark"] as ThemeChoice[]).map((t) => ({ id: `theme-${t}`, label: `Theme: ${t}`, hint: "appearance", run: () => setTheme(t) })),
-    { id: "add-csv", label: "Add tshark CSV files", hint: "runs", run: () => { navigate("runs", { add: "1" }); } },
-    { id: "bundle", label: "Download the JSON bundle", hint: "export", run: () => fetch(bundleUrl).then((r) => r.blob()).then((b) => downloadBlob("cadence-bundle.json", b)) },
-    { id: "print", label: "Print or save the Evidence report as PDF", hint: "export", run: () => { navigate("evidence"); setTimeout(() => window.print(), 400); } },
-  ], [navigate, setTheme, bundleUrl]);
 
   return (
     <>
@@ -105,19 +84,6 @@ export default function App() {
               })}
             </ul>
           </nav>
-          <div className="ml-auto flex items-center gap-1">
-            <Button size="sm" variant="ghost" onClick={() => setPaletteOpen(true)} icon={<CommandLineIcon className="size-4" aria-hidden />} aria-keyshortcuts="Control+K Meta+K">
-              <span className="hidden sm:inline">Commands</span><span className="sr-only sm:hidden">Commands</span>
-              <kbd className="hidden rounded border border-line px-1 font-mono text-[0.7rem] text-ink-3 lg:inline">Ctrl K</kbd>
-            </Button>
-            <label className="sr-only" htmlFor="theme">Theme</label>
-            <select id="theme" value={theme} onChange={(e) => setTheme(e.target.value as ThemeChoice)}
-              className="hover-fade min-h-11 rounded-md border border-line-strong bg-surface px-2 text-sm text-ink hover:bg-surface-2">
-              <option value="system">System theme</option>
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
         </div>
         <div role="note" aria-label="Data provenance" className={`border-t border-line ${prov === "capture" ? "bg-real-bg" : prov === "simulated" ? "bg-sim-bg" : "bg-surface-2"}`}>
           <div className="mx-auto flex max-w-[1400px] flex-wrap items-center gap-x-3 gap-y-1 px-4 py-1.5 text-xs text-ink">
@@ -166,7 +132,6 @@ export default function App() {
           <a className="inline-flex min-h-11 items-center underline" href="#/evidence">About this project</a>
         </div>
       </footer>
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={commands} />
     </>
   );
 }

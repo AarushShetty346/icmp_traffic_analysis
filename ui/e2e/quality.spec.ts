@@ -10,20 +10,16 @@ const ROUTES = ["runs", "signal", "detectors", "stress", "decode", "evidence"];
 const here = path.dirname(fileURLToPath(import.meta.url));
 const out = path.join(here, "..", "..", "docs-ui");
 
-for (const theme of ["light", "dark"] as const) {
-  for (const route of ROUTES) {
-    test(`axe: ${route}, ${theme} theme, no critical or serious violations`, async ({ page }) => {
-      const errors = watchErrors(page);
-      await page.addInitScript((t) => localStorage.setItem("cadence-theme", t), theme);
-      await open(page, `#/${route}`);
-      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-      const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
-      const bad = result.violations.filter((v) => v.impact === "critical" || v.impact === "serious")
-        .map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`);
-      expect(bad).toEqual([]);
-      expect(errors).toEqual([]);
-    });
-  }
+for (const route of ROUTES) {
+  test(`axe: ${route}, no critical or serious violations`, async ({ page }) => {
+    const errors = watchErrors(page);
+    await open(page, `#/${route}`);
+    const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]).analyze();
+    const bad = result.violations.filter((v) => v.impact === "critical" || v.impact === "serious")
+      .map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 3).map((n) => n.target.join(" ")).join(" | ")}`);
+    expect(bad).toEqual([]);
+    expect(errors).toEqual([]);
+  });
 }
 
 test("no horizontal scroll at 360, 390, 768, 1024, 1440 and 1920 px", async ({ page }, info) => {
@@ -71,29 +67,16 @@ test("keyboard-only walkthrough reaches every view's controls with a visible foc
     expect(seen.at(-1)).toContain("About this project");
     expect(unringed, `${route}: focused elements without a visible focus ring`).toBe(0);
   }
-  // Palette by keyboard: Ctrl+K, type, Enter.
-  await open(page, "#/runs");
-  await page.keyboard.press("Control+k");
-  await page.keyboard.type("decode");
-  await page.keyboard.press("Enter");
-  await expect(page).toHaveURL(/#\/decode/);
-  log.push("### Command palette", "", "Ctrl+K, type `decode`, Enter: opens Decode.", "");
   if (process.env.RECORD) fs.writeFileSync(path.join(out, "keyboard-walkthrough.md"), `# Keyboard walkthrough (recorded by e2e/quality.spec.ts)\n\n${log.join("\n")}`);
 });
 
-test("screenshots of every route, light and dark", async ({ page }, info) => {
+test("screenshots of every route", async ({ page }, info) => {
   test.skip(!process.env.RECORD, "set RECORD=1 to refresh docs-ui/screens");
   const tag = info.project.name.startsWith("mobile") ? "390" : "1440";
   fs.mkdirSync(path.join(out, "screens"), { recursive: true });
-  for (const theme of ["light", "dark"]) {
-    for (const route of ROUTES) {
-      await open(page, `#/${route}`);
-      await page.evaluate((t) => localStorage.setItem("cadence-theme", t), theme);
-      await page.reload();
-      await open(page, `#/${route}`);
-      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-      await page.waitForTimeout(300);
-      await page.screenshot({ path: path.join(out, "screens", `${route}-${theme}-${tag}.png`), fullPage: true });
-    }
+  for (const route of ROUTES) {
+    await open(page, `#/${route}`);
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: path.join(out, "screens", `${route}-light-${tag}.png`), fullPage: true });
   }
 });

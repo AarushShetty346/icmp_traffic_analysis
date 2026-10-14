@@ -27,9 +27,8 @@ project title appears only in Evidence → About.
 - **Colour.** One brand hue (teal, OKLCH hue 205) generated to a 50–950 scale, a neutral warm grey, and
   an amber scale for SIMULATED (`ui/scripts/palette.mjs`). Semantic tokens (`--bg`, `--surface`,
   `--ink`, `--ink-2`, `--ink-3`, `--line`, `--accent`, `--sim-*`, `--real-*`, `--flag`) are CSS variables;
-  Tailwind v4 reads them through `@theme inline` in `ui/src/styles/index.css`. Dark mode is chosen per
-  token, not inverted. Contrast is computed by the script: body text ≥ 7:1 (AAA) and all other text ≥ 4.5:1
-  in both themes.
+  Tailwind v4 reads them through `@theme inline` in `ui/src/styles/index.css`. The site is light only. Contrast is computed by the
+  script: body text ≥ 7:1 (AAA) and all other text ≥ 4.5:1.
 - **Data colours.** Normal traffic blue, covert orange (validated with the dataviz skill's palette checker
   for colour-vision deficiency separation); a single-hue 8-step sequential blue ramp for the stress
   matrix, with the cell label ink chosen per step. Flags (suspicious windows, wrong bits, lost requests)
@@ -45,7 +44,7 @@ project title appears only in Evidence → About.
 
 Runs → Signal → Detectors → Stress matrix → Decode → Evidence, as top-level tabs (a 3×2 grid on phones).
 Every view keeps its state in the URL hash (`#/detectors?cond=jitter%2050%20ms&w=16`), so any screen is a
-link. Ctrl/Cmd-K opens a command palette for navigation, theme, adding CSV files and exports.
+link.
 
 ## States
 

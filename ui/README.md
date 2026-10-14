@@ -12,7 +12,7 @@ npm run preview        # serve dist/ on :4173
 npm test               # unit tests, incl. parity with Python golden fixtures to 1e-9
 npm run typecheck
 npm run size           # initial JS budget: 300 KB gzipped
-npm run storybook      # component states, light/dark toolbar
+npm run storybook      # component states
 npm run e2e            # Playwright: controls manifest, axe, overflow, keyboard (needs npm run build)
 ```
 

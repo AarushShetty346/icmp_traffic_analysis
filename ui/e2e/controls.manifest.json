@@ -1,5 +1,5 @@
 {
- "$comment": "Every interactive control in Cadence, by route. e2e/controls.spec.ts fails if the page shows a control that matches no entry here, and runs each entry's action and expectation at 390x844 and 1440x900. route '*' applies everywhere; 'palette' is the open command palette.",
+ "$comment": "Every interactive control in Cadence, by route. e2e/controls.spec.ts fails if the page shows a control that matches no entry here, and runs each entry's action and expectation at 390x844 and 1440x900. route '*' applies everywhere.",
  "scans": {
   "runs": [
    "#/runs",
@@ -21,9 +21,6 @@
   ],
   "evidence": [
    "#/evidence"
-  ],
-  "palette": [
-   "#/stress"
   ]
  },
  "controls": [
@@ -114,28 +111,6 @@
     "hash": "^#/evidence"
    },
    "effect": "Opens the Evidence view"
-  },
-  {
-   "route": "*",
-   "role": "button",
-   "name": "^Commands",
-   "regex": true,
-   "action": "click",
-   "expect": {
-    "dialog": true
-   },
-   "effect": "Opens the command palette"
-  },
-  {
-   "route": "*",
-   "role": "combobox",
-   "name": "Theme",
-   "regex": false,
-   "action": "select",
-   "expect": {
-    "theme": true
-   },
-   "effect": "Switches between system, light and dark theme"
   },
   {
    "route": "*",
@@ -931,139 +906,6 @@
     "download": true
    },
    "effect": "Downloads the bundle's JSON Schema"
-  },
-  {
-   "route": "palette",
-   "role": "combobox",
-   "name": "Search commands",
-   "regex": false,
-   "action": "fill-enter",
-   "expect": {
-    "hash": "^#/evidence"
-   },
-   "effect": "Filters commands; Enter runs the first match",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Go to Runs",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "hash": "^#/runs"
-   },
-   "effect": "Opens Runs",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Go to Signal",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "hash": "^#/signal"
-   },
-   "effect": "Opens Signal",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Go to Detectors",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "hash": "^#/detectors"
-   },
-   "effect": "Opens Detectors",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Go to Stress matrix",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "hash": "^#/stress"
-   },
-   "effect": "Opens Stress matrix",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Go to Decode",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "hash": "^#/decode"
-   },
-   "effect": "Opens Decode",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Go to Evidence",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "hash": "^#/evidence"
-   },
-   "effect": "Opens Evidence",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "^Theme: (system|light|dark)$",
-   "regex": true,
-   "action": "click",
-   "expect": {
-    "themeAny": true
-   },
-   "effect": "Sets the theme",
-   "start": "#/stress",
-   "all": true
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Add tshark CSV files",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "filechooser": true
-   },
-   "effect": "Opens Runs and the file picker",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Download the JSON bundle",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "download": true
-   },
-   "effect": "Downloads the data bundle",
-   "start": "#/stress"
-  },
-  {
-   "route": "palette",
-   "role": "option",
-   "name": "Print or save the Evidence report as PDF",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "print": true
-   },
-   "effect": "Opens Evidence and the print dialog",
-   "start": "#/stress"
   }
  ]
 }

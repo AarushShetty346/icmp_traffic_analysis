@@ -12,7 +12,6 @@ from pathlib import Path
 import markdown
 from playwright.sync_api import sync_playwright
 
-
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "handouts"
 OUT.mkdir(exist_ok=True)

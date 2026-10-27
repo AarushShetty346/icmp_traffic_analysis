@@ -371,11 +371,9 @@
    "role": "combobox",
    "name": "Delay model",
    "regex": false,
-   "action": "select",
-   "expect": {
-    "hash": "model="
-   },
-   "effect": "Changes delay model and redraws every chart"
+   "action": "inspect",
+   "expect": {},
+   "effect": "Shows the delay model (the shipped Review 3 bundle has only netem-style, so there is nothing to switch to)"
   },
   {
    "route": "signal",
@@ -498,11 +496,9 @@
    "role": "combobox",
    "name": "Delay model",
    "regex": false,
-   "action": "select",
-   "expect": {
-    "hash": "model="
-   },
-   "effect": "Changes delay model and recomputes every verdict"
+   "action": "inspect",
+   "expect": {},
+   "effect": "Shows the delay model (the shipped Review 3 bundle has only netem-style, so there is nothing to switch to)"
   },
   {
    "route": "detectors",
@@ -683,11 +679,9 @@
    "role": "combobox",
    "name": "Delay model",
    "regex": false,
-   "action": "select",
-   "expect": {
-    "hash": "model="
-   },
-   "effect": "Changes delay model shown in the matrix"
+   "action": "inspect",
+   "expect": {},
+   "effect": "Shows the delay model (the shipped Review 3 bundle has only netem-style, so there is nothing to switch to)"
   },
   {
    "route": "stress",
@@ -765,11 +759,9 @@
    "role": "combobox",
    "name": "Delay model",
    "regex": false,
-   "action": "select",
-   "expect": {
-    "hash": "model="
-   },
-   "effect": "Changes delay model and decodes again"
+   "action": "inspect",
+   "expect": {},
+   "effect": "Shows the delay model (the shipped Review 3 bundle has only netem-style, so there is nothing to switch to)"
   },
   {
    "route": "decode",
@@ -854,7 +846,7 @@
   {
    "route": "evidence",
    "role": "link",
-   "name": "^(scripts|icmp_detector)/.+",
+   "name": "^(scripts|icmp_detector|results)/.+",
    "regex": true,
    "action": "inspect",
    "expect": {

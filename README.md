@@ -84,7 +84,8 @@ python -m icmp_detector study --out results                                   # 
 python -m icmp_detector study --out results/netem --delay-model netem \
     --seeds 7 8 9 10 11 --bootstrap 500                                       # netem model, CIs, seed spread
 python -m icmp_detector benchmark                                             # stress grid + speed
-python -m icmp_detector export-ui --out ui/public/data                        # workbench data (validated)
+python -m icmp_detector export-ui --out ui/public/data --plan review3        # shipped workbench data: the Review 3 study
+python -m icmp_detector export-ui --out ui/public/data                        # wider stress grid (seed 11, 4 channels)
 python -m icmp_detector golden --out tests/golden                             # parity fixtures
 ```
 
@@ -138,7 +139,7 @@ python -m icmp_detector decode captures/test_covert_1.csv --bits 0101... --thres
 python -m icmp_detector fieldcheck --normal captures/normal_j20_r01.csv --covert captures/covert_j20_r01.csv
 
 # 6. put real runs into the workbench (they are badged REAL CAPTURE)
-python -m icmp_detector export-ui --out ui/public/data --captures captures/ --src 10.0.0.1
+python -m icmp_detector export-ui --out ui/public/data --plan review3 --captures captures/ --src 10.0.0.1
 ```
 
 `--src`, `--dst` and `--ident` filter the flow (identifiers may be written `0x0001`, `1` or `01`). When ICMP

@@ -236,14 +236,19 @@ def cmd_fieldcheck(args) -> None:
 def cmd_export_ui(args) -> None:
     from .export import build_bundle, write_bundle
 
-    bundle = build_bundle(
-        seed=args.seed,
-        runs=args.runs,
-        n_boot=args.bootstrap,
-        captures=args.captures,
-        multi_seeds=tuple(args.seeds) if args.seeds else (),
-        src=args.src,
-    )
+    if args.plan == "review3":
+        from .export import REVIEW3
+
+        bundle = build_bundle(captures=args.captures, multi_seeds=tuple(args.seeds) if args.seeds else (), src=args.src, **REVIEW3)
+    else:
+        bundle = build_bundle(
+            seed=args.seed,
+            runs=args.runs,
+            n_boot=args.bootstrap,
+            captures=args.captures,
+            multi_seeds=tuple(args.seeds) if args.seeds else (),
+            src=args.src,
+        )
     for p in write_bundle(bundle, args.out):
         print(f"wrote {p} ({p.stat().st_size / 1024:.0f} KB)")
     prov = bundle["provenance"]
@@ -371,6 +376,8 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--seeds", type=int, nargs="*", default=[7, 8, 9, 10, 11], help="seeds for the seed-spread table")
     p.add_argument("--captures", help="folder of real tshark CSVs with capture manifests")
     p.add_argument("--src", help="keep only Echo Requests from this IP in real captures")
+    p.add_argument("--plan", choices=["stress", "review3"], default="stress",
+                   help="review3: the Review 3 study (seed 7, 10 runs, netem, 2 channels, 6 conditions); ignores --seed/--runs/--bootstrap")
     p.set_defaults(func=cmd_export_ui)
 
     p = sub.add_parser("golden", help="write parity fixtures for the workbench's TypeScript port")

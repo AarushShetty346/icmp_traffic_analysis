@@ -1,20 +1,20 @@
-import { ArrowDownTrayIcon, CheckCircleIcon, ClockIcon, PrinterIcon, QuestionMarkCircleIcon, BeakerIcon } from "@heroicons/react/20/solid";
+import { ArrowDownTrayIcon, CheckCircleIcon, ClockIcon, PrinterIcon, QuestionMarkCircleIcon, BeakerIcon, MinusCircleIcon, XCircleIcon } from "@heroicons/react/20/solid";
 import { Button } from "../components/ui/Button";
 import { DataTable } from "../components/ui/DataTable";
 import { Panel } from "../components/ui/Panel";
 import { ProvenanceBadge } from "../components/ui/ProvenanceBadge";
 import { StatTile } from "../components/ui/StatTile";
 import { Skeleton } from "../components/ui/States";
-import { LIMITS, objectives, STATUS_TEXT, type Status } from "../content/evidence";
+import { LIMITS, objectives, REFERENCES, STATUS_TEXT, type Status } from "../content/evidence";
 import { useData } from "../lib/data/DataContext";
 import { downloadBlob, downloadText } from "../lib/exporting";
 import { markdownReport } from "../lib/report";
 
 const STATUS_ICON: Record<Status, typeof CheckCircleIcon> = {
-  met: CheckCircleIcon, "code-ready": ClockIcon, "simulated-only": BeakerIcon, unknown: QuestionMarkCircleIcon,
+  met: CheckCircleIcon, partly: MinusCircleIcon, "not-met": XCircleIcon, "code-ready": ClockIcon, "simulated-only": BeakerIcon, unknown: QuestionMarkCircleIcon,
 };
 const STATUS_TONE: Record<Status, string> = {
-  met: "text-ok", "code-ready": "text-ink-2", "simulated-only": "text-sim-ink", unknown: "text-ink-3",
+  met: "text-ok", partly: "text-ink-2", "not-met": "text-ink-2", "code-ready": "text-ink-2", "simulated-only": "text-sim-ink", unknown: "text-ink-3",
 };
 
 export default function EvidenceView() {
@@ -44,13 +44,13 @@ export default function EvidenceView() {
 
       {loading ? <Skeleton className="h-24" label="Loading the data bundle" /> : <>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Objectives met with real data" value={`${objs.filter((o) => o.status === "met").length} of ${objs.length}`} />
-        <StatTile label="Code ready, waiting for lab data" value={String(objs.filter((o) => o.status === "code-ready").length)} />
-        <StatTile label="Simulated only" value={String(objs.filter((o) => o.status === "simulated-only").length)} provenance="simulated" />
-        <StatTile label="Wording still to add" value={String(objs.filter((o) => o.status === "unknown").length)} detail="from the Review 1 report" />
+        <StatTile label="Objectives met" value={`${objs.filter((o) => o.status === "met").length} of ${objs.length}`} detail="on simulated inputs, as in the Review 3 scorecard" />
+        <StatTile label="Partly met" value={String(objs.filter((o) => o.status === "partly").length)} detail="code or simulation exists; lab run pending" />
+        <StatTile label="Not met" value={String(objs.filter((o) => o.status === "not-met").length)} />
+        <StatTile label="Real captures loaded" value={String(runs.filter((r) => r.source === "capture").length)} detail="every number here is simulated until then" />
       </div>
 
-      <Panel title="Review 3 checklist" id="checklist" help="Status of each Review 1 objective, judged from the data that is actually loaded. Objectives with no wording are not in the repository yet.">
+      <Panel title="Review 3 checklist" id="checklist" help="Each Review 1 objective with its Review 3 status. Met means a working analysis validated on simulated inputs, not a completed lab evaluation; objectives that need lab data become met once real captures are loaded.">
         <ol className="grid gap-2">
           {objs.map((o) => {
             const Icon = STATUS_ICON[o.status];
@@ -103,10 +103,9 @@ export default function EvidenceView() {
 
 
       <Panel title="References" id="refs">
-        <p className="max-w-prose text-sm text-ink-2">
-          The reference list from the Review 1 report is not in the repository, so none is shown here rather than an invented one.
-          Add it to <span className="font-mono">ui/src/content/evidence.ts</span>.
-        </p>
+        <ol className="grid list-decimal gap-2 pl-6 text-sm text-ink-2">
+          {REFERENCES.map((r) => <li key={r} className="[overflow-wrap:anywhere]">{r}</li>)}
+        </ol>
       </Panel>
 
       <Panel title="Exports" id="exports" provenance={bundle?.provenance.hasCapture ? (bundle.provenance.hasSimulated ? "mixed" : "capture") : "simulated"}

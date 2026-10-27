@@ -2,6 +2,7 @@
 
     python -m icmp_detector export-ui --out ui/public/data
     python -m icmp_detector export-ui --out ui/public/data --captures captures/
+    python -m icmp_detector export-ui --out ui/public/data --plan review3   # the shipped bundle
 
 The bundle is validated against ``schema/bundle.schema.json`` before it is
 written. Every run, matrix cell and curve carries ``source`` (``simulated`` or
@@ -34,11 +35,25 @@ from .experiment import CHANNELS, LabelledSet, build_baseline, evaluate, multi_s
 from .features import ALL_FEATURES
 from .generator import git_commit
 from .metrics import consecutive_gaps, decode_bits, decoding_accuracy, two_means_threshold
-from .simulate import DELAY_MODELS, channel_run, normal_run
+from .simulate import CONDITIONS, DELAY_MODELS, channel_run, normal_run
 
 SCHEMA_VERSION = "1.0.0"
 ROC_FEATURES = ("std", "iqr", "entropy", "off_nominal", "ks")
 MAX_ROC_POINTS = 32
+
+# The Review 3 study (results/netem): its two channels and six conditions. The subtle channel keeps the
+# workbench's "0.95/1.05 s" name; it is the "0.95/1.05 s (subtle)" channel of RESULTS.md.
+REVIEW3_CHANNELS = {"0.75/1.25 s": CHANNELS["0.75/1.25 s"], "0.95/1.05 s": CHANNELS["0.95/1.05 s (subtle)"]}
+REVIEW3 = {
+    "seed": 7,
+    "runs": 10,
+    "n_boot": 500,
+    "example_runs": 10,
+    "delay_models": ("netem",),
+    "channels": REVIEW3_CHANNELS,
+    "conditions": CONDITIONS,
+    "multi_channels": REVIEW3_CHANNELS,
+}
 
 
 def schema() -> dict:
@@ -376,11 +391,12 @@ def build_bundle(
     delay_models: tuple[str, ...] = DELAY_MODELS,
     multi_seeds: tuple[int, ...] = (7, 8, 9, 10, 11),
     src: str | None = None,
+    multi_channels: dict = CHANNELS,
     **sim_kwargs,
 ) -> dict:
     sim = simulated_part(seed=seed, runs=runs, n_boot=n_boot, delay_models=delay_models, **sim_kwargs)
     cap = capture_part(captures, n_boot=n_boot, src=src) if captures else None
-    ms = multi_seed_study(multi_seeds, runs=10, requests=64, window_sizes=(32,), channels=CHANNELS, delay_model="netem") if multi_seeds else None
+    ms = multi_seed_study(multi_seeds, runs=10, requests=64, window_sizes=(32,), channels=multi_channels, delay_model="netem") if multi_seeds else None
     parts = [sim] + ([cap] if cap else [])
 
     def merged(key: str) -> list:

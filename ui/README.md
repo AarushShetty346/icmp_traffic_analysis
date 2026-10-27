@@ -2,7 +2,7 @@
 
 The analysis workbench for this project: a static React app that reads the JSON bundle exported by
 `python -m icmp_detector export-ui` and tshark CSV files you drop in, and recomputes the detectors in the
-browser. Every number is badged SIMULATED or REAL CAPTURE.
+browser. The guided case teaches the same methods step by step. Every number keeps its source label.
 
 ```bash
 npm ci
@@ -13,7 +13,7 @@ npm test               # unit tests, incl. parity with Python golden fixtures to
 npm run typecheck
 npm run size           # initial JS budget: 300 KB gzipped
 npm run storybook      # component states
-npm run e2e            # Playwright: controls manifest, axe, overflow, keyboard (needs npm run build)
+npm run e2e            # Playwright: guided case, controls, axe, overflow, keyboard (needs npm run build)
 ```
 
 If Playwright cannot download its browser, point it at a local Chromium: `CHROMIUM_PATH=/path/to/chrome npm run e2e`.
@@ -21,10 +21,12 @@ If Playwright cannot download its browser, point it at a local Chromium: `CHROMI
 
 ## Data
 
-`public/data/bundle.json` and `bundle.schema.json` come from the Python exporter; regenerate them with
+`public/data/bundle.json` is the 610-run simulated bundle used by the guided case. The narrower 250-run Review 3 study is preserved as `public/data/review3.bundle.json`; Evidence lets you download it. `bundle.schema.json` describes the data format. Regenerate either bundle with
 
 ```bash
-python -m icmp_detector export-ui --out ui/public/data                       # simulated only
+python -m icmp_detector export-ui --out review3-export --plan review3         # simulated only, narrower Review 3 study
+cp review3-export/bundle.json ui/public/data/review3.bundle.json             # preserve it beside the guided-case bundle
+python -m icmp_detector export-ui --out ui/public/data                       # simulated only, wider stress grid used by the guided case
 python -m icmp_detector export-ui --out ui/public/data --captures captures/   # plus real testbed CSVs
 ```
 
@@ -36,9 +38,9 @@ The bundle is validated with Zod (`src/lib/data/schema.ts`) before any view sees
 |---|---|
 | `src/lib/analysis/` | TypeScript port of features, detectors, ROC and decoding; `parity.test.ts` checks it against `tests/golden/` |
 | `src/lib/data/` | Bundle schema, CSV parser (runs in `src/workers/csv.worker.ts`), data context |
-| `src/views/` | Runs, Signal, Detectors, Stress matrix, Decode, Evidence |
+| `src/views/` | Guided case, Runs, Signal, Detectors, Stress matrix, Decode, Guide, Evidence |
 | `src/components/` | UI primitives (Radix-based) and SVG charts (d3-scale / d3-shape) |
-| `src/content/evidence.ts` | Review 3 checklist text and known limits; add the Review 1 objective wording and references here |
+| `src/content/evidence.ts` | Confirmed Review 3 objective checklist, references, and known limits |
 | `e2e/controls.manifest.json` | Every interactive control, its action and expected effect |
 | `scripts/palette.mjs` | Colour scales and contrast checks |
 

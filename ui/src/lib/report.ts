@@ -1,5 +1,5 @@
 // Markdown evidence report built from the loaded bundle. Every number carries its provenance.
-import { LIMITS, objectives, STATUS_TEXT } from "../content/evidence";
+import { LIMITS, objectives, REFERENCES, STATUS_TEXT } from "../content/evidence";
 import type { Bundle } from "./data/schema";
 import type { Run } from "./data/runs";
 
@@ -16,7 +16,7 @@ export function markdownReport(b: Bundle, uploads: Run[], now = new Date()): str
   if (uploads.length) lines.push(`${uploads.length} CSV file(s) were added in the browser; they are not part of the numbers below.`, "");
 
   lines.push("## Review 3 checklist", "", "| # | Objective | Status | Evidence |", "|---|---|---|---|");
-  for (const o of objectives(b)) lines.push(`| ${o.n} | ${o.status === "unknown" ? "Original Review 1 wording not yet verified" : o.text} | ${STATUS_TEXT[o.status]} | ${o.evidence} |`);
+  for (const o of objectives(b)) lines.push(`| ${o.n} | ${o.text} | ${STATUS_TEXT[o.status]} | ${o.evidence} |`);
   lines.push("");
 
   const model = b.provenance.delayModels.at(-1);
@@ -36,6 +36,7 @@ export function markdownReport(b: Bundle, uploads: Run[], now = new Date()): str
   }
 
   lines.push("## Known limits", "", ...LIMITS.map((l) => `- ${l}`), "");
+  lines.push("## References", "", ...REFERENCES.map((r, i) => `${i + 1}. ${r}`), "");
   lines.push("Defensive analysis for an authorised, closed lab testbed only.", "");
   return lines.join("\n");
 }

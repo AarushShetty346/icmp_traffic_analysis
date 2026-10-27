@@ -24,7 +24,8 @@ If Playwright cannot download its browser, point it at a local Chromium: `CHROMI
 `public/data/bundle.json` and `bundle.schema.json` come from the Python exporter; regenerate them with
 
 ```bash
-python -m icmp_detector export-ui --out ui/public/data                       # simulated only
+python -m icmp_detector export-ui --out ui/public/data --plan review3        # simulated only, the Review 3 study (shipped)
+python -m icmp_detector export-ui --out ui/public/data                       # simulated only, wider stress grid
 python -m icmp_detector export-ui --out ui/public/data --captures captures/   # plus real testbed CSVs
 ```
 

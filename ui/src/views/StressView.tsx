@@ -5,6 +5,7 @@ import { Heatmap, RampLegend, type Cell } from "../components/charts/Heatmap";
 import { Button } from "../components/ui/Button";
 import { DataTable } from "../components/ui/DataTable";
 import { Segmented, SelectField } from "../components/ui/Field";
+import { Disclosure } from "../components/ui/Disclosure";
 import { Panel } from "../components/ui/Panel";
 import { StatTile } from "../components/ui/StatTile";
 import { EmptyState } from "../components/ui/States";
@@ -56,20 +57,40 @@ export default function StressView() {
   return (
     <div className="grid gap-4">
       <Panel title="Filters" id="filters">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid gap-3 sm:grid-cols-2">
           <SelectField label="Metric" help={METRIC_HELP} value={metric} onValueChange={(v) => setParams({ metric: v === "dr" ? null : v })}
             options={METRICS.map((m) => ({ value: m, label: METRIC_LABEL[m] }))} />
           <SelectField label="Detector" help={DETECTOR_HELP} value={det} disabled={metric.startsWith("decode")} onValueChange={(v) => setParams({ det: v === "matched" ? null : v })}
             options={DETECTOR_OPTIONS.map((d) => ({ value: d.value, label: d.label }))} />
-          <Segmented label="Window" value={String(w)} onValueChange={(v) => setParams({ w: v })} options={windowsAvail.map((x) => ({ value: String(x), label: `${x}` }))}
-            help="Requests per observation window." />
-          {source === "simulated" ? <SelectField label="Delay model" help={MODEL_HELP} value={model} options={modelOptions(bundle)} onValueChange={(v) => setParams({ model: v })} /> : null}
-          {sources.length > 1 ? (
-            <SelectField label="Data" value={source} onValueChange={(v) => setParams({ source: v, cell: null })}
-              options={sources.map((s) => ({ value: s, label: s === "capture" ? "Real captures" : "Simulated" }))} />
-          ) : null}
         </div>
+        <Disclosure label="Advanced filters" defaultOpen={params.has("w") || params.has("model") || params.has("source")}
+          summary={`Window ${w}${source === "simulated" ? ` · ${model} delay model` : ""} · ${source === "capture" ? "real captures" : "simulated data"}`}>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Segmented label="Window" value={String(w)} onValueChange={(v) => setParams({ w: v })} options={windowsAvail.map((x) => ({ value: String(x), label: `${x}` }))}
+              help="Requests per observation window." />
+            {source === "simulated" ? <SelectField label="Delay model" help={MODEL_HELP} value={model} options={modelOptions(bundle)} onValueChange={(v) => setParams({ model: v })} /> : null}
+            {sources.length > 1 ? (
+              <SelectField label="Data source" value={source} onValueChange={(v) => setParams({ source: v, cell: null })}
+                options={sources.map((s) => ({ value: s, label: s === "capture" ? "Real captures" : "Simulated" }))} />
+            ) : <p className="self-end text-sm text-ink-2">Data source: {source === "capture" ? "real captures" : "simulated runs only"} in this bundle.</p>}
+          </div>
+        </Disclosure>
       </Panel>
+
+      <section aria-labelledby="read-grid-title" className="rounded-lg border border-line bg-surface p-4 text-sm text-ink-2">
+        <h2 id="read-grid-title" className="text-base font-semibold text-ink">How to read the grid</h2>
+        <ul className="mt-2 grid gap-1 sm:grid-cols-2">
+          <li><strong className="text-ink">Rows</strong> are message timings such as 0.95/1.05: the gaps in seconds the sender uses for a 0 and a 1. Gaps closer to 1 s are subtler.</li>
+          <li><strong className="text-ink">Columns</strong> are network conditions: added jitter (delay variation) and packet loss. On a phone the grid turns sideways, so these become the rows.</li>
+          <li><strong className="text-ink">Darker</strong> cells mean a higher value of the chosen metric (see the colour scale under the grid).</li>
+          <li><strong className="text-ink">Click a cell</strong> to see its numbers, intervals and example runs, and to open it in Detectors.</li>
+        </ul>
+        <p className="mt-2">{metric === "fpr"
+          ? <>You are viewing <strong className="text-ink">false alarms</strong>: here dark is <strong className="text-ink">bad</strong>, because ordinary traffic is being accused.</>
+          : metric === "dr"
+            ? <>You are viewing <strong className="text-ink">detection</strong>: here dark is <strong className="text-ink">good</strong>, because hidden messages are caught. Check false alarms too before trusting a dark cell.</>
+            : <>You are viewing <strong className="text-ink">decoding accuracy</strong>: dark means the receiver recovers more of the hidden bits, which is good for the sender and bad for the defender.</>}</p>
+      </section>
 
       <Panel title={`${METRIC_LABEL[metric][0].toUpperCase()}${METRIC_LABEL[metric].slice(1)} by channel and condition`} id="matrix" provenance={prov}
         help="Rows: gap settings of the covert channel (bit 0 / bit 1). Columns: network conditions. Darker is higher. Select a cell to see its runs and interval.">

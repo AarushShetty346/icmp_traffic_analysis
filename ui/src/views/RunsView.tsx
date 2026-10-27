@@ -1,4 +1,4 @@
-import { ArrowUpTrayIcon, ArrowUturnLeftIcon, ChartBarIcon, DocumentTextIcon, MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/20/solid";
+import { ArrowRightIcon, ArrowUpTrayIcon, ArrowUturnLeftIcon, BeakerIcon, ChartBarIcon, DocumentTextIcon, MagnifyingGlassIcon, TrashIcon } from "@heroicons/react/20/solid";
 import { useEffect, useMemo, useRef, useState, type DragEvent } from "react";
 import { Button } from "../components/ui/Button";
 import { DataTable, type Column } from "../components/ui/DataTable";
@@ -11,6 +11,7 @@ import { ChartSkeleton, EmptyState, ErrorState } from "../components/ui/States";
 import { useData } from "../lib/data/DataContext";
 import { lostPackets, type Run } from "../lib/data/runs";
 import { compareFields } from "../lib/analysis/fieldcheck";
+import { SAMPLE_NAMES, SAMPLE_PREFIX, sampleFiles } from "../lib/data/samples";
 import { runsProvenance } from "../lib/view/select";
 import { useRoute } from "../lib/state/route";
 
@@ -47,6 +48,16 @@ export default function RunsView() {
     requests: runs.reduce((n, r) => n + r.times.length, 0),
   }), [runs]);
   const remove = (r: Run) => { removeUpload(r.id); setRemoved(r); };
+  const samplesLoaded = Object.values(SAMPLE_NAMES).every((n) => uploads.some((u) => u.name === n));
+  const samples = useMemo(() => (status === "ready" ? sampleFiles(runs) : null), [status, runs]);
+  const showSamples = () => setParams({ q: SAMPLE_PREFIX, role: "all", source: null, label: null });
+  const loadSamples = () => {
+    if (!samplesLoaded && samples) {
+      const missing = samples.files.filter((f) => !uploads.some((u) => u.name === f.name));
+      addFiles(missing, samples.known);
+    }
+    showSamples();
+  };
 
   const onDrop = (e: DragEvent) => {
     e.preventDefault();
@@ -116,20 +127,43 @@ export default function RunsView() {
           then see what evidence is still needed in <a href="#/evidence" className="text-accent underline">Evidence</a>.
         </p>
       </Panel>
-      <Panel title="Add captures" id="add" help="Drop tshark CSV exports (scripts/lab/export_csv.sh). They are parsed in a background thread in this browser and never uploaded anywhere.">
-        <div
-          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-          onDragLeave={() => setDragging(false)}
-          onDrop={onDrop}
-          className={`flex flex-col items-center gap-3 rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors ${dragging ? "border-accent bg-accent-soft" : "border-line-strong"}`}
-        >
-          <ArrowUpTrayIcon className="size-8 text-ink-3" aria-hidden />
-          <p className="text-sm text-ink-2">Drop <span className="font-mono">.csv</span> files here, or</p>
-          <Button variant="primary" loading={parsing} onClick={() => input.current?.click()}>Choose CSV files</Button>
-          <input ref={input} type="file" accept=".csv,text/csv" multiple className="sr-only" tabIndex={-1} aria-hidden
-            onChange={(e) => { addFiles([...(e.target.files ?? [])]); e.target.value = ""; }} />
-          <p className="max-w-prose text-xs text-ink-3">Files without an explicit simulation marker start as <strong>Unverified</strong>. Check where each file came from, then set its source and normal/covert label in the table. The filename only suggests a label.</p>
+      <Panel title="Add captures" id="add" help="Sample CSVs are made from the bundled simulated study. Your own files are tshark CSV exports (scripts/lab/export_csv.sh). Both are parsed in a background thread in this browser and never uploaded anywhere.">
+        <div className="grid gap-3 lg:grid-cols-2">
+          <div className="flex flex-col items-start gap-3 rounded-lg border border-line-strong bg-surface-2 px-4 py-5">
+            <h3 className="text-sm font-semibold text-ink">Quick start: sample CSVs</h3>
+            <p className="max-w-prose text-sm text-ink-2">
+              Loads three example files made from the bundled <strong>simulated</strong> study: a normal baseline,
+              a normal test run and a covert test run. They go through the same CSV reader as your own files, get their
+              labels and roles set for you, and stay labelled Simulated. They are not real captures.
+            </p>
+            <Button variant="primary" icon={<BeakerIcon className="size-4" aria-hidden />} loading={parsing} disabled={!samples && !samplesLoaded} onClick={loadSamples}>
+              {samplesLoaded ? "Show sample CSVs" : "Load sample CSVs"}</Button>
+          </div>
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={onDrop}
+            className={`flex flex-col items-center gap-3 rounded-lg border-2 border-dashed px-4 py-5 text-center transition-colors ${dragging ? "border-accent bg-accent-soft" : "border-line-strong"}`}
+          >
+            <h3 className="text-sm font-semibold text-ink">Your own receiver CSVs</h3>
+            <ArrowUpTrayIcon className="size-8 text-ink-3" aria-hidden />
+            <p className="text-sm text-ink-2">Drop <span className="font-mono">.csv</span> files here, or</p>
+            <Button loading={parsing} onClick={() => input.current?.click()}>Choose your own CSV files</Button>
+            <input ref={input} type="file" accept=".csv,text/csv" multiple className="sr-only" tabIndex={-1} aria-hidden
+              onChange={(e) => { addFiles([...(e.target.files ?? [])]); e.target.value = ""; }} />
+            <p className="max-w-prose text-xs text-ink-3">Files without an explicit simulation marker start as <strong>Unverified</strong>. Check where each file came from, then set its source, normal/covert label and baseline/test use in the table. The filename only suggests a label.</p>
+          </div>
         </div>
+        {samplesLoaded ? (
+          <div role="status" className="mt-3 flex flex-col gap-2 rounded-md border border-accent bg-accent-soft p-3 text-sm text-ink sm:flex-row sm:items-center">
+            <p className="min-w-0 flex-1">
+              Sample CSVs loaded (simulated): <span className="font-mono">{SAMPLE_NAMES.baseline}</span> is the baseline, the other two are
+              test runs, one normal and one covert. The table below is filtered to them.
+            </p>
+            <Button variant="primary" icon={<ArrowRightIcon className="size-4" aria-hidden />} onClick={() => navigate("detectors", { src: "uploads" })}>
+              Check them in Detectors</Button>
+          </div>
+        ) : null}
         {uploadErrors.length ? (
           <div className="mt-3"><ErrorState title="Some files could not be read" message={uploadErrors.map((e) => `${e.name}: ${e.error}`).join(" · ")} /></div>
         ) : null}

@@ -174,7 +174,7 @@
   {
    "route": "runs",
    "role": "button",
-   "name": "Choose CSV files",
+   "name": "Choose your own CSV files",
    "regex": false,
    "action": "click",
    "expect": {

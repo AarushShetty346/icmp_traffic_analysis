@@ -27,7 +27,7 @@ a { color: #00616b; text-decoration: underline; }
 .cue { font-size: 10pt; }
 .cue table { font-size: 9.6pt; }
 .cue th, .cue td { padding: 5pt 6pt; }
-</style></head><body class=''><main><h1>Presenter 2 — Harsh: guardian and defence (5:00–10:00)</h1>
+.cue { font-size: 9.4pt; } .cue table { font-size: 9pt; } .cue th, .cue td { padding: 4pt 5pt; }</style></head><body class=''><main><h1>Presenter 2 — Harsh: guardian and defence (5:00–10:00)</h1>
 <p><strong>Your question:</strong> Can we detect or disrupt the hidden timing <em>without</em> accusing ordinary traffic or delaying it too much? You own <strong>Guardian</strong>, <strong>Detectors</strong>, and <strong>Stress matrix</strong>. You do not need to re-teach the sender's 0/1 encoding; the first speaker has done that.</p>
 <p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case?step=2">Guided case — Guardian</a>. <strong>End screen:</strong> Guided case — Locked note. Leave the mouse with Aarush.</p>
 <h2>Your five-minute route</h2>
@@ -54,13 +54,14 @@ a { color: #00616b; text-decoration: underline; }
 <p>“This model releases requests on steadier one-second slots when it can. It cannot send a packet before it arrives; it only holds it. More waiting can damage the hidden timing, but it also delays innocent pings. The relay is a browser model, not a deployed router.”</p>
 </blockquote>
 <h3>8:05–9:10 — Show the full detector workbench</h3>
-<p><strong>Click <code>Detectors</code> in the top navigation.</strong> Point to the settings, the fixed-rule and baseline result tiles, and scroll once to the verdict chart or ROC/feature comparison. No need to tune sliders live.</p>
+<p><strong>Click <code>Detectors</code> in the top navigation.</strong> Point to the short explanation at the top of <strong>Settings</strong>, then the three main choices: <strong>Network variation</strong>, <strong>Message subtlety</strong>, and <strong>Learn normal from</strong> (Same network / Clean network). Point to the four result tiles, then scroll once to <strong>Verdict per window</strong>. No need to tune anything live.</p>
 <blockquote>
-<p>“This is the full instrument panel behind the guided guardian. We can choose data and network condition, window size, baseline percentile, fixed thresholds, and features. It calculates detection and false alarms, then gives per-window verdicts and comparison curves. The guided scene uses a narrow, readable subset of this same analysis.”</p>
+<p>“This is the full instrument panel behind the guided guardian. By default it asks three questions: how noisy is the network, how subtle is the message, and did we learn normal traffic under the same network or a clean one? A good detector catches the hidden-message windows and leaves ordinary traffic alone, so we read detection and false alarms together. Everything else, data source, delay model, window size, percentile, fixed thresholds and features, is under Advanced options. The guided scene uses a narrow, readable subset of this same analysis.”</p>
 </blockquote>
+<p><strong>Optional, only if you have 15 seconds:</strong> click <strong>Advanced options</strong> to show the deeper controls exist, or <strong>Show</strong> on <strong>ROC curve</strong> (it starts collapsed, like <strong>Which feature separates best</strong>).</p>
 <p>If someone asks about the ROC curve: it plots detection against false alarms as a threshold changes. It does <strong>not</strong> turn this small simulated dataset into real-world validation.</p>
 <h3>9:10–9:45 — Show the broader test grid</h3>
-<p><strong>Click <code>Stress matrix</code>.</strong> Point across the channel settings (rows) and network conditions (columns). Optionally change <strong>Metric</strong> from <code>detection rate</code> to <code>false-positive rate</code> if you have at least 20 seconds.</p>
+<p><strong>Click <code>Stress matrix</code>.</strong> Only <strong>Metric</strong> and <strong>Detector</strong> are shown; window, delay model and data source sit under <strong>Advanced filters</strong>. Point to the <strong>How to read the grid</strong> box, then across the message timings (rows) and network conditions (columns). Darker means a higher value. Optionally change <strong>Metric</strong> from <code>detection rate</code> to <code>false-positive rate</code> if you have at least 20 seconds; the box then says dark is bad. On a phone-sized screen the grid turns sideways.</p>
 <blockquote>
 <p>“One attractive result can hide a fragile method. This grid asks what happens when we make the timing subtler or add delay and loss. We can switch the metric to see detection, false alarms, or decoding accuracy. This is where we look for failure cases, not just the best cell.”</p>
 </blockquote>
@@ -83,4 +84,4 @@ a { color: #00616b; text-decoration: underline; }
 <li><strong>“Is 100% detection a proven result?”</strong> No: here it means 10 of 10 message windows in one controlled simulated condition. Also state the false alarms and the absence of real captures.</li>
 <li><strong>“Did you install this relay on a router?”</strong> No. The algorithm is a causal model in the browser. A real deployment would need latency and throughput measurements on lab hardware.</li>
 </ul>
-<p><strong>If the clock is running out:</strong> show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages. Keep the 10:00 handoff; Aarush needs his full five minutes.</p></main></body></html>
+<p><strong>If the clock is running out:</strong> show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages (their default screens are enough; skip Advanced options). Keep the 10:00 handoff; Aarush needs his full five minutes.</p></main></body></html>

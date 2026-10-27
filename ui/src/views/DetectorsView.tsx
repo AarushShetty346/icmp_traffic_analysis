@@ -5,6 +5,7 @@ import { RocChart, type Curve } from "../components/charts/RocChart";
 import { DecisionStrip, type StripRow } from "../components/charts/DecisionStrip";
 import { DataTable } from "../components/ui/DataTable";
 import { FieldLabel, Segmented, SelectField, SliderField } from "../components/ui/Field";
+import { Disclosure } from "../components/ui/Disclosure";
 import { Panel } from "../components/ui/Panel";
 import { StatTile } from "../components/ui/StatTile";
 import { EmptyState, ErrorState } from "../components/ui/States";
@@ -14,6 +15,7 @@ import {
 import { ALL_FEATURES, FEATURE_HELP, windows, type FeatureName } from "../lib/analysis/features";
 import { useData } from "../lib/data/DataContext";
 import { runLabel, type Run } from "../lib/data/runs";
+import { SAMPLE_PREFIX } from "../lib/data/samples";
 import { numParam, useRoute } from "../lib/state/route";
 import {
   bundleSet, channelOptions, conditionOptions, MODEL_HELP, modelOptions, pct, pick, runsProvenance, uploadSet,
@@ -97,46 +99,66 @@ export default function DetectorsView() {
     setParams({ feat: next.length && !(next.length === 1 && next[0] === "std") ? next.join(",") : null });
   };
 
+  const advancedChanged = src !== "bundle" || params.has("model") || w !== (bundle?.settings.defaultWindow ?? 32) || !isDefault;
   const settings = (
     <Panel title="Settings" id="settings" help="Every change recomputes the baseline and every window's verdict in this browser.">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Segmented label="Data" value={src} onValueChange={(v) => setParams({ src: v === "bundle" ? null : v })}
-          options={[{ value: "bundle", label: "Exported runs" }, { value: "uploads", label: "My CSV files" }]}
-          help="Exported runs come from the bundle. 'My CSV files' uses the files added on the Runs view, with the roles and labels set there." />
-        {src === "bundle" ? (
-          <>
-            <SelectField label="Delay model" help={MODEL_HELP} value={model} options={modelOptions(bundle)} onValueChange={(v) => setParams({ model: v })} />
-            <SelectField label="Network condition" value={cond} options={conditionOptions(bundle)} onValueChange={(v) => setParams({ cond: v })}
-              help="Added jitter and loss in the simulated network." />
-            <SelectField label="Covert channel" value={chan} options={channelOptions(bundle)} onValueChange={(v) => setParams({ chan: v })}
-              help="Gap used for a 0 bit and for a 1 bit. Closer to 1 s is harder to see." />
-            <Segmented label="Baseline learned on" value={base} onValueChange={(v) => setParams({ base: v === "matched" ? null : v })}
-              options={[{ value: "matched", label: "Same conditions" }, { value: "clean", label: "Clean LAN" }]}
-              help="Same conditions: normal runs under the tested network condition. Clean LAN: normal runs without added jitter or loss." />
-          </>
-        ) : null}
-        <SliderField label="Window size" value={w} min={4} max={64} step={1} unit="requests" onValueChange={(v) => setParams({ w: v, step: step > v ? null : step || null })}
-          help="Requests per observation window." />
-        <SliderField label="Window step" value={step} min={0} max={w} step={1} format={(v) => (v === 0 || v === w ? "no overlap" : `${v} requests`)} onValueChange={(v) => setParams({ step: v === 0 || v === w ? null : v })}
-          help="Smaller than the window size gives overlapping windows (more, correlated rulings)." />
-        <SliderField label="Baseline percentile" value={percentile} min={80} max={99.5} step={0.5} format={(v) => `p${v}`} onValueChange={(v) => setParams({ pct: v === 95 ? null : v })}
-          help="The baseline flags a window when a feature passes this percentile of normal windows. Two-sided features use the central band instead." />
-        <SliderField label="Fixed rule: std limit" value={stdLimit} min={0.005} max={0.3} step={0.005} format={(v) => `${(v * 1000).toFixed(0)} ms`} onValueChange={(v) => setParams({ std: v === 0.1 ? null : v })}
-          help="The fixed rule flags a window when its gap standard deviation is above this." />
-        <SliderField label="Fixed rule: mean limit" value={meanLimit} min={0.005} max={0.3} step={0.005} format={(v) => `± ${(v * 1000).toFixed(0)} ms`} onValueChange={(v) => setParams({ mean: v === 0.1 ? null : v })}
-          help="The fixed rule also flags a window when its mean gap is further than this from 1 s." />
+      <div className="mb-3 max-w-prose text-sm text-ink-2" id="detectors-intro">
+        <p>
+          A detector looks at short stretches of ping gaps (windows) and calls each one <strong className="text-ink">suspicious</strong> or{" "}
+          <strong className="text-ink">normal</strong>. A good detector does two things at once: it <strong className="text-ink">catches</strong> windows
+          that carry a hidden message (high detection rate) and it <strong className="text-ink">leaves ordinary traffic alone</strong> (low false-alarm rate).
+          Flagging everything would catch every message but accuse every ordinary ping, so always read the two numbers together.
+        </p>
       </div>
-      <fieldset className="mt-3">
-        <legend><FieldLabel label="Baseline detector features" help="The baseline flags a window if any checked feature is outside its learned range." /></legend>
-        <div className="flex flex-wrap gap-1">
-          {ALL_FEATURES.map((f) => (
-            <label key={f} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm ${features.includes(f) ? "border-accent bg-accent-soft text-ink" : "border-line-strong text-ink-2"}`}>
-              <input type="checkbox" className="size-4 accent-[var(--accent)]" checked={features.includes(f)} onChange={() => toggleFeature(f)} />
-              <span className="font-mono">{f}</span>
-            </label>
-          ))}
+      {src === "bundle" ? (
+        <div className="grid gap-3 sm:grid-cols-3">
+          <SelectField label="Network variation" value={cond} options={conditionOptions(bundle)} onValueChange={(v) => setParams({ cond: v })}
+            help="How much random delay (jitter) and packet loss the simulated network adds. More variation makes ordinary traffic look irregular too." />
+          <SelectField label="Message subtlety" value={chan} options={channelOptions(bundle)} onValueChange={(v) => setParams({ chan: v })}
+            help="The gaps the sender uses for a 0 bit and for a 1 bit. Gaps closer to the normal 1 s are subtler and harder to catch." />
+          <Segmented label="Learn normal from" value={base} onValueChange={(v) => setParams({ base: v === "matched" ? null : v })}
+            options={[{ value: "matched", label: "Same network" }, { value: "clean", label: "Clean network" }]}
+            help="Same network: the learned detector studies ordinary traffic under the same variation it is tested on. Clean network: it learns once from ordinary traffic without added jitter or loss." />
         </div>
-      </fieldset>
+      ) : (
+        <p className="rounded-md border border-line bg-surface-2 p-3 text-sm text-ink-2">
+          Using <strong className="text-ink">My CSV files</strong>: {set.baseline.length} baseline, {set.normal.length} normal test and {set.covert.length} covert test file{set.covert.length === 1 ? "" : "s"},
+          with the roles and labels set on the <a href="#/runs" className="text-accent underline">Runs</a> view. Switch back to the exported runs under Advanced options.
+          {set.baseline.length < 3 ? <> With only {set.baseline.length} baseline file{set.baseline.length === 1 ? "" : "s"} the learned normal range comes from very few windows, so some false alarms on ordinary traffic are expected. The exported runs learn from several baseline runs per condition.</> : null}
+        </p>
+      )}
+      <Disclosure key={src} label="Advanced options" defaultOpen={advancedChanged}
+        summary="Data source, delay model, window, thresholds and features">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Segmented label="Data source" value={src} onValueChange={(v) => setParams({ src: v === "bundle" ? null : v })}
+            options={[{ value: "bundle", label: "Exported runs" }, { value: "uploads", label: "My CSV files" }]}
+            help="Exported runs come from the bundle. 'My CSV files' uses the files added on the Runs view (including the simulated sample CSVs), with the roles and labels set there." />
+          {src === "bundle" ? (
+            <SelectField label="Delay model" help={MODEL_HELP} value={model} options={modelOptions(bundle)} onValueChange={(v) => setParams({ model: v })} />
+          ) : null}
+          <SliderField label="Window size" value={w} min={4} max={64} step={1} unit="requests" onValueChange={(v) => setParams({ w: v, step: step > v ? null : step || null })}
+            help="Requests per observation window." />
+          <SliderField label="Window step" value={step} min={0} max={w} step={1} format={(v) => (v === 0 || v === w ? "no overlap" : `${v} requests`)} onValueChange={(v) => setParams({ step: v === 0 || v === w ? null : v })}
+            help="Smaller than the window size gives overlapping windows (more, correlated rulings)." />
+          <SliderField label="Baseline percentile" value={percentile} min={80} max={99.5} step={0.5} format={(v) => `p${v}`} onValueChange={(v) => setParams({ pct: v === 95 ? null : v })}
+            help="The baseline flags a window when a feature passes this percentile of normal windows. Two-sided features use the central band instead." />
+          <SliderField label="Fixed rule: std limit" value={stdLimit} min={0.005} max={0.3} step={0.005} format={(v) => `${(v * 1000).toFixed(0)} ms`} onValueChange={(v) => setParams({ std: v === 0.1 ? null : v })}
+            help="The fixed rule flags a window when its gap standard deviation is above this." />
+          <SliderField label="Fixed rule: mean limit" value={meanLimit} min={0.005} max={0.3} step={0.005} format={(v) => `± ${(v * 1000).toFixed(0)} ms`} onValueChange={(v) => setParams({ mean: v === 0.1 ? null : v })}
+            help="The fixed rule also flags a window when its mean gap is further than this from 1 s." />
+        </div>
+        <fieldset className="mt-3">
+          <legend><FieldLabel label="Baseline detector features" help="The baseline flags a window if any checked feature is outside its learned range." /></legend>
+          <div className="flex flex-wrap gap-1">
+            {ALL_FEATURES.map((f) => (
+              <label key={f} className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm ${features.includes(f) ? "border-accent bg-accent-soft text-ink" : "border-line-strong text-ink-2"}`}>
+                <input type="checkbox" className="size-4 accent-[var(--accent)]" checked={features.includes(f)} onChange={() => toggleFeature(f)} />
+                <span className="font-mono">{f}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      </Disclosure>
       {!isDefault ? <p className="mt-2 text-xs text-ink-3">Settings differ from the project defaults (window step none, p95, 100 ms limits, std only), so exported intervals below are for the defaults, not these settings.</p> : null}
     </Panel>
   );
@@ -147,7 +169,7 @@ export default function DetectorsView() {
         {settings}
         <EmptyState title={src === "uploads" ? "Not enough of your files yet" : "No runs for these settings"}>
           {src === "uploads"
-            ? "Add at least one baseline run, one normal test run and one covert test run on the Runs view, and set their roles and labels there."
+            ? <>Add at least one baseline run, one normal test run and one covert test run on the <a href="#/runs" className="text-accent underline">Runs</a> view and set their roles and labels there, or press <strong>Load sample CSVs</strong> there for three simulated examples.</>
             : "This combination is not in the exported bundle. Pick another condition or delay model."}
         </EmptyState>
       </div>
@@ -159,9 +181,10 @@ export default function DetectorsView() {
   const roc = comparison.find((c) => c.feature === rocFeature) ?? comparison[0];
   const curves: Curve[] = [{ key: "live", label: `${roc.feature}, live (${set.normal.length + set.covert.length} runs)`, color: "var(--series-normal)", points: roc.points }];
   if (exportedRoc) curves.push({ key: "exp", label: `${roc.feature}, exported (${bundle?.provenance.runsPerSet ?? "?"} runs per set)`, color: "var(--series-covert)", points: exportedRoc.points, dashed: true });
+  const stripName = (r: Run) => (r.origin === "upload" ? r.name.replace(SAMPLE_PREFIX, "").replace(/\.csv$/i, "") : `${r.label} #${r.id.split("-").pop()}`);
   const strip: StripRow[] = rulings.flatMap((v) => [
-    { key: `${v.run.id}-f`, label: `${v.run.label} #${v.run.id.split("-").pop()} · fixed`, flags: v.fixed, truth: v.run.label },
-    { key: `${v.run.id}-b`, label: `${v.run.label} #${v.run.id.split("-").pop()} · baseline`, flags: v.learned, truth: v.run.label },
+    { key: `${v.run.id}-f`, label: `${stripName(v.run)} · fixed`, flags: v.fixed, truth: v.run.label },
+    { key: `${v.run.id}-b`, label: `${stripName(v.run)} · baseline`, flags: v.learned, truth: v.run.label },
   ]);
 
   return (
@@ -190,8 +213,8 @@ export default function DetectorsView() {
         </ChartFrame>
       </Panel>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title={mode === "roc" ? "ROC curve" : "Precision and recall"} id="roc" provenance={prov}
+      <div className="grid items-start gap-4 lg:grid-cols-2">
+        <Panel title={mode === "roc" ? "ROC curve" : "Precision and recall"} id="roc" provenance={prov} collapsible defaultOpen={false}
           help="Sweeps the threshold on one feature from strict to loose. The dot is where the baseline's own threshold sits. Area under the ROC curve (AUC) is 1 for perfect separation and 0.5 for chance."
           actions={<Segmented label="Curve" value={mode} onValueChange={(v) => setParams({ mode: v === "roc" ? null : v })} options={[{ value: "roc", label: "ROC" }, { value: "pr", label: "PR" }]} />}>
           <div className="mb-3 max-w-xs">
@@ -206,7 +229,7 @@ export default function DetectorsView() {
           </ChartFrame>
         </Panel>
 
-        <Panel title="Which feature separates best" id="features" provenance={prov}
+        <Panel title="Which feature separates best" id="features" provenance={prov} collapsible defaultOpen={false}
           help="Every feature on its own, scored live on the runs above: AUC, and the detection and false-positive rates at the baseline threshold.">
           <ChartFrame title="AUC by feature" provenance={prov} height={0} fileName="cadence-feature-auc"
             legend={[{ label: "AUC, live", color: "var(--series-normal)", shape: "square" }, ...(exportedFeatures ? [{ label: "AUC, exported", color: "var(--series-covert)", shape: "square" as const }] : [])]}>

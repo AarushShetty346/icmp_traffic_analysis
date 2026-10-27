@@ -13,7 +13,8 @@ interface DataState {
   uploads: Run[];
   uploadErrors: { name: string; error: string }[];
   parsing: boolean;
-  addFiles: (files: File[]) => void;
+  /** Parse CSV files. `known` gives files the app made itself (keyed by file name) their label, role and source. */
+  addFiles: (files: File[], known?: Record<string, KnownExample>) => void;
   updateUpload: (id: string, patch: Partial<Run>) => void;
   removeUpload: (id: string) => void;
   /** Put back a file removed with removeUpload (undo). */
@@ -21,6 +22,9 @@ interface DataState {
   retry: () => void;
   bundleUrl: string;
 }
+
+/** Metadata for a CSV the app generated itself, such as the simulated sample files on the Runs view. */
+export type KnownExample = Pick<Run, "label" | "role" | "source"> & Partial<Pick<Run, "condition" | "channel" | "delayModel" | "bits">>;
 
 const Ctx = createContext<DataState | null>(null);
 export const BUNDLE_URL = `${import.meta.env.BASE_URL}data/bundle.json`;
@@ -60,7 +64,7 @@ export function DataProvider({ children, initial }: { children: ReactNode; initi
     return () => { cancelled = true; };
   }, [attempt, initial]);
 
-  const addFiles = useCallback((files: File[]) => {
+  const addFiles = useCallback((files: File[], known?: Record<string, KnownExample>) => {
     if (!files.length) return;
     if (!workerRef.current) workerRef.current = new Worker(new URL("../../workers/csv.worker.ts", import.meta.url), { type: "module" });
     const id = ++counter.current;
@@ -73,7 +77,10 @@ export function DataProvider({ children, initial }: { children: ReactNode; initi
       const ok: Run[] = [];
       const bad: { name: string; error: string }[] = [];
       e.data.results.forEach((res, i) => {
-        if (res.ok) ok.push(fromUpload(res.value, id * 100 + i));
+        if (res.ok) {
+          const run = fromUpload(res.value, id * 100 + i);
+          ok.push(known?.[run.name] ? { ...run, ...known[run.name] } : run);
+        }
         else bad.push({ name: res.name, error: res.error });
       });
       setUploads((u) => [...u, ...ok]);

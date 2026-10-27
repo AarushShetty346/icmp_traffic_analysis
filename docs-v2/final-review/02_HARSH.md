@@ -36,15 +36,17 @@ Read the live figures if the condition or dataset was changed. Do not memorize a
 
 ### 8:05–9:10 — Show the full detector workbench
 
-**Click `Detectors` in the top navigation.** Point to the settings, the fixed-rule and baseline result tiles, and scroll once to the verdict chart or ROC/feature comparison. No need to tune sliders live.
+**Click `Detectors` in the top navigation.** Point to the short explanation at the top of **Settings**, then the three main choices: **Network variation**, **Message subtlety**, and **Learn normal from** (Same network / Clean network). Point to the four result tiles, then scroll once to **Verdict per window**. No need to tune anything live.
 
-> “This is the full instrument panel behind the guided guardian. We can choose data and network condition, window size, baseline percentile, fixed thresholds, and features. It calculates detection and false alarms, then gives per-window verdicts and comparison curves. The guided scene uses a narrow, readable subset of this same analysis.”
+> “This is the full instrument panel behind the guided guardian. By default it asks three questions: how noisy is the network, how subtle is the message, and did we learn normal traffic under the same network or a clean one? A good detector catches the hidden-message windows and leaves ordinary traffic alone, so we read detection and false alarms together. Everything else, data source, delay model, window size, percentile, fixed thresholds and features, is under Advanced options. The guided scene uses a narrow, readable subset of this same analysis.”
+
+**Optional, only if you have 15 seconds:** click **Advanced options** to show the deeper controls exist, or **Show** on **ROC curve** (it starts collapsed, like **Which feature separates best**).
 
 If someone asks about the ROC curve: it plots detection against false alarms as a threshold changes. It does **not** turn this small simulated dataset into real-world validation.
 
 ### 9:10–9:45 — Show the broader test grid
 
-**Click `Stress matrix`.** Point across the channel settings (rows) and network conditions (columns). Optionally change **Metric** from `detection rate` to `false-positive rate` if you have at least 20 seconds.
+**Click `Stress matrix`.** Only **Metric** and **Detector** are shown; window, delay model and data source sit under **Advanced filters**. Point to the **How to read the grid** box, then across the message timings (rows) and network conditions (columns). Darker means a higher value. Optionally change **Metric** from `detection rate` to `false-positive rate` if you have at least 20 seconds; the box then says dark is bad. On a phone-sized screen the grid turns sideways.
 
 > “One attractive result can hide a fragile method. This grid asks what happens when we make the timing subtler or add delay and loss. We can switch the metric to see detection, false alarms, or decoding accuracy. This is where we look for failure cases, not just the best cell.”
 
@@ -69,4 +71,4 @@ Stop speaking and hand him the laptop.
 - **“Is 100% detection a proven result?”** No: here it means 10 of 10 message windows in one controlled simulated condition. Also state the false alarms and the absence of real captures.
 - **“Did you install this relay on a router?”** No. The algorithm is a causal model in the browser. A real deployment would need latency and throughput measurements on lab hardware.
 
-**If the clock is running out:** show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages. Keep the 10:00 handoff; Aarush needs his full five minutes.
+**If the clock is running out:** show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages (their default screens are enough; skip Advanced options). Keep the 10:00 handoff; Aarush needs his full five minutes.

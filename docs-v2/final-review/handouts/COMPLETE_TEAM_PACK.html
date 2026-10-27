@@ -27,7 +27,7 @@ a { color: #00616b; text-decoration: underline; }
 .cue { font-size: 10pt; }
 .cue table { font-size: 9.6pt; }
 .cue th, .cue td { padding: 5pt 6pt; }
-</style></head><body class=''><main><section class="packet"><p class="packet-label">Team pack · START_HERE.md</p><h1>Cadence — 15-minute, three-person review</h1>
+.cue { font-size: 9.4pt; } .cue table { font-size: 9pt; } .cue th, .cue td { padding: 4pt 5pt; }</style></head><body class=''><main><section class="packet"><p class="packet-label">Team pack · START_HERE.md</p><h1>Cadence — 15-minute, three-person review</h1>
 <p><strong>Order:</strong> You → Harsh → Aarush. <strong>One laptop, one browser session.</strong> Each person speaks for roughly five minutes and leaves the next person's chapter open.</p>
 <h2>The single story</h2>
 <blockquote>
@@ -121,10 +121,11 @@ a { color: #00616b; text-decoration: underline; }
 </blockquote>
 <p><strong>One fact to remember:</strong> one byte = eight bits. A millisecond (ms) is one-thousandth of a second.</p>
 <h3>1:30–2:15 — Show what data the project has</h3>
-<p><strong>Click <code>Runs</code> in the top navigation.</strong> Point to the source banner, the <strong>610</strong> loaded recordings, the <strong>0</strong> real captures, the CSV import area, and one row in the table. Do not import a file during the timed demo.</p>
+<p><strong>Click <code>Runs</code> in the top navigation.</strong> Point to the source banner, the <strong>610</strong> loaded recordings, the <strong>0</strong> real captures, the <strong>Add captures</strong> area (left: <strong>Load sample CSVs</strong>; right: <strong>Choose your own CSV files</strong>), and one row in the table. Do not import a file during the timed demo.</p>
 <blockquote>
 <p>“This is the recording table. It includes ordinary and message-carrying examples under different conditions. We can import receiver capture CSVs here and inspect their origin. Today’s included 610 runs are simulated and there are no included real receiver captures. That source label matters whenever we quote a result.”</p>
 </blockquote>
+<p><strong>Only if someone asks how import works:</strong> click <strong>Load sample CSVs</strong>. Three example files appear, labelled <strong>Simulated</strong>, already set as one normal baseline, one normal test run and one covert test run. Say: “These are made from our simulated study and go through the same CSV reader as a real capture; they are not real captures.” <strong>Check them in Detectors</strong> shows them under <strong>My CSV files</strong>. Afterwards the page counts 613 runs, so <strong>reload the page</strong> before Aarush's Evidence section to get back to 610.</p>
 <p>If someone asks why 610: these are prepared examples across channels, conditions, seeds, and roles; <strong>the count is not 610 independent real experiments</strong>.</p>
 <h3>2:15–3:00 — Show the original analysis workbench</h3>
 <p><strong>Click <code>Signal</code>.</strong> Point at <strong>Choose runs</strong>, the four measurement tiles, and the <strong>Inter-packet delay over time</strong> graph. Scroll a little to reveal <strong>Gap distribution</strong> if the projector allows it.</p>
@@ -184,13 +185,14 @@ a { color: #00616b; text-decoration: underline; }
 <p>“This model releases requests on steadier one-second slots when it can. It cannot send a packet before it arrives; it only holds it. More waiting can damage the hidden timing, but it also delays innocent pings. The relay is a browser model, not a deployed router.”</p>
 </blockquote>
 <h3>8:05–9:10 — Show the full detector workbench</h3>
-<p><strong>Click <code>Detectors</code> in the top navigation.</strong> Point to the settings, the fixed-rule and baseline result tiles, and scroll once to the verdict chart or ROC/feature comparison. No need to tune sliders live.</p>
+<p><strong>Click <code>Detectors</code> in the top navigation.</strong> Point to the short explanation at the top of <strong>Settings</strong>, then the three main choices: <strong>Network variation</strong>, <strong>Message subtlety</strong>, and <strong>Learn normal from</strong> (Same network / Clean network). Point to the four result tiles, then scroll once to <strong>Verdict per window</strong>. No need to tune anything live.</p>
 <blockquote>
-<p>“This is the full instrument panel behind the guided guardian. We can choose data and network condition, window size, baseline percentile, fixed thresholds, and features. It calculates detection and false alarms, then gives per-window verdicts and comparison curves. The guided scene uses a narrow, readable subset of this same analysis.”</p>
+<p>“This is the full instrument panel behind the guided guardian. By default it asks three questions: how noisy is the network, how subtle is the message, and did we learn normal traffic under the same network or a clean one? A good detector catches the hidden-message windows and leaves ordinary traffic alone, so we read detection and false alarms together. Everything else, data source, delay model, window size, percentile, fixed thresholds and features, is under Advanced options. The guided scene uses a narrow, readable subset of this same analysis.”</p>
 </blockquote>
+<p><strong>Optional, only if you have 15 seconds:</strong> click <strong>Advanced options</strong> to show the deeper controls exist, or <strong>Show</strong> on <strong>ROC curve</strong> (it starts collapsed, like <strong>Which feature separates best</strong>).</p>
 <p>If someone asks about the ROC curve: it plots detection against false alarms as a threshold changes. It does <strong>not</strong> turn this small simulated dataset into real-world validation.</p>
 <h3>9:10–9:45 — Show the broader test grid</h3>
-<p><strong>Click <code>Stress matrix</code>.</strong> Point across the channel settings (rows) and network conditions (columns). Optionally change <strong>Metric</strong> from <code>detection rate</code> to <code>false-positive rate</code> if you have at least 20 seconds.</p>
+<p><strong>Click <code>Stress matrix</code>.</strong> Only <strong>Metric</strong> and <strong>Detector</strong> are shown; window, delay model and data source sit under <strong>Advanced filters</strong>. Point to the <strong>How to read the grid</strong> box, then across the message timings (rows) and network conditions (columns). Darker means a higher value. Optionally change <strong>Metric</strong> from <code>detection rate</code> to <code>false-positive rate</code> if you have at least 20 seconds; the box then says dark is bad. On a phone-sized screen the grid turns sideways.</p>
 <blockquote>
 <p>“One attractive result can hide a fragile method. This grid asks what happens when we make the timing subtler or add delay and loss. We can switch the metric to see detection, false alarms, or decoding accuracy. This is where we look for failure cases, not just the best cell.”</p>
 </blockquote>
@@ -213,7 +215,7 @@ a { color: #00616b; text-decoration: underline; }
 <li><strong>“Is 100% detection a proven result?”</strong> No: here it means 10 of 10 message windows in one controlled simulated condition. Also state the false alarms and the absence of real captures.</li>
 <li><strong>“Did you install this relay on a router?”</strong> No. The algorithm is a causal model in the browser. A real deployment would need latency and throughput measurements on lab hardware.</li>
 </ul>
-<p><strong>If the clock is running out:</strong> show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages. Keep the 10:00 handoff; Aarush needs his full five minutes.</p></section><section class="packet"><p class="packet-label">Team pack · 03_AARUSH.md</p><h1>Presenter 3 — Aarush: encryption, decoding, and evidence (10:00–15:00)</h1>
+<p><strong>If the clock is running out:</strong> show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages (their default screens are enough; skip Advanced options). Keep the 10:00 handoff; Aarush needs his full five minutes.</p></section><section class="packet"><p class="packet-label">Team pack · 03_AARUSH.md</p><h1>Presenter 3 — Aarush: encryption, decoding, and evidence (10:00–15:00)</h1>
 <p><strong>Your question:</strong> If the note is encrypted, what can the receiver and guardian still do—and what have we really proved? You own <strong>Locked note</strong>, <strong>Decode</strong>, <strong>Guide</strong>, <strong>Case closed</strong>, and <strong>Evidence</strong>. Do not repeat the detector-rule comparison; Harsh has covered it.</p>
 <p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case?step=3">Guided case — Locked note</a>. <strong>End screen:</strong> Evidence page, with the limits and next experiment stated aloud.</p>
 <h2>Your five-minute route</h2>

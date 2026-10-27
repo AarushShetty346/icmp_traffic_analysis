@@ -24,9 +24,11 @@ Do not say the site is sending packets live. This first graphic is a concept dia
 
 ### 1:30–2:15 — Show what data the project has
 
-**Click `Runs` in the top navigation.** Point to the source banner, the **610** loaded recordings, the **0** real captures, the CSV import area, and one row in the table. Do not import a file during the timed demo.
+**Click `Runs` in the top navigation.** Point to the source banner, the **610** loaded recordings, the **0** real captures, the **Add captures** area (left: **Load sample CSVs**; right: **Choose your own CSV files**), and one row in the table. Do not import a file during the timed demo.
 
 > “This is the recording table. It includes ordinary and message-carrying examples under different conditions. We can import receiver capture CSVs here and inspect their origin. Today’s included 610 runs are simulated and there are no included real receiver captures. That source label matters whenever we quote a result.”
+
+**Only if someone asks how import works:** click **Load sample CSVs**. Three example files appear, labelled **Simulated**, already set as one normal baseline, one normal test run and one covert test run. Say: “These are made from our simulated study and go through the same CSV reader as a real capture; they are not real captures.” **Check them in Detectors** shows them under **My CSV files**. Afterwards the page counts 613 runs, so **reload the page** before Aarush's Evidence section to get back to 610.
 
 If someone asks why 610: these are prepared examples across channels, conditions, seeds, and roles; **the count is not 610 independent real experiments**.
 

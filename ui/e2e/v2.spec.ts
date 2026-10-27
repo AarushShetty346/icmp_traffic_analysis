@@ -92,3 +92,53 @@ test("an unmarked CSV remains unverified until its source is explicitly chosen",
   expect((await reportDownload).suggestedFilename()).toBe("cadence-evidence.md");
   expect(errors).toEqual([]);
 });
+
+test("sample CSVs load as simulated files with roles that Detectors can use", async ({ page }) => {
+  const errors = watchErrors(page);
+  await open(page, "#/runs");
+  await page.getByRole("button", { name: "Load sample CSVs" }).click();
+  const names = ["sample_simulated_baseline_normal.csv", "sample_simulated_test_normal.csv", "sample_simulated_test_covert.csv"];
+  for (const name of names) await expect(page.getByRole("combobox", { name: `Provenance of ${name}` })).toHaveValue("simulated");
+  await expect(page.getByRole("combobox", { name: `Use of ${names[0]}` })).toHaveValue("baseline-matched");
+  await expect(page.getByRole("combobox", { name: `Use of ${names[1]}` })).toHaveValue("test");
+  await expect(page.getByRole("combobox", { name: `Use of ${names[2]}` })).toHaveValue("test");
+  await expect(page.getByRole("combobox", { name: `Label of ${names[1]}` })).toHaveValue("normal");
+  await expect(page.getByRole("combobox", { name: `Label of ${names[2]}` })).toHaveValue("covert");
+  await expect(page.getByText("Showing 3 of 3 runs.")).toBeVisible();
+  await page.getByRole("button", { name: "Check them in Detectors" }).click();
+  await expect(page).toHaveURL(/#\/detectors\?src=uploads/);
+  await expect(page.locator("#settings")).toContainText("1 baseline, 1 normal test and 1 covert test file");
+  await expect(page.getByRole("button", { name: "Advanced options" })).toHaveAttribute("aria-expanded", "true");
+  await expect(page.getByText("Baseline: detection rate")).toBeVisible();
+  await expect(page.locator("#rulings")).toContainText(/simulated/i);
+  await expect(page.getByRole("note", { name: "Data source" })).toContainText("DEMO DATA");
+  expect(errors).toEqual([]);
+});
+
+test("Detectors and Stress show the main choices first and keep the rest under advanced controls", async ({ page }) => {
+  const errors = watchErrors(page);
+  await open(page, "#/detectors");
+  for (const label of ["Network variation", "Message subtlety"]) await expect(page.getByRole("combobox", { name: label })).toBeVisible();
+  await expect(page.getByText("Learn normal from")).toBeVisible();
+  await expect(page.getByText(/catches.*hidden message/)).toBeVisible();
+  await expect(page.getByRole("slider", { name: "Window size" })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Show roc curve" })).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByRole("button", { name: "Show which feature separates best" })).toHaveAttribute("aria-expanded", "false");
+  await page.getByRole("button", { name: "Advanced options" }).click();
+  await expect(page.getByRole("slider", { name: "Window size" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Delay model" })).toBeVisible();
+  await page.getByRole("button", { name: "Show roc curve" }).click();
+  await expect(page.getByRole("combobox", { name: "Feature" })).toBeVisible();
+
+  await page.goto("/#/stress");
+  await expect(page.getByRole("combobox", { name: "Metric" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Detector" })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "Delay model" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "How to read the grid" })).toBeVisible();
+  await expect(page.locator("#read-grid-title").locator("..")).toContainText("dark is good");
+  await page.getByRole("combobox", { name: "Metric" }).selectOption("fpr");
+  await expect(page.locator("#read-grid-title").locator("..")).toContainText("dark is bad");
+  await page.getByRole("button", { name: "Advanced filters" }).click();
+  await expect(page.getByRole("combobox", { name: "Delay model" })).toBeVisible();
+  expect(errors).toEqual([]);
+});

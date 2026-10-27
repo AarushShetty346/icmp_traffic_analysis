@@ -15,7 +15,7 @@
 9. a "Decode"
 10. a "Evidence"
 11. button "What is Add captures?"
-12. button "Choose CSV files"
+12. button "Choose your own CSV files"
 13. button "What is Runs?"
 14. input "Search runs"
 15. select "Provenance"

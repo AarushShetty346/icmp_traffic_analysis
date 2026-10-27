@@ -16,7 +16,7 @@ export function markdownReport(b: Bundle, uploads: Run[], now = new Date()): str
   if (uploads.length) lines.push(`${uploads.length} CSV file(s) were added in the browser; they are not part of the numbers below.`, "");
 
   lines.push("## Review 3 checklist", "", "| # | Objective | Status | Evidence |", "|---|---|---|---|");
-  for (const o of objectives(b)) lines.push(`| ${o.n} | ${o.text} | ${STATUS_TEXT[o.status]} | ${o.evidence} |`);
+  for (const o of objectives(b)) lines.push(`| ${o.n} | ${o.status === "unknown" ? "Original Review 1 wording not yet verified" : o.text} | ${STATUS_TEXT[o.status]} | ${o.evidence} |`);
   lines.push("");
 
   const model = b.provenance.delayModels.at(-1);

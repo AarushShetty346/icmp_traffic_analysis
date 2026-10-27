@@ -1,0 +1,107 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><title>START HERE</title><style>
+@page { size: A4; margin: 16mm 15mm 17mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #24302f; font-size: 10pt; line-height: 1.43; }
+main { max-width: 100%; }
+h1 { color: #143d43; font-size: 21pt; line-height: 1.15; margin: 0 0 13pt; padding-bottom: 8pt; border-bottom: 2px solid #00636d; }
+h2 { color: #18444a; font-size: 13pt; margin: 18pt 0 6pt; break-after: avoid; }
+h3 { color: #244348; font-size: 11pt; margin: 14pt 0 5pt; break-after: avoid; }
+p { margin: 6pt 0; }
+strong { color: #172d30; }
+blockquote { margin: 7pt 0 9pt; padding: 7pt 10pt; background: #eef5f3; border-left: 3pt solid #00636d; break-inside: avoid; }
+blockquote p { margin: 0; }
+ul, ol { padding-left: 17pt; margin: 6pt 0; }
+li { margin: 3pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 7pt 0 11pt; font-size: 8.5pt; }
+thead { display: table-header-group; }
+th { background: #e9f1ef; color: #173f44; text-align: left; }
+th, td { border: 1px solid #ccd8d4; padding: 5pt 6pt; vertical-align: top; }
+tr { break-inside: avoid; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: .93em; background: #f1f3f1; padding: 0 2pt; }
+pre { white-space: pre-wrap; font: 8.4pt/1.35 Consolas, 'Courier New', monospace; background: #f3f5f4; border: 1px solid #d9e1de; padding: 8pt; break-inside: avoid; }
+pre code { padding: 0; background: none; }
+a { color: #00616b; text-decoration: underline; }
+.packet { break-before: page; }
+.packet:first-child { break-before: auto; }
+.packet-label { color: #62736f; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8pt; }
+.cue { font-size: 10pt; }
+.cue table { font-size: 9.6pt; }
+.cue th, .cue td { padding: 5pt 6pt; }
+</style></head><body class=''><main><h1>Cadence — 15-minute, three-person review</h1>
+<p><strong>Order:</strong> You → Harsh → Aarush. <strong>One laptop, one browser session.</strong> Each person speaks for roughly five minutes and leaves the next person's chapter open.</p>
+<h2>The single story</h2>
+<blockquote>
+<p>A sender hides 0s and 1s in the pauses between ordinary ping requests. We first inspect those pauses, then test whether a defender can spot or disrupt the message without harming normal traffic. Finally, we encrypt the note and ask what the defender can still learn. The site makes those ideas visible and gives us a workbench to test them; the included network runs are simulated.</p>
+</blockquote>
+<p>Keep coming back to <strong>three questions</strong>: Can the receiver read the bits? Can the guardian notice the timing? What does the defence cost ordinary traffic?</p>
+<h2>The run of show</h2>
+<table>
+<thead>
+<tr>
+<th>Clock</th>
+<th>Speaker</th>
+<th>Live route and purpose</th>
+<th>Leave the laptop here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00–5:00</td>
+<td>You</td>
+<td>Guided case chapters 1–2, <strong>Runs</strong>, <strong>Signal</strong>. Explain how bits become waits, show where recordings come from, then investigate a suspicious trace.</td>
+<td>Guided case, <strong>Guardian</strong> chapter open.</td>
+</tr>
+<tr>
+<td>5:00–10:00</td>
+<td>Harsh</td>
+<td>Guided case <strong>Guardian</strong>, then <strong>Detectors</strong> and <strong>Stress matrix</strong>. Compare detection with false alarms; show the pacing trade-off and wider results grid.</td>
+<td>Guided case, <strong>Locked note</strong> chapter open.</td>
+</tr>
+<tr>
+<td>10:00–15:00</td>
+<td>Aarush</td>
+<td>Guided case <strong>Locked note</strong>, <strong>Decode</strong>, <strong>Guide</strong>, <strong>Case closed</strong>, <strong>Evidence</strong>. Demonstrate real browser encryption, decoding, limits, architecture, and the next experiment.</td>
+<td>Evidence page and final claim visible.</td>
+</tr>
+</tbody>
+</table>
+<p>This touches every main function on the top navigation. The <strong>Analysis overview</strong> in the footer is a map of the five workbench tools; mention it if someone asks where to begin, but it needs no separate live stop.</p>
+<h2>Exact handoffs</h2>
+<ol>
+<li><strong>You → Harsh:</strong> Click <strong>Continue: Guardian</strong>. Say: “We can see a suspicious timing pattern. Harsh will show whether a rule can detect it reliably, and what happens to ordinary traffic.” Hand him the laptop.</li>
+<li><strong>Harsh → Aarush:</strong> Return to <strong>Guided case</strong>, open <strong>Locked note</strong> in the chapter bar. Say: “A guardian can see timing and can even disrupt it. Aarush will show what changes when the note itself is encrypted.” Hand him the laptop.</li>
+<li><strong>Aarush → panel:</strong> Finish on <strong>Evidence</strong>. Say: “Our software and browser encryption work, and the simulations show the trade-offs. The next claim needs real receiver-side captures; the page states that limit openly.”</li>
+</ol>
+<h2>Keep these claims precise</h2>
+<ul>
+<li><strong>610 included runs are simulated; zero included receiver captures are real.</strong> The CSV importer accepts a user's capture, but importing a file does not prove how it was collected.</li>
+<li>The guided case computes from the included dataset. A high detection percentage is a result for a <strong>small controlled set of windows</strong>, not a universal accuracy guarantee.</li>
+<li>The paced relay is a <strong>causal browser model</strong> that holds packets; it has not been deployed on a router.</li>
+<li>AES-256-GCM encryption is performed by the browser's Web Crypto API. The encrypted bytes' <strong>timing delivery is simulated</strong>, with no ICMP packets sent by that scene.</li>
+<li>Our contribution is the integrated investigation and evaluation workflow: sender idea → receiver evidence → detector errors → defence cost → encrypted content → evidence limits. We are not claiming to have invented AES or covert timing channels.</li>
+</ul>
+<h2>Five-minute preflight on the review laptop</h2>
+<ol>
+<li>Keep both <code>C:\Users\adita\Desktop\CADENCE-V2</code> and the original <code>CNPROJECT</code> folder present: the local copy shares installed UI dependencies with the original to save disk space.</li>
+<li>Open <a href="http://127.0.0.1:5174/#/case">http://127.0.0.1:5174/#/case</a>. If it does not load, open PowerShell and run:</li>
+</ol>
+<p><code>powershell
+   cd C:\Users\adita\Desktop\CADENCE-V2\ui
+   npm run dev -- --host 127.0.0.1 --port 5174 --strictPort</code></p>
+<p>Leave that PowerShell window open. Do not open <code>index.html</code> directly as a file.
+3. Confirm the banner says the included recordings are simulated, and the first page says <strong>610 simulated recordings</strong> after loading.
+4. Check that <strong>Guardian</strong> opens and <strong>Locked note → Lock this note</strong> succeeds. Reload the start URL afterward.
+5. Keep this run sheet and the three speaker cards open on a phone or printed. Leave the laptop browser for the demo itself. Use a visible timer; rehearse the <em>clicks</em> as well as the words.</p>
+<h2>Recovery links if the browser lands on the wrong page</h2>
+<ul>
+<li><a href="http://127.0.0.1:5174/#/case">Start / idea</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=1">Detective</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=2">Guardian</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=3">Locked note</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=4">Case closed</a></li>
+<li><a href="http://127.0.0.1:5174/#/evidence">Evidence</a></li>
+</ul>
+<p>The top navigation reaches Runs, Signal, Detectors, Stress matrix, Decode, Guide, and Evidence. If a click or animation is slow, <strong>say the point while it loads</strong>. Skip an optional control before stealing time from the next presenter.</p>
+<h2>What to rehearse together</h2>
+<p>Run the whole sequence twice. The first pass is slow, with questions; the second pass uses a timer and the same laptop. Each person must practice <strong>arriving at their starting screen</strong>, speaking their first line, making their clicks, and delivering their handoff. Do a third pass only for the part that ran over time. Read <a href="QUESTIONS_AND_ARCHITECTURE.md">common questions</a> once as a team.</p>
+<p>Speaker cards: <a href="01_YOU.md">You</a> · <a href="02_HARSH.md">Harsh</a> · <a href="03_AARUSH.md">Aarush</a>.</p></main></body></html>

@@ -15,7 +15,7 @@ export function watchErrors(page: Page): string[] {
 
 export async function open(page: Page, hash: string) {
   await page.goto(`/${hash}`);
-  await expect(page.locator("main h1")).toBeVisible();
+  await expect(page.locator("main h1").first()).toBeVisible();
   await expect(page.getByRole("status", { name: /Loading/ })).toHaveCount(0, { timeout: 15_000 });
   await settled(page);
 }

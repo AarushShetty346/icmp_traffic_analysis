@@ -46,7 +46,7 @@ export const LIMITS = [
   "The baseline is small and correlated: 10–20 runs of 64 requests give 20–40 windows of 32, so the 95th percentile is noisy and clean-traffic false-positive rates sit at 15–25 %, not 5 %.",
   "Both simulated delay models are approximations of tc netem behaviour, not measurements of the testbed.",
   "The planned 0.75/1.25 s channel is trivially separable; conclusions should lead with the subtle 0.95/1.05 s and 0.98/1.02 s channels.",
-  "The decoder does not model clock drift between sender and receiver.",
+  "The timing model does not include long-term sender pacing drift or receiver timestamp clock error.",
   "Non-timing differences (TTL, IP id, payload) between the real senders are not measured until the field check runs on real captures.",
   "Speed figures measure CPU per window only, not live capture or many flows at once.",
 ];

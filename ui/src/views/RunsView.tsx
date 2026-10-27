@@ -61,6 +61,7 @@ export default function RunsView() {
       <select aria-label={`Provenance of ${r.name}`} value={r.source} onChange={(e) => updateUpload(r.id, { source: e.target.value as Run["source"] })}
         className="min-h-11 rounded-md border border-line-strong bg-surface px-2 text-xs text-ink">
         <option value="capture">Real capture</option><option value="simulated">Simulated</option>
+        <option value="unverified">Unverified</option>
       </select>) : <ProvenanceBadge source={r.source} compact />, csv: (r) => r.source },
     { key: "label", header: "Label", cell: (r) => r.origin === "upload" ? (
       <select aria-label={`Label of ${r.name}`} value={r.label} onChange={(e) => updateUpload(r.id, { label: e.target.value as Run["label"] })}
@@ -127,7 +128,7 @@ export default function RunsView() {
           <Button variant="primary" loading={parsing} onClick={() => input.current?.click()}>Choose CSV files</Button>
           <input ref={input} type="file" accept=".csv,text/csv" multiple className="sr-only" tabIndex={-1} aria-hidden
             onChange={(e) => { addFiles([...(e.target.files ?? [])]); e.target.value = ""; }} />
-          <p className="max-w-prose text-xs text-ink-3">Files whose name starts with <span className="font-mono">covert</span> are labelled covert, others normal; change it in the table. Files written by <span className="font-mono">icmp_detector simulate</span> are recognised and badged Simulated.</p>
+          <p className="max-w-prose text-xs text-ink-3">Files without an explicit simulation marker start as <strong>Unverified</strong>. Check where each file came from, then set its source and normal/covert label in the table. The filename only suggests a label.</p>
         </div>
         {uploadErrors.length ? (
           <div className="mt-3"><ErrorState title="Some files could not be read" message={uploadErrors.map((e) => `${e.name}: ${e.error}`).join(" · ")} /></div>
@@ -161,7 +162,7 @@ export default function RunsView() {
         </div>
         <div className="mb-3 grid gap-3 sm:grid-cols-3">
           <SelectField label="Provenance" value={source} onValueChange={(v) => setParams({ source: v === "all" ? null : v })}
-            options={[{ value: "all", label: "All" }, { value: "simulated", label: "Simulated" }, { value: "capture", label: "Real capture" }]} />
+            options={[{ value: "all", label: "All" }, { value: "simulated", label: "Simulated" }, { value: "capture", label: "Real capture" }, { value: "unverified", label: "Unverified" }]} />
           <SelectField label="Label" value={label} onValueChange={(v) => setParams({ label: v === "all" ? null : v })}
             options={[{ value: "all", label: "All" }, { value: "normal", label: "Normal" }, { value: "covert", label: "Covert" }]} />
           <SelectField label="Used as" value={role} onValueChange={(v) => setParams({ role: v === "test" ? null : v })}
@@ -184,12 +185,12 @@ export default function RunsView() {
         {bundle?.fieldcheck.length ? bundle.fieldcheck.map((fc) => (
           <div key={`${fc.normalFile}-${fc.covertFile}`} className="mb-4">
             <p className="mb-2 text-sm text-ink-2">{fc.condition}: <span className="font-mono">{fc.normalFile}</span> vs <span className="font-mono">{fc.covertFile}</span></p>
-            <FieldTable rows={fc.rows} />
+            <FieldTable rows={fc.rows} provenanceNote="BUNDLE CAPTURE field comparison" />
           </div>
         )) : localCheck ? (
           <div>
             <p className="mb-2 text-sm text-ink-2">Your files: <span className="font-mono">{upNormal[0].name}</span> (normal) vs <span className="font-mono">{upCovert[0].name}</span> (covert)</p>
-            <FieldTable rows={localCheck} />
+            <FieldTable rows={localCheck} provenanceNote={`${runsProvenance([upNormal[0], upCovert[0]]).toUpperCase()} imported-file comparison`} />
           </div>
         ) : (
           <EmptyState title="No field comparison yet">
@@ -202,7 +203,7 @@ export default function RunsView() {
       </>}
 
       <Dialog open={!!manifestRun} onOpenChange={(o) => !o && setManifestRun(null)} title={manifestRun ? `Manifest: ${manifestRun.name}` : "Manifest"} wide
-        description={manifestRun?.source === "simulated" ? "Simulated run: these are the generation parameters, not a capture manifest." : "Run manifest written by the lab scripts."}>
+        description={manifestRun?.source === "simulated" ? "Simulated run: these are the generation parameters, not a capture manifest." : manifestRun?.origin === "upload" ? "Imported file: its source label is user-selected; inspect its original capture manifest separately." : "Run manifest written by the lab scripts."}>
         {manifestRun ? (
           <pre className="max-h-[60vh] overflow-auto rounded-md bg-surface-2 p-3 font-mono text-xs text-ink">{JSON.stringify(
             manifestFor(manifestRun) ?? (manifestRun.origin === "upload"
@@ -215,9 +216,9 @@ export default function RunsView() {
   );
 }
 
-function FieldTable({ rows }: { rows: { field: string; normal: string | null; covert: string | null; differs: boolean | null; note: string }[] }) {
+function FieldTable({ rows, provenanceNote }: { rows: { field: string; normal: string | null; covert: string | null; differs: boolean | null; note: string }[]; provenanceNote: string }) {
   return (
-    <DataTable caption="Packet fields" csvName="cadence-fieldcheck" provenanceNote="REAL CAPTURE field comparison"
+    <DataTable caption="Packet fields" csvName="cadence-fieldcheck" provenanceNote={provenanceNote}
       rows={rows} rowKey={(r) => r.field}
       columns={[
         { key: "f", header: "Field", cell: (r) => r.field },

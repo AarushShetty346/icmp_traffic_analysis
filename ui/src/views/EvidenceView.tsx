@@ -1,126 +1,24 @@
-import { ArrowDownTrayIcon, CheckCircleIcon, ClockIcon, PrinterIcon, QuestionMarkCircleIcon, BeakerIcon } from "@heroicons/react/20/solid";
-import { Button } from "../components/ui/Button";
-import { DataTable } from "../components/ui/DataTable";
-import { Panel } from "../components/ui/Panel";
-import { ProvenanceBadge } from "../components/ui/ProvenanceBadge";
-import { StatTile } from "../components/ui/StatTile";
-import { Skeleton } from "../components/ui/States";
-import { LIMITS, objectives, STATUS_TEXT, type Status } from "../content/evidence";
+import { ArrowDownTrayIcon, ArrowRightIcon, BeakerIcon, ClipboardDocumentCheckIcon, PrinterIcon, ShieldExclamationIcon } from "@heroicons/react/20/solid";
+import { LIMITS, objectives, STATUS_TEXT } from "../content/evidence";
 import { useData } from "../lib/data/DataContext";
 import { downloadBlob, downloadText } from "../lib/exporting";
 import { markdownReport } from "../lib/report";
 
-const STATUS_ICON: Record<Status, typeof CheckCircleIcon> = {
-  met: CheckCircleIcon, "code-ready": ClockIcon, "simulated-only": BeakerIcon, unknown: QuestionMarkCircleIcon,
-};
-const STATUS_TONE: Record<Status, string> = {
-  met: "text-ok", "code-ready": "text-ink-2", "simulated-only": "text-sim-ink", unknown: "text-ink-3",
-};
-
 export default function EvidenceView() {
-  const { bundle, uploads, runs, bundleUrl, status } = useData();
-  const loading = status === "loading";
-  const objs = objectives(bundle);
-  const count = (pred: (r: (typeof runs)[number]) => boolean) => runs.filter(pred).length;
-  const coverage = [
-    { what: "Normal runs", sim: count((r) => r.label === "normal" && r.source === "simulated"), real: count((r) => r.label === "normal" && r.source === "capture") },
-    { what: "Covert runs", sim: count((r) => r.label === "covert" && r.source === "simulated"), real: count((r) => r.label === "covert" && r.source === "capture") },
-    { what: "Stress-matrix cells", sim: bundle?.matrix.filter((m) => m.source === "simulated").length ?? 0, real: bundle?.matrix.filter((m) => m.source === "capture").length ?? 0 },
-    { what: "Decoded runs", sim: bundle?.decode.filter((d) => d.source === "simulated").length ?? 0, real: bundle?.decode.filter((d) => d.source === "capture").length ?? 0 },
-    { what: "Field comparisons", sim: 0, real: bundle?.fieldcheck.length ?? 0 },
-  ];
+  const { bundle, uploads, runs, bundleUrl } = useData();
+  const real = runs.filter((r) => r.source === "capture").length;
+  const simulated = runs.filter((r) => r.source === "simulated").length;
+  const unverified = runs.filter((r) => r.source === "unverified").length;
+  const items = objectives(bundle);
 
-  return (
-    <div className="grid gap-4">
-      <Panel title="About this project" id="about">
-        <p className="text-lg font-semibold text-ink">Detection of ICMP-Based Covert Timing Channels Using Network Traffic Analysis</p>
-        <p className="mt-1 text-sm text-ink-2">BCSE308P Computer Networks lab project, VIT Vellore, by Harsh Jha, Anuj Deshpande and Aarush Shetty.</p>
-        <p className="mt-2 max-w-prose text-sm text-ink-2">
-          Cadence is the analysis workbench for the project. It reads the JSON bundle exported by <span className="font-mono">python -m icmp_detector export-ui</span> and
-          tshark CSV files you add, and recomputes the detectors in the browser with code checked against the Python implementation to 10⁻⁹.
-          The work is defensive analysis on an authorised, closed lab testbed; nothing here sends traffic.
-        </p>
-      </Panel>
-
-      {loading ? <Skeleton className="h-24" label="Loading the data bundle" /> : <>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Objectives met with real data" value={`${objs.filter((o) => o.status === "met").length} of ${objs.length}`} />
-        <StatTile label="Code ready, waiting for lab data" value={String(objs.filter((o) => o.status === "code-ready").length)} />
-        <StatTile label="Simulated only" value={String(objs.filter((o) => o.status === "simulated-only").length)} provenance="simulated" />
-        <StatTile label="Wording still to add" value={String(objs.filter((o) => o.status === "unknown").length)} detail="from the Review 1 report" />
-      </div>
-
-      <Panel title="Review 3 checklist" id="checklist" help="Status of each Review 1 objective, judged from the data that is actually loaded. Objectives with no wording are not in the repository yet.">
-        <ol className="grid gap-2">
-          {objs.map((o) => {
-            const Icon = STATUS_ICON[o.status];
-            return (
-              <li key={o.n} className="grid gap-1 rounded-md border border-line p-3 sm:grid-cols-[2rem_1fr_auto] sm:items-start">
-                <span className="font-mono text-sm text-ink-3">{o.n}.</span>
-                <div className="min-w-0">
-                  <p className="text-sm text-ink">{o.text}</p>
-                  <p className="text-xs text-ink-3">{o.evidence}</p>
-                  {o.links.length ? (
-                    <p className="mt-1 flex flex-wrap gap-x-3 text-xs">
-                      {o.links.map((l) => <a key={l.href} href={l.href} className="inline-flex min-h-11 items-center text-accent underline" {...(l.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}>{l.label}</a>)}
-                    </p>
-                  ) : null}
-                </div>
-                <span className={`inline-flex items-center gap-1 text-sm font-medium ${STATUS_TONE[o.status]}`}><Icon className="size-4" aria-hidden />{STATUS_TEXT[o.status]}</span>
-              </li>
-            );
-          })}
-        </ol>
-      </Panel>
-
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Data coverage" id="coverage" help="How much of the loaded data is simulated and how much is real capture, including CSV files added in this browser.">
-          <DataTable caption="Data coverage" csvName="cadence-coverage" provenanceNote="counts by provenance"
-            rows={coverage} rowKey={(r) => r.what}
-            columns={[
-              { key: "w", header: "What", cell: (r) => r.what },
-              { key: "s", header: "Simulated", numeric: true, cell: (r) => r.sim },
-              { key: "r", header: "Real capture", numeric: true, cell: (r) => r.real },
-            ]} />
-          {bundle ? (
-            <dl className="mt-3 grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs text-ink-2">
-              <dt>Bundle</dt><dd className="font-mono">schema {bundle.schemaVersion}, generated {bundle.generatedAt}</dd>
-              <dt>Commit</dt><dd className="font-mono [overflow-wrap:anywhere]">{bundle.provenance.commit ?? "unknown"}</dd>
-              <dt>Seed</dt><dd className="font-mono">{bundle.provenance.seed}, {bundle.provenance.runsPerSet} runs per set, {bundle.provenance.bootstrapResamples} bootstrap resamples</dd>
-              <dt>Delay models</dt><dd className="font-mono">{bundle.provenance.delayModels.join(", ")}</dd>
-              <dt>Added files</dt><dd className="font-mono">{uploads.length}</dd>
-            </dl>
-          ) : null}
-        </Panel>
-
-        <Panel title="Known limits" id="limits" help="Threats to validity to state at Review 3. Details in AUDIT.md, section B.">
-          <ul className="grid list-disc gap-2 pl-5 text-sm text-ink-2">
-            {LIMITS.map((l) => <li key={l}>{l}</li>)}
-          </ul>
-        </Panel>
-      </div>
-
-
-
-      <Panel title="References" id="refs">
-        <p className="max-w-prose text-sm text-ink-2">
-          The reference list from the Review 1 report is not in the repository, so none is shown here rather than an invented one.
-          Add it to <span className="font-mono">ui/src/content/evidence.ts</span>.
-        </p>
-      </Panel>
-
-      <Panel title="Exports" id="exports" provenance={bundle?.provenance.hasCapture ? (bundle.provenance.hasSimulated ? "mixed" : "capture") : "simulated"}
-        help="Every export carries its provenance: the report states it at the top, CSV files in their first line, PNG charts in their footer.">
-        <div className="no-print flex flex-wrap gap-2">
-          <Button variant="primary" icon={<ArrowDownTrayIcon className="size-4" aria-hidden />} disabled={!bundle}
-            onClick={() => bundle && downloadText("cadence-evidence.md", markdownReport(bundle, uploads), "text/markdown")}>Markdown report</Button>
-          <Button icon={<PrinterIcon className="size-4" aria-hidden />} onClick={() => window.print()}>Print or save as PDF</Button>
-          <Button icon={<ArrowDownTrayIcon className="size-4" aria-hidden />} onClick={() => fetch(bundleUrl).then((r) => r.blob()).then((b) => downloadBlob("cadence-bundle.json", b))}>JSON bundle</Button>
-          <Button icon={<ArrowDownTrayIcon className="size-4" aria-hidden />} onClick={() => fetch(bundleUrl.replace(/bundle\.json$/, "bundle.schema.json")).then((r) => r.blob()).then((b) => downloadBlob("bundle.schema.json", b))}>JSON Schema</Button>
-        </div>
-        <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-ink-3">Printing keeps the provenance banner on every page. <ProvenanceBadge source="simulated" compact /> marks simulated numbers.</p>
-      </Panel>
-      </>}
-    </div>
-  );
+  return <div className="evidence-v2">
+    <header className="evidence-hero"><span className="eyebrow">EVIDENCE BEFORE CLAIMS</span><h1>What do we actually know?</h1><p>Cadence lets you investigate timing channels and compare defences. This page separates what the software demonstrates from what still needs a measured network experiment.</p><div className="evidence-hero-status"><BeakerIcon className="size-5" aria-hidden /><strong>Current shipped study: simulated</strong><span>No real receiver captures are included in the bundle.</span></div></header>
+    <div className="evidence-counts"><div><span>SIMULATED RECORDINGS</span><strong>{simulated}</strong><small>Computer-generated examples</small></div><div><span>REAL-CAPTURE LABELS</span><strong>{real}</strong><small>{real ? "Check their manifests before citing them" : "None included yet"}</small></div><div><span>UNVERIFIED IMPORTS</span><strong>{unverified}</strong><small>Set their source in Recordings</small></div></div>
+    <section className="evidence-v2-section"><div className="evidence-section-head"><span className="eyebrow">THE HONEST STORY</span><h2>Three levels of evidence</h2></div><div className="evidence-levels"><article><span>01 / SOFTWARE</span><h3>Working now</h3><p>The browser can read recordings, measure packet gaps, compare detection rules, model a paced relay, and lock and unlock a message with browser encryption.</p><strong>Shows the method works as software.</strong></article><article><span>02 / SIMULATION</span><h3>Included now</h3><p>Prepared runs show how the methods behave under modelled delay and loss. They help us find interesting conditions and failure cases.</p><strong>Shows behaviour in a model.</strong></article><article><span>03 / NETWORK MEASUREMENT</span><h3>Still needed</h3><p>Capture normal and covert ping traffic at a lab receiver, repeat under controlled conditions, and compare observed results with the model.</p><strong>Needed for real-network conclusions.</strong></article></div></section>
+    <section className="evidence-v2-section evidence-next"><div><span className="eyebrow">THE NEXT SCIENTIFIC STEP</span><h2>Turn the case into a measured result.</h2><p>The lab tools are already in this local project. A small, well-documented experiment is more convincing than a larger grid of unexplained numbers.</p></div><ol><li><b>Capture ordinary pings</b><span>Use receiver-side timestamps to establish normal timing.</span></li><li><b>Capture a controlled hidden-message run</b><span>Record what was sent and what arrived; keep a run manifest.</span></li><li><b>Repeat under delay variation and loss</b><span>Compare clean and noisy conditions with separate training and test runs.</span></li><li><b>Report both benefits and costs</b><span>Detection, false alarms, recovered bits, and any added delay.</span></li></ol><a href="#/runs">Open the recording table <ArrowRightIcon className="size-4" aria-hidden /></a></section>
+    <section className="evidence-v2-section"><div className="evidence-section-head"><span className="eyebrow">LIMITS TO SAY OUT LOUD</span><h2>What could mislead us?</h2></div><div className="evidence-limits"><ShieldExclamationIcon className="size-6" aria-hidden /><ul>{LIMITS.map((limit) => <li key={limit}>{limit}</li>)}</ul></div></section>
+    <section className="evidence-v2-section"><div className="evidence-section-head"><span className="eyebrow">RESEARCH FOUNDATION</span><h2>Where the ideas come from</h2><p>This project combines and teaches established networking and security ideas. Its claim should come from transparent experiments, not from saying the methods were invented here.</p></div><div className="evidence-links"><a href="https://www.rfc-editor.org/info/rfc792/" target="_blank" rel="noreferrer"><b>RFC 792</b><span>What an ICMP Echo Request is</span></a><a href="https://people.cs.georgetown.edu/~clay/research/pubs/cabuk-covert-channels-tissec.pdf" target="_blank" rel="noreferrer"><b>IP covert-channel research</b><span>Prior timing-channel design and detection</span></a><a href="https://man7.org/linux/man-pages/man8/tc-netem.8.html" target="_blank" rel="noreferrer"><b>Linux netem</b><span>Real-network delay and loss controls</span></a><a href="https://www.w3.org/TR/WebCryptoAPI/" target="_blank" rel="noreferrer"><b>Web Cryptography</b><span>Browser AES-GCM used in the locked-note scene</span></a></div></section>
+    <details className="evidence-review"><summary><ClipboardDocumentCheckIcon className="size-5" aria-hidden /> Review objective tracker <span>{items.filter((o) => o.status === "unknown").length} entries need original wording</span></summary><p>This tracker was inherited from the original workbench. Only objective wording confirmed in its source was filled in; the remaining descriptions should be checked against the original Review 1 document before a formal presentation.</p><ol>{items.map((o) => <li key={o.n}><b>{o.n}. {o.status === "unknown" ? "Confirm original objective wording" : o.text}</b><span>{STATUS_TEXT[o.status]} · {o.evidence}</span>{o.links.length ? <span>{o.links.map((l) => <a key={l.href} href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel={l.href.startsWith("http") ? "noreferrer" : undefined}>{l.label}</a>)}</span> : null}</li>)}</ol></details>
+    <section className="evidence-v2-section evidence-exports"><div className="evidence-section-head"><span className="eyebrow">TAKE THE EVIDENCE WITH YOU</span><h2>Export the details</h2><p>The report, charts, and data retain source labels. The report's objective tracker is a draft until its wording is checked.</p></div><div><button disabled={!bundle} onClick={() => bundle && downloadText("cadence-evidence.md", markdownReport(bundle, uploads), "text/markdown")}><ArrowDownTrayIcon className="size-4" aria-hidden /> Markdown report</button><button onClick={() => window.print()}><PrinterIcon className="size-4" aria-hidden /> Print or save PDF</button><button disabled={!bundle} onClick={() => fetch(bundleUrl).then((r) => r.blob()).then((b) => downloadBlob("cadence-bundle.json", b))}><ArrowDownTrayIcon className="size-4" aria-hidden /> Data bundle</button><button disabled={!bundle} onClick={() => fetch(bundleUrl.replace(/bundle\.json$/, "bundle.schema.json")).then((r) => r.blob()).then((b) => downloadBlob("bundle.schema.json", b))}><ArrowDownTrayIcon className="size-4" aria-hidden /> Data format</button></div></section>
+  </div>;
 }

@@ -1,0 +1,83 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><title>01 YOU</title><style>
+@page { size: A4; margin: 16mm 15mm 17mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #24302f; font-size: 10pt; line-height: 1.43; }
+main { max-width: 100%; }
+h1 { color: #143d43; font-size: 21pt; line-height: 1.15; margin: 0 0 13pt; padding-bottom: 8pt; border-bottom: 2px solid #00636d; }
+h2 { color: #18444a; font-size: 13pt; margin: 18pt 0 6pt; break-after: avoid; }
+h3 { color: #244348; font-size: 11pt; margin: 14pt 0 5pt; break-after: avoid; }
+p { margin: 6pt 0; }
+strong { color: #172d30; }
+blockquote { margin: 7pt 0 9pt; padding: 7pt 10pt; background: #eef5f3; border-left: 3pt solid #00636d; break-inside: avoid; }
+blockquote p { margin: 0; }
+ul, ol { padding-left: 17pt; margin: 6pt 0; }
+li { margin: 3pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 7pt 0 11pt; font-size: 8.5pt; }
+thead { display: table-header-group; }
+th { background: #e9f1ef; color: #173f44; text-align: left; }
+th, td { border: 1px solid #ccd8d4; padding: 5pt 6pt; vertical-align: top; }
+tr { break-inside: avoid; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: .93em; background: #f1f3f1; padding: 0 2pt; }
+pre { white-space: pre-wrap; font: 8.4pt/1.35 Consolas, 'Courier New', monospace; background: #f3f5f4; border: 1px solid #d9e1de; padding: 8pt; break-inside: avoid; }
+pre code { padding: 0; background: none; }
+a { color: #00616b; text-decoration: underline; }
+.packet { break-before: page; }
+.packet:first-child { break-before: auto; }
+.packet-label { color: #62736f; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8pt; }
+.cue { font-size: 10pt; }
+.cue table { font-size: 9.6pt; }
+.cue th, .cue td { padding: 5pt 6pt; }
+</style></head><body class=''><main><h1>Presenter 1 — You: sender and detective (0:00–5:00)</h1>
+<p><strong>Your question:</strong> How can a message hide in ping timing, and what evidence can we inspect? You own <strong>The idea</strong>, <strong>Runs</strong>, <strong>Signal</strong>, and <strong>Detective</strong>. Harsh owns the decision rules, so stop at the question “Is this suspicious enough to alarm?”</p>
+<p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case">Guided case — The idea</a>. <strong>End screen:</strong> Guided case — Guardian. Leave the mouse with Harsh.</p>
+<h2>Your five-minute route</h2>
+<h3>0:00–0:45 — Give the audience a reason to care</h3>
+<p><strong>Point at the concept diagram. Say:</strong></p>
+<blockquote>
+<p>“This project studies a hidden communication method. A ping is a simple network check. Its requests normally arrive about one second apart. A sender can keep the packets looking ordinary but change the <em>waiting time</em> between them. A short wait can stand for zero; a long wait can stand for one. We ask whether someone watching the receiver can spot that pattern.”</p>
+</blockquote>
+<p>Do not say the site is sending packets live. This first graphic is a concept diagram.</p>
+<h3>0:45–1:30 — Make the bits concrete</h3>
+<p><strong>Scroll to “Turn a note into packet timing.”</strong> Leave <code>HI</code> in <strong>Your short note</strong>, or type it again. Point at <strong>16 bits</strong> and the blue/orange squares.</p>
+<blockquote>
+<p>“Computers store text as bits, meaning zeros and ones. <code>HI</code> is two bytes, or sixteen bits. In this simple example, zero waits 0.75 seconds and one waits 1.25 seconds. The later investigation uses a subtler pair, 0.95 and 1.05 seconds, because a real question is whether the difference stays visible once the network adds delay.”</p>
+</blockquote>
+<p><strong>One fact to remember:</strong> one byte = eight bits. A millisecond (ms) is one-thousandth of a second.</p>
+<h3>1:30–2:15 — Show what data the project has</h3>
+<p><strong>Click <code>Runs</code> in the top navigation.</strong> Point to the source banner, the <strong>610</strong> loaded recordings, the <strong>0</strong> real captures, the CSV import area, and one row in the table. Do not import a file during the timed demo.</p>
+<blockquote>
+<p>“This is the recording table. It includes ordinary and message-carrying examples under different conditions. We can import receiver capture CSVs here and inspect their origin. Today’s included 610 runs are simulated and there are no included real receiver captures. That source label matters whenever we quote a result.”</p>
+</blockquote>
+<p>If someone asks why 610: these are prepared examples across channels, conditions, seeds, and roles; <strong>the count is not 610 independent real experiments</strong>.</p>
+<h3>2:15–3:00 — Show the original analysis workbench</h3>
+<p><strong>Click <code>Signal</code>.</strong> Point at <strong>Choose runs</strong>, the four measurement tiles, and the <strong>Inter-packet delay over time</strong> graph. Scroll a little to reveal <strong>Gap distribution</strong> if the projector allows it.</p>
+<blockquote>
+<p>“The detector works with arrival times at the receiver. We subtract consecutive arrival times to get each gap. The Signal view compares two recordings, measures their average and variation, and shows the gap distribution. Blue is ordinary traffic; orange is the message example. This is the detailed workbench behind the simpler detective scene.”</p>
+</blockquote>
+<p><strong>Do not explain KS distance unless asked.</strong> It measures how different two distributions are; 0 is similar, 1 is far apart.</p>
+<h3>3:00–4:45 — Be the detective</h3>
+<p><strong>Click <code>Guided case</code>, then chapter <code>02 Detective</code>.</strong> Keep the defaults: <strong>Variation of 50 ms</strong>, <strong>0.95/1.05 s · subtle</strong>, <strong>Case file A</strong>. Point at the blue reference and orange case, then the three measurements under the graph. Click <strong>A hidden message</strong> to reveal the labelled answer.</p>
+<blockquote>
+<p>“Here is the same idea as a small investigation. The blue trace is an ordinary reference and the orange trace is the unknown case. Each point is a pause measured in milliseconds. The case’s pauses vary more, but one squiggly line is only a clue. The measurements below make the comparison repeatable. I guess this one carries a hidden message; the label confirms it because this run was generated by the simulator.”</p>
+</blockquote>
+<p>If time allows, select <strong>Case file B</strong> and guess <strong>Ordinary pings</strong>, then return to <strong>Case file A</strong> before the handoff. Skip this if the clock is past 4:20.</p>
+<h3>4:45–5:00 — Hand off cleanly</h3>
+<p><strong>Click <code>Continue: Guardian</code>. Say:</strong></p>
+<blockquote>
+<p>“We have a clue in the pauses. Harsh will now turn that clue into an alarm rule, count its mistakes, and test whether a defence can interfere with the message.”</p>
+</blockquote>
+<p>Stop speaking and hand him the laptop.</p>
+<h2>Your three memory anchors</h2>
+<ol>
+<li><strong>Packet contents can look normal while timing carries bits.</strong></li>
+<li><strong>The receiver measures gaps; network variation makes them noisy.</strong></li>
+<li><strong>The included data is simulated, so a graph is evidence about the model.</strong></li>
+</ol>
+<h2>If you get a question</h2>
+<ul>
+<li><strong>“What is ICMP?”</strong> The protocol used by ping. We look at the arrival times of its Echo Requests.</li>
+<li><strong>“Why measure at the receiver?”</strong> The network can alter delays. The receiver sees what actually arrived.</li>
+<li><strong>“Is orange proof of an attack?”</strong> No. In this controlled run we know its label; a real case needs repeated measurements and a detector with false alarms checked.</li>
+<li><strong>“What if a packet is lost?”</strong> The analysis uses ICMP sequence numbers to avoid treating a missing request as one ordinary gap. Harsh and Aarush will discuss detection and recovery effects.</li>
+</ul>
+<p><strong>If the clock is running out:</strong> omit the Gap distribution scroll and Case file B. Preserve the final detective guess and the handoff. The Runs and Signal tabs should still be briefly visible.</p></main></body></html>

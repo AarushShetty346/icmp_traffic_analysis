@@ -5,11 +5,13 @@ import type { ParsedCapture } from "./csv";
 export type Label = "normal" | "covert";
 export type Role = "baseline-clean" | "baseline-matched" | "test";
 
+export type RunSource = Source | "unverified";
+
 export interface Run {
   id: string;
   name: string;
   label: Label;
-  source: Source;
+  source: RunSource;
   role: Role;
   origin: "bundle" | "upload";
   condition: string;
@@ -46,7 +48,7 @@ export function fromUpload(p: ParsedCapture, index: number): Run {
     id: `upload-${index}-${p.name}`,
     name: p.name,
     label: lower.startsWith("covert") ? "covert" : "normal",
-    source: p.simulated ? "simulated" : "capture",
+    source: p.simulated ? "simulated" : "unverified",
     role: "test",
     origin: "upload",
     condition: "uploaded",

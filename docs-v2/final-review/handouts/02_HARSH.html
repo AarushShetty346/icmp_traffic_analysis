@@ -1,0 +1,86 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><title>02 HARSH</title><style>
+@page { size: A4; margin: 16mm 15mm 17mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #24302f; font-size: 10pt; line-height: 1.43; }
+main { max-width: 100%; }
+h1 { color: #143d43; font-size: 21pt; line-height: 1.15; margin: 0 0 13pt; padding-bottom: 8pt; border-bottom: 2px solid #00636d; }
+h2 { color: #18444a; font-size: 13pt; margin: 18pt 0 6pt; break-after: avoid; }
+h3 { color: #244348; font-size: 11pt; margin: 14pt 0 5pt; break-after: avoid; }
+p { margin: 6pt 0; }
+strong { color: #172d30; }
+blockquote { margin: 7pt 0 9pt; padding: 7pt 10pt; background: #eef5f3; border-left: 3pt solid #00636d; break-inside: avoid; }
+blockquote p { margin: 0; }
+ul, ol { padding-left: 17pt; margin: 6pt 0; }
+li { margin: 3pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 7pt 0 11pt; font-size: 8.5pt; }
+thead { display: table-header-group; }
+th { background: #e9f1ef; color: #173f44; text-align: left; }
+th, td { border: 1px solid #ccd8d4; padding: 5pt 6pt; vertical-align: top; }
+tr { break-inside: avoid; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: .93em; background: #f1f3f1; padding: 0 2pt; }
+pre { white-space: pre-wrap; font: 8.4pt/1.35 Consolas, 'Courier New', monospace; background: #f3f5f4; border: 1px solid #d9e1de; padding: 8pt; break-inside: avoid; }
+pre code { padding: 0; background: none; }
+a { color: #00616b; text-decoration: underline; }
+.packet { break-before: page; }
+.packet:first-child { break-before: auto; }
+.packet-label { color: #62736f; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8pt; }
+.cue { font-size: 10pt; }
+.cue table { font-size: 9.6pt; }
+.cue th, .cue td { padding: 5pt 6pt; }
+</style></head><body class=''><main><h1>Presenter 2 — Harsh: guardian and defence (5:00–10:00)</h1>
+<p><strong>Your question:</strong> Can we detect or disrupt the hidden timing <em>without</em> accusing ordinary traffic or delaying it too much? You own <strong>Guardian</strong>, <strong>Detectors</strong>, and <strong>Stress matrix</strong>. You do not need to re-teach the sender's 0/1 encoding; the first speaker has done that.</p>
+<p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case?step=2">Guided case — Guardian</a>. <strong>End screen:</strong> Guided case — Locked note. Leave the mouse with Aarush.</p>
+<h2>Your five-minute route</h2>
+<h3>5:00–5:45 — Explain what a guardian actually judges</h3>
+<p><strong>Point to the three rule choices. Say:</strong></p>
+<blockquote>
+<p>“We should not declare an attack from one unusual pause. This guardian judges a small group of 32 requests. It measures how much their gaps vary, then compares that with a limit. We test three ways to choose the limit: one fixed number, a limit learned from ordinary traffic under the same conditions, and a limit learned only on a clean network.”</p>
+</blockquote>
+<p><strong>Plain terms:</strong> a <em>window</em> is one group of requests; a <em>baseline</em> is a normal reference used to choose a limit; <em>standard deviation</em> means how much the pauses wobble around their average.</p>
+<h3>5:45–6:45 — Compare the rules, including mistakes</h3>
+<p><strong>Begin on <code>Same conditions</code>.</strong> Point to <strong>Messages caught</strong> and <strong>False alarms</strong> together. On the default example they show <strong>10/10 caught</strong> and <strong>3/10 ordinary windows falsely flagged</strong>. Click <strong>Fixed limit</strong>: it usually shows <strong>0/10 caught, 0/10 false alarms</strong> on this default example. Click <strong>Clean-only baseline</strong>: it shows <strong>10/10 caught but 10/10 false alarms</strong>. Return to <strong>Same conditions</strong>.</p>
+<blockquote>
+<p>“If a rule never sounds the alarm, its false-alarm rate looks perfect but it misses the message. If it alarms on everything, it catches the message but becomes useless for ordinary users. The same-conditions baseline is more sensible here, yet even it still wrongly flags some normal traffic. These figures describe this small simulated set, not an accuracy guarantee for the Internet.”</p>
+</blockquote>
+<p>Read the live figures if the condition or dataset was changed. Do not memorize a percentage without its numerator and denominator.</p>
+<h3>6:45–7:20 — Make the statistics visible</h3>
+<p><strong>Point to <code>Verdict by observation window</code>.</strong> Red squares in the ordinary row are false alarms; red squares in the message row are detections.</p>
+<blockquote>
+<p>“These squares are the actual decisions behind those percentages. The ordinary row shows the cost of mistakes; the message row shows what was caught. That is why we report both numbers together.”</p>
+</blockquote>
+<h3>7:20–8:05 — Show the second defence and its cost</h3>
+<p><strong>Point to <code>Try a second defence: pace the packets</code>.</strong> At the default <strong>500 ms</strong> waiting room, the screen shows about <strong>90% bits read before</strong>, <strong>57% after</strong>, and <strong>+470 ms</strong> added wait to ordinary pings. Move the slider briefly to <strong>0 ms</strong>: no added wait and no disruption. Return to <strong>500 ms</strong>.</p>
+<blockquote>
+<p>“This model releases requests on steadier one-second slots when it can. It cannot send a packet before it arrives; it only holds it. More waiting can damage the hidden timing, but it also delays innocent pings. The relay is a browser model, not a deployed router.”</p>
+</blockquote>
+<h3>8:05–9:10 — Show the full detector workbench</h3>
+<p><strong>Click <code>Detectors</code> in the top navigation.</strong> Point to the settings, the fixed-rule and baseline result tiles, and scroll once to the verdict chart or ROC/feature comparison. No need to tune sliders live.</p>
+<blockquote>
+<p>“This is the full instrument panel behind the guided guardian. We can choose data and network condition, window size, baseline percentile, fixed thresholds, and features. It calculates detection and false alarms, then gives per-window verdicts and comparison curves. The guided scene uses a narrow, readable subset of this same analysis.”</p>
+</blockquote>
+<p>If someone asks about the ROC curve: it plots detection against false alarms as a threshold changes. It does <strong>not</strong> turn this small simulated dataset into real-world validation.</p>
+<h3>9:10–9:45 — Show the broader test grid</h3>
+<p><strong>Click <code>Stress matrix</code>.</strong> Point across the channel settings (rows) and network conditions (columns). Optionally change <strong>Metric</strong> from <code>detection rate</code> to <code>false-positive rate</code> if you have at least 20 seconds.</p>
+<blockquote>
+<p>“One attractive result can hide a fragile method. This grid asks what happens when we make the timing subtler or add delay and loss. We can switch the metric to see detection, false alarms, or decoding accuracy. This is where we look for failure cases, not just the best cell.”</p>
+</blockquote>
+<h3>9:45–10:00 — Hand off cleanly</h3>
+<p><strong>Click <code>Guided case</code>, then chapter <code>04 Locked note</code>. Say:</strong></p>
+<blockquote>
+<p>“The guardian can see and disrupt timing, but it has not read the note itself. Aarush will show what encryption changes, what it costs, and what our evidence supports.”</p>
+</blockquote>
+<p>Stop speaking and hand him the laptop.</p>
+<h2>Your three memory anchors</h2>
+<ol>
+<li><strong>Detection rate and false-alarm rate must be read together.</strong></li>
+<li><strong>A normal baseline should match the conditions it will face.</strong></li>
+<li><strong>A pacing defence has a legitimate-traffic delay cost.</strong></li>
+</ol>
+<h2>If you get a question</h2>
+<ul>
+<li><strong>“What exactly is the learned limit?”</strong> The guided baseline uses the 95th-percentile standard deviation from separate ordinary 32-request windows; it alarms when a test window exceeds it.</li>
+<li><strong>“Why 32?”</strong> It is the guided case's observation size, a trade-off between reacting quickly and collecting enough gaps. The full Detectors tool lets us change it; we do not claim 32 is universally optimal.</li>
+<li><strong>“Is 100% detection a proven result?”</strong> No: here it means 10 of 10 message windows in one controlled simulated condition. Also state the false alarms and the absence of real captures.</li>
+<li><strong>“Did you install this relay on a router?”</strong> No. The algorithm is a causal model in the browser. A real deployment would need latency and throughput measurements on lab hardware.</li>
+</ul>
+<p><strong>If the clock is running out:</strong> show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages. Keep the 10:00 handoff; Aarush needs his full five minutes.</p></main></body></html>

@@ -54,6 +54,7 @@ export function parseCaptureCsv(text: string, name: string, opts: ParseOptions =
   const srcCol = col("ip.src") >= 0 ? col("ip.src") : col("src");
   const typeCol = col("icmp.type");
   const payloadCol = col("data.data");
+  const simulatedCol = col("simulated");
   const fieldCols = Object.entries(FIELD_COLUMNS).map(([c, f]) => [col(c), f] as const).filter(([i]) => i >= 0);
   const rows: { t: number; seq: number; src: string; cells: string[] }[] = [];
   for (const line of lines.slice(1)) {
@@ -75,7 +76,7 @@ export function parseCaptureCsv(text: string, name: string, opts: ParseOptions =
     name,
     times: rows.map((r) => r.t),
     seq: seqOk ? rows.map((r) => r.seq) : null,
-    simulated: col("simulated") >= 0,
+    simulated: simulatedCol >= 0 && rows.every((r) => ["1", "true", "yes"].includes((r.cells[simulatedCol] ?? "").trim().toLowerCase())),
     sources: [...new Set(rows.map((r) => r.src).filter(Boolean))],
     fields,
     payloadHex: payloadCol >= 0 ? rows.map((r) => (r.cells[payloadCol] ?? "").replace(/:/g, "").trim()) : null,

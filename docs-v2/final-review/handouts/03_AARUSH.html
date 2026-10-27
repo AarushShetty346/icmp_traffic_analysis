@@ -1,0 +1,87 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><title>03 AARUSH</title><style>
+@page { size: A4; margin: 16mm 15mm 17mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #24302f; font-size: 10pt; line-height: 1.43; }
+main { max-width: 100%; }
+h1 { color: #143d43; font-size: 21pt; line-height: 1.15; margin: 0 0 13pt; padding-bottom: 8pt; border-bottom: 2px solid #00636d; }
+h2 { color: #18444a; font-size: 13pt; margin: 18pt 0 6pt; break-after: avoid; }
+h3 { color: #244348; font-size: 11pt; margin: 14pt 0 5pt; break-after: avoid; }
+p { margin: 6pt 0; }
+strong { color: #172d30; }
+blockquote { margin: 7pt 0 9pt; padding: 7pt 10pt; background: #eef5f3; border-left: 3pt solid #00636d; break-inside: avoid; }
+blockquote p { margin: 0; }
+ul, ol { padding-left: 17pt; margin: 6pt 0; }
+li { margin: 3pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 7pt 0 11pt; font-size: 8.5pt; }
+thead { display: table-header-group; }
+th { background: #e9f1ef; color: #173f44; text-align: left; }
+th, td { border: 1px solid #ccd8d4; padding: 5pt 6pt; vertical-align: top; }
+tr { break-inside: avoid; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: .93em; background: #f1f3f1; padding: 0 2pt; }
+pre { white-space: pre-wrap; font: 8.4pt/1.35 Consolas, 'Courier New', monospace; background: #f3f5f4; border: 1px solid #d9e1de; padding: 8pt; break-inside: avoid; }
+pre code { padding: 0; background: none; }
+a { color: #00616b; text-decoration: underline; }
+.packet { break-before: page; }
+.packet:first-child { break-before: auto; }
+.packet-label { color: #62736f; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8pt; }
+.cue { font-size: 10pt; }
+.cue table { font-size: 9.6pt; }
+.cue th, .cue td { padding: 5pt 6pt; }
+</style></head><body class=''><main><h1>Presenter 3 — Aarush: encryption, decoding, and evidence (10:00–15:00)</h1>
+<p><strong>Your question:</strong> If the note is encrypted, what can the receiver and guardian still do—and what have we really proved? You own <strong>Locked note</strong>, <strong>Decode</strong>, <strong>Guide</strong>, <strong>Case closed</strong>, and <strong>Evidence</strong>. Do not repeat the detector-rule comparison; Harsh has covered it.</p>
+<p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case?step=3">Guided case — Locked note</a>. <strong>End screen:</strong> Evidence page, with the limits and next experiment stated aloud.</p>
+<h2>Your five-minute route</h2>
+<h3>10:00–10:35 — Set up the new question</h3>
+<p><strong>Point to the four-stage flow: note → lock → timing bits → receiver. Say:</strong></p>
+<blockquote>
+<p>“Harsh showed that the guardian can notice timing. Now we ask a different question: can it read the message? We lock the text using AES-GCM in the browser, then model those encrypted bytes as short and long waits. The intended receiver knows the key phrase; the guardian sees the pauses, not the phrase.”</p>
+</blockquote>
+<p><strong>Plain distinction:</strong> encryption hides <em>contents</em>. It does not automatically make a timing pattern look ordinary.</p>
+<h3>10:35–11:55 — Run the locked-note experiment</h3>
+<p><strong>Leave <code>HI</code> and the prefilled demo key phrase. Click <code>Lock this note</code>.</strong> Point to <strong>2 bytes → 46 bytes → 368 bits → 6 min 8 sec</strong>. Point to <strong>timing bits recovered</strong>, the successful <strong>HI</strong> unlock, and the guardian result. Click <strong>Try a wrong key</strong>; it should say <strong>Could not unlock</strong>. If time permits, restore the receiver phrase by typing <code>cadence-demo-key</code>, then set <strong>Network delay variation</strong> to <strong>50 ms</strong> to show that damaged encrypted bits can also block the unlock.</p>
+<blockquote>
+<p>“The encryption is real browser cryptography. Even a two-letter note becomes a 46-byte package because it needs a salt, one-time value, and integrity check. At roughly one timing bit per second, that is over six minutes of modelled transmission. With the right key and intact bits, the receiver gets <code>HI</code>. A wrong key fails. The guardian may still flag the timing without knowing the note. Encryption changes secrecy, not the visibility or cost of this channel.”</p>
+</blockquote>
+<p>Read the guardian's flagged-chunk count from the screen; it can change when fresh random encryption bytes are made. <strong>No actual ping is sent by this experiment.</strong> The prefilled phrase is for demonstration, not a strong production secret.</p>
+<h3>11:55–12:35 — Show the original decoder</h3>
+<p><strong>Click <code>Decode</code> in the top navigation.</strong> Point to <strong>Try your own message</strong>, <strong>Choose a covert run</strong>, the threshold choices, the recovered-bit result, and the sent/decoded bit strip. You can leave its defaults; the upper ideal example and the prepared noisy run intentionally have different outcomes.</p>
+<blockquote>
+<p>“Decode is the detailed receiver view. It turns a received short or long gap back into zero or one. The top toy example is clean and should recover the note. Below, a prepared run includes network variation, so we compare sent and recovered bits and try fixed or adaptive dividing lines. A high bit percentage is useful, but an encrypted message needs <em>every</em> bit intact to unlock.”</p>
+</blockquote>
+<p><strong>Important:</strong> the guided locked note and this prepared decoder run are related demonstrations, not the same live packet trace.</p>
+<h3>12:35–12:55 — Show that the site teaches its vocabulary</h3>
+<p><strong>Click <code>Guide</code>.</strong> Type <code>jitter</code> into <strong>Find a word</strong> and point to the explanation. Clear search only if you have time.</p>
+<blockquote>
+<p>“The guide explains the units, charts, and terms inside the product. Jitter simply means packet delay changes from one request to the next.”</p>
+</blockquote>
+<h3>12:55–13:20 — Close the guided story</h3>
+<p><strong>Click <code>Guided case</code>, then chapter <code>05 Case closed</code>.</strong> Point to the three summary cards.</p>
+<blockquote>
+<p>“The full story is sender, detective, guardian, and encrypted receiver. A message can be readable, detectable, both, or neither; a defence also has a cost. The final question is what our evidence actually supports.”</p>
+</blockquote>
+<p><strong>Click <code>Inspect evidence and limits</code>.</strong></p>
+<h3>13:20–14:35 — Make the evidence boundary explicit</h3>
+<p><strong>On <code>Evidence</code>, point to the three counts and the three levels of evidence.</strong> Show <strong>610 simulated recordings</strong>, <strong>0 real-capture labels</strong>, and <strong>0 unverified imports</strong> on a fresh session. Point to <strong>Turn the case into a measured result</strong>. If time permits, scroll to the export buttons; do not start a download unless asked.</p>
+<blockquote>
+<p>“The software can read runs, calculate gaps, compare detectors, model pacing, and encrypt and unlock in the browser. The shipped examples are simulations. We have not included real receiver-side lab captures, so we do not claim measured real-network detection performance. Our next experiment is to capture ordinary and encoded pings at the receiver, repeat under delay and loss, and report detection, false alarms, recovered bits, and added delay.”</p>
+</blockquote>
+<h3>14:35–15:00 — Give the architecture and final claim</h3>
+<blockquote>
+<p>“Under the hood, Python tools generate or capture runs and export a versioned JSON bundle. The React/TypeScript browser reads that bundle, computes the analysis, draws the charts, and uses Web Crypto for the locked note. Our contribution is a coherent, inspectable attacker–defender learning and evaluation workflow. Real lab captures are the next validation step.”</p>
+</blockquote>
+<p>Stop there. Leave <strong>Evidence</strong> visible for questions.</p>
+<h2>Your three memory anchors</h2>
+<ol>
+<li><strong>Real encryption; modelled packet timing.</strong></li>
+<li><strong>Correct key plus intact bits are required to recover the note.</strong></li>
+<li><strong>Working software and simulated results are distinct from real-network proof.</strong></li>
+</ol>
+<h2>If you get a question</h2>
+<ul>
+<li><strong>“Did you invent AES?”</strong> No. The browser uses standard AES-256-GCM. Our project connects encryption to the timing-channel investigation.</li>
+<li><strong>“Why does <code>HI</code> take six minutes?”</strong> The encrypted package has 46 bytes, or 368 bits. At about one bit per second, that is roughly 368 seconds. It is an estimate from the model.</li>
+<li><strong>“Can the guardian decrypt it?”</strong> It does not have the key. It can still examine the timing metadata and raise an alarm.</li>
+<li><strong>“What if one bit flips?”</strong> AES-GCM's integrity check rejects the whole package; bit recovery and whole-message recovery are different measures.</li>
+<li><strong>“Where is the backend?”</strong> The live UI is a browser app reading a prepared data bundle. Python scripts handle generating/exporting examples and the planned lab capture workflow; the browser does the interactive analysis and encryption.</li>
+</ul>
+<p><strong>If the clock is running out:</strong> keep Locked note and Evidence. Show Decode and Guide for 10–15 seconds each, then deliver the final honest claim. Do not consume extra time trying to make random encrypted bytes produce a particular flagged count.</p></main></body></html>

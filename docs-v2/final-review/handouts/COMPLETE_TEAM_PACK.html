@@ -1,0 +1,475 @@
+<!doctype html><html lang='en'><head><meta charset='utf-8'><title>Cadence — complete team pack</title><style>
+@page { size: A4; margin: 16mm 15mm 17mm; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #24302f; font-size: 10pt; line-height: 1.43; }
+main { max-width: 100%; }
+h1 { color: #143d43; font-size: 21pt; line-height: 1.15; margin: 0 0 13pt; padding-bottom: 8pt; border-bottom: 2px solid #00636d; }
+h2 { color: #18444a; font-size: 13pt; margin: 18pt 0 6pt; break-after: avoid; }
+h3 { color: #244348; font-size: 11pt; margin: 14pt 0 5pt; break-after: avoid; }
+p { margin: 6pt 0; }
+strong { color: #172d30; }
+blockquote { margin: 7pt 0 9pt; padding: 7pt 10pt; background: #eef5f3; border-left: 3pt solid #00636d; break-inside: avoid; }
+blockquote p { margin: 0; }
+ul, ol { padding-left: 17pt; margin: 6pt 0; }
+li { margin: 3pt 0; }
+table { border-collapse: collapse; width: 100%; margin: 7pt 0 11pt; font-size: 8.5pt; }
+thead { display: table-header-group; }
+th { background: #e9f1ef; color: #173f44; text-align: left; }
+th, td { border: 1px solid #ccd8d4; padding: 5pt 6pt; vertical-align: top; }
+tr { break-inside: avoid; }
+code { font-family: Consolas, 'Courier New', monospace; font-size: .93em; background: #f1f3f1; padding: 0 2pt; }
+pre { white-space: pre-wrap; font: 8.4pt/1.35 Consolas, 'Courier New', monospace; background: #f3f5f4; border: 1px solid #d9e1de; padding: 8pt; break-inside: avoid; }
+pre code { padding: 0; background: none; }
+a { color: #00616b; text-decoration: underline; }
+.packet { break-before: page; }
+.packet:first-child { break-before: auto; }
+.packet-label { color: #62736f; font-size: 8pt; text-transform: uppercase; letter-spacing: .08em; margin: 0 0 8pt; }
+.cue { font-size: 10pt; }
+.cue table { font-size: 9.6pt; }
+.cue th, .cue td { padding: 5pt 6pt; }
+</style></head><body class=''><main><section class="packet"><p class="packet-label">Team pack · START_HERE.md</p><h1>Cadence — 15-minute, three-person review</h1>
+<p><strong>Order:</strong> You → Harsh → Aarush. <strong>One laptop, one browser session.</strong> Each person speaks for roughly five minutes and leaves the next person's chapter open.</p>
+<h2>The single story</h2>
+<blockquote>
+<p>A sender hides 0s and 1s in the pauses between ordinary ping requests. We first inspect those pauses, then test whether a defender can spot or disrupt the message without harming normal traffic. Finally, we encrypt the note and ask what the defender can still learn. The site makes those ideas visible and gives us a workbench to test them; the included network runs are simulated.</p>
+</blockquote>
+<p>Keep coming back to <strong>three questions</strong>: Can the receiver read the bits? Can the guardian notice the timing? What does the defence cost ordinary traffic?</p>
+<h2>The run of show</h2>
+<table>
+<thead>
+<tr>
+<th>Clock</th>
+<th>Speaker</th>
+<th>Live route and purpose</th>
+<th>Leave the laptop here</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0:00–5:00</td>
+<td>You</td>
+<td>Guided case chapters 1–2, <strong>Runs</strong>, <strong>Signal</strong>. Explain how bits become waits, show where recordings come from, then investigate a suspicious trace.</td>
+<td>Guided case, <strong>Guardian</strong> chapter open.</td>
+</tr>
+<tr>
+<td>5:00–10:00</td>
+<td>Harsh</td>
+<td>Guided case <strong>Guardian</strong>, then <strong>Detectors</strong> and <strong>Stress matrix</strong>. Compare detection with false alarms; show the pacing trade-off and wider results grid.</td>
+<td>Guided case, <strong>Locked note</strong> chapter open.</td>
+</tr>
+<tr>
+<td>10:00–15:00</td>
+<td>Aarush</td>
+<td>Guided case <strong>Locked note</strong>, <strong>Decode</strong>, <strong>Guide</strong>, <strong>Case closed</strong>, <strong>Evidence</strong>. Demonstrate real browser encryption, decoding, limits, architecture, and the next experiment.</td>
+<td>Evidence page and final claim visible.</td>
+</tr>
+</tbody>
+</table>
+<p>This touches every main function on the top navigation. The <strong>Analysis overview</strong> in the footer is a map of the five workbench tools; mention it if someone asks where to begin, but it needs no separate live stop.</p>
+<h2>Exact handoffs</h2>
+<ol>
+<li><strong>You → Harsh:</strong> Click <strong>Continue: Guardian</strong>. Say: “We can see a suspicious timing pattern. Harsh will show whether a rule can detect it reliably, and what happens to ordinary traffic.” Hand him the laptop.</li>
+<li><strong>Harsh → Aarush:</strong> Return to <strong>Guided case</strong>, open <strong>Locked note</strong> in the chapter bar. Say: “A guardian can see timing and can even disrupt it. Aarush will show what changes when the note itself is encrypted.” Hand him the laptop.</li>
+<li><strong>Aarush → panel:</strong> Finish on <strong>Evidence</strong>. Say: “Our software and browser encryption work, and the simulations show the trade-offs. The next claim needs real receiver-side captures; the page states that limit openly.”</li>
+</ol>
+<h2>Keep these claims precise</h2>
+<ul>
+<li><strong>610 included runs are simulated; zero included receiver captures are real.</strong> The CSV importer accepts a user's capture, but importing a file does not prove how it was collected.</li>
+<li>The guided case computes from the included dataset. A high detection percentage is a result for a <strong>small controlled set of windows</strong>, not a universal accuracy guarantee.</li>
+<li>The paced relay is a <strong>causal browser model</strong> that holds packets; it has not been deployed on a router.</li>
+<li>AES-256-GCM encryption is performed by the browser's Web Crypto API. The encrypted bytes' <strong>timing delivery is simulated</strong>, with no ICMP packets sent by that scene.</li>
+<li>Our contribution is the integrated investigation and evaluation workflow: sender idea → receiver evidence → detector errors → defence cost → encrypted content → evidence limits. We are not claiming to have invented AES or covert timing channels.</li>
+</ul>
+<h2>Five-minute preflight on the review laptop</h2>
+<ol>
+<li>Keep both <code>C:\Users\adita\Desktop\CADENCE-V2</code> and the original <code>CNPROJECT</code> folder present: the local copy shares installed UI dependencies with the original to save disk space.</li>
+<li>Open <a href="http://127.0.0.1:5174/#/case">http://127.0.0.1:5174/#/case</a>. If it does not load, open PowerShell and run:</li>
+</ol>
+<p><code>powershell
+   cd C:\Users\adita\Desktop\CADENCE-V2\ui
+   npm run dev -- --host 127.0.0.1 --port 5174 --strictPort</code></p>
+<p>Leave that PowerShell window open. Do not open <code>index.html</code> directly as a file.
+3. Confirm the banner says the included recordings are simulated, and the first page says <strong>610 simulated recordings</strong> after loading.
+4. Check that <strong>Guardian</strong> opens and <strong>Locked note → Lock this note</strong> succeeds. Reload the start URL afterward.
+5. Keep this run sheet and the three speaker cards open on a phone or printed. Leave the laptop browser for the demo itself. Use a visible timer; rehearse the <em>clicks</em> as well as the words.</p>
+<h2>Recovery links if the browser lands on the wrong page</h2>
+<ul>
+<li><a href="http://127.0.0.1:5174/#/case">Start / idea</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=1">Detective</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=2">Guardian</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=3">Locked note</a></li>
+<li><a href="http://127.0.0.1:5174/#/case?step=4">Case closed</a></li>
+<li><a href="http://127.0.0.1:5174/#/evidence">Evidence</a></li>
+</ul>
+<p>The top navigation reaches Runs, Signal, Detectors, Stress matrix, Decode, Guide, and Evidence. If a click or animation is slow, <strong>say the point while it loads</strong>. Skip an optional control before stealing time from the next presenter.</p>
+<h2>What to rehearse together</h2>
+<p>Run the whole sequence twice. The first pass is slow, with questions; the second pass uses a timer and the same laptop. Each person must practice <strong>arriving at their starting screen</strong>, speaking their first line, making their clicks, and delivering their handoff. Do a third pass only for the part that ran over time. Read <a href="QUESTIONS_AND_ARCHITECTURE.md">common questions</a> once as a team.</p>
+<p>Speaker cards: <a href="01_YOU.md">You</a> · <a href="02_HARSH.md">Harsh</a> · <a href="03_AARUSH.md">Aarush</a>.</p></section><section class="packet"><p class="packet-label">Team pack · 01_YOU.md</p><h1>Presenter 1 — You: sender and detective (0:00–5:00)</h1>
+<p><strong>Your question:</strong> How can a message hide in ping timing, and what evidence can we inspect? You own <strong>The idea</strong>, <strong>Runs</strong>, <strong>Signal</strong>, and <strong>Detective</strong>. Harsh owns the decision rules, so stop at the question “Is this suspicious enough to alarm?”</p>
+<p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case">Guided case — The idea</a>. <strong>End screen:</strong> Guided case — Guardian. Leave the mouse with Harsh.</p>
+<h2>Your five-minute route</h2>
+<h3>0:00–0:45 — Give the audience a reason to care</h3>
+<p><strong>Point at the concept diagram. Say:</strong></p>
+<blockquote>
+<p>“This project studies a hidden communication method. A ping is a simple network check. Its requests normally arrive about one second apart. A sender can keep the packets looking ordinary but change the <em>waiting time</em> between them. A short wait can stand for zero; a long wait can stand for one. We ask whether someone watching the receiver can spot that pattern.”</p>
+</blockquote>
+<p>Do not say the site is sending packets live. This first graphic is a concept diagram.</p>
+<h3>0:45–1:30 — Make the bits concrete</h3>
+<p><strong>Scroll to “Turn a note into packet timing.”</strong> Leave <code>HI</code> in <strong>Your short note</strong>, or type it again. Point at <strong>16 bits</strong> and the blue/orange squares.</p>
+<blockquote>
+<p>“Computers store text as bits, meaning zeros and ones. <code>HI</code> is two bytes, or sixteen bits. In this simple example, zero waits 0.75 seconds and one waits 1.25 seconds. The later investigation uses a subtler pair, 0.95 and 1.05 seconds, because a real question is whether the difference stays visible once the network adds delay.”</p>
+</blockquote>
+<p><strong>One fact to remember:</strong> one byte = eight bits. A millisecond (ms) is one-thousandth of a second.</p>
+<h3>1:30–2:15 — Show what data the project has</h3>
+<p><strong>Click <code>Runs</code> in the top navigation.</strong> Point to the source banner, the <strong>610</strong> loaded recordings, the <strong>0</strong> real captures, the CSV import area, and one row in the table. Do not import a file during the timed demo.</p>
+<blockquote>
+<p>“This is the recording table. It includes ordinary and message-carrying examples under different conditions. We can import receiver capture CSVs here and inspect their origin. Today’s included 610 runs are simulated and there are no included real receiver captures. That source label matters whenever we quote a result.”</p>
+</blockquote>
+<p>If someone asks why 610: these are prepared examples across channels, conditions, seeds, and roles; <strong>the count is not 610 independent real experiments</strong>.</p>
+<h3>2:15–3:00 — Show the original analysis workbench</h3>
+<p><strong>Click <code>Signal</code>.</strong> Point at <strong>Choose runs</strong>, the four measurement tiles, and the <strong>Inter-packet delay over time</strong> graph. Scroll a little to reveal <strong>Gap distribution</strong> if the projector allows it.</p>
+<blockquote>
+<p>“The detector works with arrival times at the receiver. We subtract consecutive arrival times to get each gap. The Signal view compares two recordings, measures their average and variation, and shows the gap distribution. Blue is ordinary traffic; orange is the message example. This is the detailed workbench behind the simpler detective scene.”</p>
+</blockquote>
+<p><strong>Do not explain KS distance unless asked.</strong> It measures how different two distributions are; 0 is similar, 1 is far apart.</p>
+<h3>3:00–4:45 — Be the detective</h3>
+<p><strong>Click <code>Guided case</code>, then chapter <code>02 Detective</code>.</strong> Keep the defaults: <strong>Variation of 50 ms</strong>, <strong>0.95/1.05 s · subtle</strong>, <strong>Case file A</strong>. Point at the blue reference and orange case, then the three measurements under the graph. Click <strong>A hidden message</strong> to reveal the labelled answer.</p>
+<blockquote>
+<p>“Here is the same idea as a small investigation. The blue trace is an ordinary reference and the orange trace is the unknown case. Each point is a pause measured in milliseconds. The case’s pauses vary more, but one squiggly line is only a clue. The measurements below make the comparison repeatable. I guess this one carries a hidden message; the label confirms it because this run was generated by the simulator.”</p>
+</blockquote>
+<p>If time allows, select <strong>Case file B</strong> and guess <strong>Ordinary pings</strong>, then return to <strong>Case file A</strong> before the handoff. Skip this if the clock is past 4:20.</p>
+<h3>4:45–5:00 — Hand off cleanly</h3>
+<p><strong>Click <code>Continue: Guardian</code>. Say:</strong></p>
+<blockquote>
+<p>“We have a clue in the pauses. Harsh will now turn that clue into an alarm rule, count its mistakes, and test whether a defence can interfere with the message.”</p>
+</blockquote>
+<p>Stop speaking and hand him the laptop.</p>
+<h2>Your three memory anchors</h2>
+<ol>
+<li><strong>Packet contents can look normal while timing carries bits.</strong></li>
+<li><strong>The receiver measures gaps; network variation makes them noisy.</strong></li>
+<li><strong>The included data is simulated, so a graph is evidence about the model.</strong></li>
+</ol>
+<h2>If you get a question</h2>
+<ul>
+<li><strong>“What is ICMP?”</strong> The protocol used by ping. We look at the arrival times of its Echo Requests.</li>
+<li><strong>“Why measure at the receiver?”</strong> The network can alter delays. The receiver sees what actually arrived.</li>
+<li><strong>“Is orange proof of an attack?”</strong> No. In this controlled run we know its label; a real case needs repeated measurements and a detector with false alarms checked.</li>
+<li><strong>“What if a packet is lost?”</strong> The analysis uses ICMP sequence numbers to avoid treating a missing request as one ordinary gap. Harsh and Aarush will discuss detection and recovery effects.</li>
+</ul>
+<p><strong>If the clock is running out:</strong> omit the Gap distribution scroll and Case file B. Preserve the final detective guess and the handoff. The Runs and Signal tabs should still be briefly visible.</p></section><section class="packet"><p class="packet-label">Team pack · 02_HARSH.md</p><h1>Presenter 2 — Harsh: guardian and defence (5:00–10:00)</h1>
+<p><strong>Your question:</strong> Can we detect or disrupt the hidden timing <em>without</em> accusing ordinary traffic or delaying it too much? You own <strong>Guardian</strong>, <strong>Detectors</strong>, and <strong>Stress matrix</strong>. You do not need to re-teach the sender's 0/1 encoding; the first speaker has done that.</p>
+<p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case?step=2">Guided case — Guardian</a>. <strong>End screen:</strong> Guided case — Locked note. Leave the mouse with Aarush.</p>
+<h2>Your five-minute route</h2>
+<h3>5:00–5:45 — Explain what a guardian actually judges</h3>
+<p><strong>Point to the three rule choices. Say:</strong></p>
+<blockquote>
+<p>“We should not declare an attack from one unusual pause. This guardian judges a small group of 32 requests. It measures how much their gaps vary, then compares that with a limit. We test three ways to choose the limit: one fixed number, a limit learned from ordinary traffic under the same conditions, and a limit learned only on a clean network.”</p>
+</blockquote>
+<p><strong>Plain terms:</strong> a <em>window</em> is one group of requests; a <em>baseline</em> is a normal reference used to choose a limit; <em>standard deviation</em> means how much the pauses wobble around their average.</p>
+<h3>5:45–6:45 — Compare the rules, including mistakes</h3>
+<p><strong>Begin on <code>Same conditions</code>.</strong> Point to <strong>Messages caught</strong> and <strong>False alarms</strong> together. On the default example they show <strong>10/10 caught</strong> and <strong>3/10 ordinary windows falsely flagged</strong>. Click <strong>Fixed limit</strong>: it usually shows <strong>0/10 caught, 0/10 false alarms</strong> on this default example. Click <strong>Clean-only baseline</strong>: it shows <strong>10/10 caught but 10/10 false alarms</strong>. Return to <strong>Same conditions</strong>.</p>
+<blockquote>
+<p>“If a rule never sounds the alarm, its false-alarm rate looks perfect but it misses the message. If it alarms on everything, it catches the message but becomes useless for ordinary users. The same-conditions baseline is more sensible here, yet even it still wrongly flags some normal traffic. These figures describe this small simulated set, not an accuracy guarantee for the Internet.”</p>
+</blockquote>
+<p>Read the live figures if the condition or dataset was changed. Do not memorize a percentage without its numerator and denominator.</p>
+<h3>6:45–7:20 — Make the statistics visible</h3>
+<p><strong>Point to <code>Verdict by observation window</code>.</strong> Red squares in the ordinary row are false alarms; red squares in the message row are detections.</p>
+<blockquote>
+<p>“These squares are the actual decisions behind those percentages. The ordinary row shows the cost of mistakes; the message row shows what was caught. That is why we report both numbers together.”</p>
+</blockquote>
+<h3>7:20–8:05 — Show the second defence and its cost</h3>
+<p><strong>Point to <code>Try a second defence: pace the packets</code>.</strong> At the default <strong>500 ms</strong> waiting room, the screen shows about <strong>90% bits read before</strong>, <strong>57% after</strong>, and <strong>+470 ms</strong> added wait to ordinary pings. Move the slider briefly to <strong>0 ms</strong>: no added wait and no disruption. Return to <strong>500 ms</strong>.</p>
+<blockquote>
+<p>“This model releases requests on steadier one-second slots when it can. It cannot send a packet before it arrives; it only holds it. More waiting can damage the hidden timing, but it also delays innocent pings. The relay is a browser model, not a deployed router.”</p>
+</blockquote>
+<h3>8:05–9:10 — Show the full detector workbench</h3>
+<p><strong>Click <code>Detectors</code> in the top navigation.</strong> Point to the settings, the fixed-rule and baseline result tiles, and scroll once to the verdict chart or ROC/feature comparison. No need to tune sliders live.</p>
+<blockquote>
+<p>“This is the full instrument panel behind the guided guardian. We can choose data and network condition, window size, baseline percentile, fixed thresholds, and features. It calculates detection and false alarms, then gives per-window verdicts and comparison curves. The guided scene uses a narrow, readable subset of this same analysis.”</p>
+</blockquote>
+<p>If someone asks about the ROC curve: it plots detection against false alarms as a threshold changes. It does <strong>not</strong> turn this small simulated dataset into real-world validation.</p>
+<h3>9:10–9:45 — Show the broader test grid</h3>
+<p><strong>Click <code>Stress matrix</code>.</strong> Point across the channel settings (rows) and network conditions (columns). Optionally change <strong>Metric</strong> from <code>detection rate</code> to <code>false-positive rate</code> if you have at least 20 seconds.</p>
+<blockquote>
+<p>“One attractive result can hide a fragile method. This grid asks what happens when we make the timing subtler or add delay and loss. We can switch the metric to see detection, false alarms, or decoding accuracy. This is where we look for failure cases, not just the best cell.”</p>
+</blockquote>
+<h3>9:45–10:00 — Hand off cleanly</h3>
+<p><strong>Click <code>Guided case</code>, then chapter <code>04 Locked note</code>. Say:</strong></p>
+<blockquote>
+<p>“The guardian can see and disrupt timing, but it has not read the note itself. Aarush will show what encryption changes, what it costs, and what our evidence supports.”</p>
+</blockquote>
+<p>Stop speaking and hand him the laptop.</p>
+<h2>Your three memory anchors</h2>
+<ol>
+<li><strong>Detection rate and false-alarm rate must be read together.</strong></li>
+<li><strong>A normal baseline should match the conditions it will face.</strong></li>
+<li><strong>A pacing defence has a legitimate-traffic delay cost.</strong></li>
+</ol>
+<h2>If you get a question</h2>
+<ul>
+<li><strong>“What exactly is the learned limit?”</strong> The guided baseline uses the 95th-percentile standard deviation from separate ordinary 32-request windows; it alarms when a test window exceeds it.</li>
+<li><strong>“Why 32?”</strong> It is the guided case's observation size, a trade-off between reacting quickly and collecting enough gaps. The full Detectors tool lets us change it; we do not claim 32 is universally optimal.</li>
+<li><strong>“Is 100% detection a proven result?”</strong> No: here it means 10 of 10 message windows in one controlled simulated condition. Also state the false alarms and the absence of real captures.</li>
+<li><strong>“Did you install this relay on a router?”</strong> No. The algorithm is a causal model in the browser. A real deployment would need latency and throughput measurements on lab hardware.</li>
+</ul>
+<p><strong>If the clock is running out:</strong> show one comparison in Guardian, the pacing cost, then briefly expose the Detectors and Stress matrix pages. Keep the 10:00 handoff; Aarush needs his full five minutes.</p></section><section class="packet"><p class="packet-label">Team pack · 03_AARUSH.md</p><h1>Presenter 3 — Aarush: encryption, decoding, and evidence (10:00–15:00)</h1>
+<p><strong>Your question:</strong> If the note is encrypted, what can the receiver and guardian still do—and what have we really proved? You own <strong>Locked note</strong>, <strong>Decode</strong>, <strong>Guide</strong>, <strong>Case closed</strong>, and <strong>Evidence</strong>. Do not repeat the detector-rule comparison; Harsh has covered it.</p>
+<p><strong>Start screen:</strong> <a href="http://127.0.0.1:5174/#/case?step=3">Guided case — Locked note</a>. <strong>End screen:</strong> Evidence page, with the limits and next experiment stated aloud.</p>
+<h2>Your five-minute route</h2>
+<h3>10:00–10:35 — Set up the new question</h3>
+<p><strong>Point to the four-stage flow: note → lock → timing bits → receiver. Say:</strong></p>
+<blockquote>
+<p>“Harsh showed that the guardian can notice timing. Now we ask a different question: can it read the message? We lock the text using AES-GCM in the browser, then model those encrypted bytes as short and long waits. The intended receiver knows the key phrase; the guardian sees the pauses, not the phrase.”</p>
+</blockquote>
+<p><strong>Plain distinction:</strong> encryption hides <em>contents</em>. It does not automatically make a timing pattern look ordinary.</p>
+<h3>10:35–11:55 — Run the locked-note experiment</h3>
+<p><strong>Leave <code>HI</code> and the prefilled demo key phrase. Click <code>Lock this note</code>.</strong> Point to <strong>2 bytes → 46 bytes → 368 bits → 6 min 8 sec</strong>. Point to <strong>timing bits recovered</strong>, the successful <strong>HI</strong> unlock, and the guardian result. Click <strong>Try a wrong key</strong>; it should say <strong>Could not unlock</strong>. If time permits, restore the receiver phrase by typing <code>cadence-demo-key</code>, then set <strong>Network delay variation</strong> to <strong>50 ms</strong> to show that damaged encrypted bits can also block the unlock.</p>
+<blockquote>
+<p>“The encryption is real browser cryptography. Even a two-letter note becomes a 46-byte package because it needs a salt, one-time value, and integrity check. At roughly one timing bit per second, that is over six minutes of modelled transmission. With the right key and intact bits, the receiver gets <code>HI</code>. A wrong key fails. The guardian may still flag the timing without knowing the note. Encryption changes secrecy, not the visibility or cost of this channel.”</p>
+</blockquote>
+<p>Read the guardian's flagged-chunk count from the screen; it can change when fresh random encryption bytes are made. <strong>No actual ping is sent by this experiment.</strong> The prefilled phrase is for demonstration, not a strong production secret.</p>
+<h3>11:55–12:35 — Show the original decoder</h3>
+<p><strong>Click <code>Decode</code> in the top navigation.</strong> Point to <strong>Try your own message</strong>, <strong>Choose a covert run</strong>, the threshold choices, the recovered-bit result, and the sent/decoded bit strip. You can leave its defaults; the upper ideal example and the prepared noisy run intentionally have different outcomes.</p>
+<blockquote>
+<p>“Decode is the detailed receiver view. It turns a received short or long gap back into zero or one. The top toy example is clean and should recover the note. Below, a prepared run includes network variation, so we compare sent and recovered bits and try fixed or adaptive dividing lines. A high bit percentage is useful, but an encrypted message needs <em>every</em> bit intact to unlock.”</p>
+</blockquote>
+<p><strong>Important:</strong> the guided locked note and this prepared decoder run are related demonstrations, not the same live packet trace.</p>
+<h3>12:35–12:55 — Show that the site teaches its vocabulary</h3>
+<p><strong>Click <code>Guide</code>.</strong> Type <code>jitter</code> into <strong>Find a word</strong> and point to the explanation. Clear search only if you have time.</p>
+<blockquote>
+<p>“The guide explains the units, charts, and terms inside the product. Jitter simply means packet delay changes from one request to the next.”</p>
+</blockquote>
+<h3>12:55–13:20 — Close the guided story</h3>
+<p><strong>Click <code>Guided case</code>, then chapter <code>05 Case closed</code>.</strong> Point to the three summary cards.</p>
+<blockquote>
+<p>“The full story is sender, detective, guardian, and encrypted receiver. A message can be readable, detectable, both, or neither; a defence also has a cost. The final question is what our evidence actually supports.”</p>
+</blockquote>
+<p><strong>Click <code>Inspect evidence and limits</code>.</strong></p>
+<h3>13:20–14:35 — Make the evidence boundary explicit</h3>
+<p><strong>On <code>Evidence</code>, point to the three counts and the three levels of evidence.</strong> Show <strong>610 simulated recordings</strong>, <strong>0 real-capture labels</strong>, and <strong>0 unverified imports</strong> on a fresh session. Point to <strong>Turn the case into a measured result</strong>. If time permits, scroll to the export buttons; do not start a download unless asked.</p>
+<blockquote>
+<p>“The software can read runs, calculate gaps, compare detectors, model pacing, and encrypt and unlock in the browser. The shipped examples are simulations. We have not included real receiver-side lab captures, so we do not claim measured real-network detection performance. Our next experiment is to capture ordinary and encoded pings at the receiver, repeat under delay and loss, and report detection, false alarms, recovered bits, and added delay.”</p>
+</blockquote>
+<h3>14:35–15:00 — Give the architecture and final claim</h3>
+<blockquote>
+<p>“Under the hood, Python tools generate or capture runs and export a versioned JSON bundle. The React/TypeScript browser reads that bundle, computes the analysis, draws the charts, and uses Web Crypto for the locked note. Our contribution is a coherent, inspectable attacker–defender learning and evaluation workflow. Real lab captures are the next validation step.”</p>
+</blockquote>
+<p>Stop there. Leave <strong>Evidence</strong> visible for questions.</p>
+<h2>Your three memory anchors</h2>
+<ol>
+<li><strong>Real encryption; modelled packet timing.</strong></li>
+<li><strong>Correct key plus intact bits are required to recover the note.</strong></li>
+<li><strong>Working software and simulated results are distinct from real-network proof.</strong></li>
+</ol>
+<h2>If you get a question</h2>
+<ul>
+<li><strong>“Did you invent AES?”</strong> No. The browser uses standard AES-256-GCM. Our project connects encryption to the timing-channel investigation.</li>
+<li><strong>“Why does <code>HI</code> take six minutes?”</strong> The encrypted package has 46 bytes, or 368 bits. At about one bit per second, that is roughly 368 seconds. It is an estimate from the model.</li>
+<li><strong>“Can the guardian decrypt it?”</strong> It does not have the key. It can still examine the timing metadata and raise an alarm.</li>
+<li><strong>“What if one bit flips?”</strong> AES-GCM's integrity check rejects the whole package; bit recovery and whole-message recovery are different measures.</li>
+<li><strong>“Where is the backend?”</strong> The live UI is a browser app reading a prepared data bundle. Python scripts handle generating/exporting examples and the planned lab capture workflow; the browser does the interactive analysis and encryption.</li>
+</ul>
+<p><strong>If the clock is running out:</strong> keep Locked note and Evidence. Show Decode and Guide for 10–15 seconds each, then deliver the final honest claim. Do not consume extra time trying to make random encrypted bytes produce a particular flagged count.</p></section><section class="packet"><p class="packet-label">Team pack · QUESTIONS_AND_ARCHITECTURE.md</p><h1>Team question bank and architecture card</h1>
+<p>Read this together once. In the review, answer in <strong>one plain sentence first</strong>, then add detail only if the reviewer asks. If a question belongs to another segment, let that presenter answer it.</p>
+<h2>The system in one picture</h2>
+<pre><code class="language-text">Python simulator ──&gt; versioned JSON example bundle ──&gt; browser UI
+Lab sender/capture scripts ──&gt; receiver CSV import ─────&gt; browser UI
+                                                   │
+                                                   ├─ gap and window measurements
+                                                   ├─ fixed and learned detector rules
+                                                   ├─ charts, tables, reports, and exports
+                                                   └─ bit decoder
+
+Browser Web Crypto ──&gt; encrypted bytes ──&gt; timing model ──&gt; receiver unlock attempt
+                                        └─&gt; guardian timing check
+</code></pre>
+<p>The interface is React/TypeScript. The guided scenes reuse the analysis functions behind the detailed workbench. Data is fetched as a versioned JSON bundle and validated in the browser. CSV parsing runs in a browser worker. The browser uses Web Crypto for AES-256-GCM. Python also contains the simulator, detector reference implementation, tests, and the closed-lab send/capture scripts. The current guided demo does not send network packets.</p>
+<h2>Core questions</h2>
+<table>
+<thead>
+<tr>
+<th>Reviewer asks</th>
+<th>Short answer</th>
+<th>Best speaker</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What is ICMP?</td>
+<td>The protocol used by ping; we examine the arrival times of its Echo Requests.</td>
+<td>You</td>
+</tr>
+<tr>
+<td>What is a covert timing channel?</td>
+<td>A sender encodes information in <em>when</em> otherwise ordinary packets arrive, rather than in their visible contents.</td>
+<td>You</td>
+</tr>
+<tr>
+<td>How does zero or one get sent?</td>
+<td>A short planned gap means 0, a long planned gap means 1; the receiver compares each received gap with a dividing line.</td>
+<td>You / Aarush</td>
+</tr>
+<tr>
+<td>Are you changing packet payloads?</td>
+<td>The timing-channel idea changes gaps; packet-field equivalence still needs real lab captures and field checks to verify.</td>
+<td>You</td>
+</tr>
+<tr>
+<td>Why receiver-side timestamps?</td>
+<td>The receiver observes the timing after network delay and loss have acted on it.</td>
+<td>You</td>
+</tr>
+<tr>
+<td>What is jitter?</td>
+<td>Variation in network delay from packet to packet; it can blur the short/long difference.</td>
+<td>You</td>
+</tr>
+<tr>
+<td>What does “ms” mean?</td>
+<td>Millisecond: one-thousandth of a second. The subtle demo gaps are 950 and 1050 ms.</td>
+<td>You</td>
+</tr>
+<tr>
+<td>Why compare a normal reference?</td>
+<td>Without ordinary traffic under comparable conditions, an unusual-looking gap has no useful context.</td>
+<td>You / Harsh</td>
+</tr>
+<tr>
+<td>What is a window?</td>
+<td>One group of consecutive requests judged together; the guided case uses 32 requests, giving up to 31 gaps.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What is standard deviation?</td>
+<td>A measure of how much the gaps wobble around their average.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>How is the learned baseline made?</td>
+<td>From separate ordinary runs, it learns a 95th-percentile limit for the chosen feature; the guided case tests standard deviation.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What is the fixed rule?</td>
+<td>In the guided case it alarms if standard deviation exceeds 100 ms or mean gap drifts over 100 ms from one second.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>Why did the fixed rule get 0% false alarms?</td>
+<td>On this default condition it raised no alarms at all, so it also missed all ten message windows.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>Why can the clean-only baseline be bad?</td>
+<td>A threshold learned in a clean network may treat ordinary noisy traffic as suspicious; the default example flags all ten ordinary windows.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What does “100% detected” mean here?</td>
+<td>Ten of ten message windows in this controlled simulated setting. It is not a universal accuracy claim.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What is a false positive?</td>
+<td>A normal window wrongly marked suspicious; it costs attention or causes unnecessary intervention.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What do ROC and AUC mean?</td>
+<td>ROC shows detection versus false alarms while the threshold changes; AUC summarizes that curve. These plots still use simulated data.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What is the Stress matrix for?</td>
+<td>It checks many combinations of channel subtlety, network variation, loss, detector choice, and metric so we can see failure cases.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What does pacing do?</td>
+<td>A model holds requests toward regular one-second release times. It may blur hidden timing, but adds delay for ordinary traffic.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>Is pacing deployed?</td>
+<td>No. It is a causal browser model; a real relay needs implementation and measured network tests.</td>
+<td>Harsh</td>
+</tr>
+<tr>
+<td>What is the adaptive decoder?</td>
+<td>It finds a dividing line between observed short and long gaps by clustering them into two groups; the fixed decoder uses one second.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>What happens if a request is lost?</td>
+<td>Sequence numbers let the analysis omit gaps crossing a missing request. Missing bits still hurt recovery. The locked-note model itself adds jitter, not packet loss.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Is the encryption real?</td>
+<td>Yes. The browser uses Web Crypto AES-256-GCM, with a key derived from the phrase using PBKDF2 and a fresh random salt and IV. The timing delivery is modelled.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Is the prefilled phrase secure?</td>
+<td>It is a demo phrase. A real system would need a strong secret and a reviewed key-management design.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Why does a two-letter note become 46 bytes?</td>
+<td>Two text bytes plus 16 salt bytes, 12 IV bytes, and a 16-byte authentication tag.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Why around six minutes?</td>
+<td>46 bytes make 368 bits; this model uses about one gap per bit at roughly one second per gap.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Does encryption hide the timing channel?</td>
+<td>It hides note contents. The guardian can still observe abnormal pauses, and noise can still corrupt the encrypted bytes.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Why does one wrong bit break decryption?</td>
+<td>AES-GCM verifies the whole encrypted package; if the key or authenticated bytes are wrong, it rejects the message.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>Is there a backend/database?</td>
+<td>The demo is a browser app loading a local JSON bundle. Python prepares data and offers lab tools; interactive analysis and encryption run in the browser.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>What is the unique contribution?</td>
+<td>One inspectable teaching/evaluation workflow joins encoding, receiver evidence, detection errors, defence cost, encrypted content, and provenance. We use established algorithms rather than claim a new cipher.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>What is your strongest honest result?</td>
+<td>The software works on its controlled simulated examples and shows concrete trade-offs. Real-network performance remains unmeasured in the shipped bundle.</td>
+<td>Aarush</td>
+</tr>
+<tr>
+<td>What is next?</td>
+<td>Collect repeated receiver-side ordinary and message runs on a closed lab testbed under clean/noisy/lossy conditions, separate training from testing, then report detection, false alarms, bit recovery, and added delay.</td>
+<td>Aarush</td>
+</tr>
+</tbody>
+</table>
+<h2>Three answers the whole team must say the same way</h2>
+<ol>
+<li><strong>“Are these real lab measurements?”</strong> “No. The shipped bundle has 610 simulated runs and zero included real receiver captures. The site labels them throughout.”</li>
+<li><strong>“Did you invent the cipher or detection statistics?”</strong> “No. The originality is in integrating them into a transparent sender–detective–guardian evaluation and teaching tool, and exposing the trade-offs.”</li>
+<li><strong>“Is this production-ready network security?”</strong> “No. It is a tested teaching and analysis tool. A real deployment needs capture data, field checks, traffic-cost measurements, and security review.”</li>
+</ol>
+<h2>If the panel asks about tests or evidence quality</h2>
+<p>The local V2 passed 72 UI unit tests, 62 Python tests (2 skipped), a production build and size check, and 32 desktop/mobile browser checks (4 intentionally skipped). Browser checks include navigation, encryption success/failure, accessible controls, and layout widths. These checks support <strong>software correctness</strong>, not real-network accuracy. The evidence page includes report/data exports and clearly distinguishes software behaviour, simulation, and required real measurements.</p>
+<h2>Terms to avoid mixing up</h2>
+<ul>
+<li><strong>Detection rate</strong> = message windows flagged / all message windows.</li>
+<li><strong>False-positive rate</strong> = ordinary windows wrongly flagged / all ordinary windows.</li>
+<li><strong>Bit recovery</strong> = correct bits / expected bits; a high percentage can still leave the whole encrypted note unreadable.</li>
+<li><strong>Encryption</strong> protects content; <strong>encoding</strong> maps bits into timing; <strong>detection</strong> judges observed timing; <strong>pacing</strong> delays release to reduce that timing pattern.</li>
+<li><strong>Simulated run</strong> is generated data. <strong>Real capture</strong> requires actual receiver-side packet timestamps and a trustworthy record of how they were collected.</li>
+</ul></section></main></body></html>

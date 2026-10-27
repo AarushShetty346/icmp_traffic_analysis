@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "Cadence: a workbench for timing analysis of ICMP Echo Request flows",
+  "description": "Cadence: an interactive detective and guardian lab for hidden messages in ping timing",
   "license": "MIT",
   "scripts": {
     "dev": "vite",

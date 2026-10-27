@@ -1,10 +1,13 @@
 // Hash routing with URL-encoded view state: #/signal?run=abc&w=32. Every view is a shareable link.
 import { useCallback, useSyncExternalStore } from "react";
 
-export const ROUTES = ["runs", "signal", "detectors", "stress", "decode", "evidence"] as const;
+export const ROUTES = ["case", "lab", "guide", "runs", "signal", "detectors", "stress", "decode", "evidence"] as const;
 export type Route = (typeof ROUTES)[number];
 
 export const ROUTE_LABEL: Record<Route, string> = {
+  case: "The case",
+  lab: "Advanced lab",
+  guide: "Field guide",
   runs: "Runs",
   signal: "Signal",
   detectors: "Detectors",
@@ -16,7 +19,7 @@ export const ROUTE_LABEL: Record<Route, string> = {
 export function parseHash(hash: string): { route: Route; params: URLSearchParams } {
   const raw = hash.replace(/^#\/?/, "");
   const [path, query = ""] = raw.split("?");
-  const route = (ROUTES as readonly string[]).includes(path) ? (path as Route) : "runs";
+  const route = (ROUTES as readonly string[]).includes(path) ? (path as Route) : "case";
   return { route, params: new URLSearchParams(query) };
 }
 

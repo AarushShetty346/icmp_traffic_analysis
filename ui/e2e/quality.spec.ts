@@ -6,9 +6,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { open, watchErrors } from "./helpers";
 
-const ROUTES = ["runs", "signal", "detectors", "stress", "decode", "evidence"];
+const ROUTES = ["case", "lab", "guide", "runs", "signal", "detectors", "stress", "decode", "evidence"];
 const here = path.dirname(fileURLToPath(import.meta.url));
-const out = path.join(here, "..", "..", "docs-ui");
+const out = path.join(here, "..", "..", "docs-v2");
 
 for (const route of ROUTES) {
   test(`axe: ${route}, no critical or serious violations`, async ({ page }) => {
@@ -42,7 +42,6 @@ test("keyboard-only walkthrough reaches every view's controls with a visible foc
   const log: string[] = [];
   for (const route of ROUTES) {
     await open(page, `#/${route}`);
-    await page.mouse.click(1, 300);
     const seen: string[] = [];
     let unringed = 0;
     let blanks = 0;
@@ -59,12 +58,12 @@ test("keyboard-only walkthrough reaches every view's controls with a visible foc
       if (seen.includes(f.key) && seen[0] === f.key) break;
       seen.push(f.key);
       if (!f.ring) unringed++;
-      if (seen.length > 1 && f.key.includes("About this project")) break;
+      if (seen.length > 1 && f.key.includes("Sources and limits")) break;
     }
     log.push(`### ${route}`, "", `${seen.length} Tab stops, from "${seen[0]}" to "${seen.at(-1)}".`, "", ...seen.map((s, i) => `${i + 1}. ${s}`), "");
     expect(seen.length).toBeGreaterThan(10);
     expect(seen.some((s) => s.includes("Skip to content"))).toBe(true);
-    expect(seen.at(-1)).toContain("About this project");
+    expect(seen.at(-1)).toContain("Sources and limits");
     expect(unringed, `${route}: focused elements without a visible focus ring`).toBe(0);
   }
   if (process.env.RECORD) fs.writeFileSync(path.join(out, "keyboard-walkthrough.md"), `# Keyboard walkthrough (recorded by e2e/quality.spec.ts)\n\n${log.join("\n")}`);

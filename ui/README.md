@@ -21,7 +21,7 @@ If Playwright cannot download its browser, point it at a local Chromium: `CHROMI
 
 ## Data
 
-`public/data/bundle.json` is the 610-run simulated bundle used by the guided case. The narrower 250-run Review 3 study is preserved as `public/data/review3.bundle.json`; Evidence lets you download it. `bundle.schema.json` describes the data format. Regenerate either bundle with
+`public/data/bundle.json` is the 610-run simulated bundle used by the guided case. The narrower 250-run Review 3 study is preserved as `public/data/review3.bundle.json`. `bundle.schema.json` describes the data format. Regenerate either bundle with
 
 ```bash
 python -m icmp_detector export-ui --out review3-export --plan review3         # simulated only, narrower Review 3 study

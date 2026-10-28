@@ -842,62 +842,6 @@
    "effect": "Moves the manual threshold; decoded bits update",
    "start": "#/decode?mode=manual",
    "key": "ArrowRight"
-  },
-  {
-   "route": "evidence",
-   "role": "link",
-   "name": "^(scripts|icmp_detector|results)/.+",
-   "regex": true,
-   "action": "inspect",
-   "expect": {
-    "href": "^https://github\\.com/AarushShetty346/icmp_traffic_analysis/"
-   },
-   "effect": "Links the artefact on GitHub",
-   "all": true
-  },
-  {
-   "route": "evidence",
-   "role": "button",
-   "name": "Markdown report",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "download": true
-   },
-   "effect": "Downloads the evidence report as Markdown"
-  },
-  {
-   "route": "evidence",
-   "role": "button",
-   "name": "Print or save as PDF",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "print": true
-   },
-   "effect": "Opens the print dialog (print stylesheet)"
-  },
-  {
-   "route": "evidence",
-   "role": "button",
-   "name": "JSON bundle",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "download": true
-   },
-   "effect": "Downloads the data bundle"
-  },
-  {
-   "route": "evidence",
-   "role": "button",
-   "name": "JSON Schema",
-   "regex": false,
-   "action": "click",
-   "expect": {
-    "download": true
-   },
-   "effect": "Downloads the bundle's JSON Schema"
   }
  ]
 }

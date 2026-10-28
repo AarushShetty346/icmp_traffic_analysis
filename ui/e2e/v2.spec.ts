@@ -87,9 +87,6 @@ test("an unmarked CSV remains unverified until its source is explicitly chosen",
   await page.goto("/#/evidence");
   await expect(page.getByText("REAL-CAPTURE LABELS")).toBeVisible();
   await expect(page.locator(".evidence-counts>div").nth(1)).toContainText("1");
-  const reportDownload = page.waitForEvent("download");
-  await page.getByRole("button", { name: "Markdown report" }).click();
-  expect((await reportDownload).suggestedFilename()).toBe("cadence-evidence.md");
   expect(errors).toEqual([]);
 });
 

@@ -28,7 +28,7 @@ The original **Runs**, **Signal**, **Detectors**, **Stress matrix**, and **Decod
 - The paced relay and locked-note transmission are **browser models**. The relay has not been deployed on a router. Browser encryption is real, but the ping timing delivery is simulated.
 - A CSV without an explicit `simulated=1` marker starts **Unverified**. Check its manifest and set its source on Recordings before citing it as a real capture. A filename does not prove origin.
 - The original Python capture, sender, field-check, and export pipeline remains in `icmp_detector/` and `scripts/lab/`. The lab runbook is `scripts/lab/README.md`.
-- The Evidence page uses the ten objective descriptions and status assessments recorded in the Review 3 work. Its references and limits are available there too.
+- The Evidence page separates what the software shows from what still needs a measured network experiment, and lists the research references.
 - The narrower 250-run Review 3 study is preserved at `ui/public/data/review3.bundle.json`; the 610-run default includes the subtle-channel conditions used by the guided case.
 
 ## How it is built
@@ -40,7 +40,7 @@ The original **Runs**, **Signal**, **Detectors**, **Stress matrix**, and **Decod
 - `ui/src/views/{Runs,Signal,Detectors,Stress,Decode}View.tsx`: full original analysis tools.
 - `ui/src/lib/analysis/`: TypeScript analysis checked against the Python implementation's golden fixtures.
 - `ui/public/data/bundle.json`: 610-run simulated example data exported by Python and validated before the views use it.
-- `ui/public/data/review3.bundle.json`: frozen 250-run Review 3 study, available from Evidence for comparison.
+- `ui/public/data/review3.bundle.json`: frozen 250-run Review 3 study, kept for comparison.
 
 ## Checks
 

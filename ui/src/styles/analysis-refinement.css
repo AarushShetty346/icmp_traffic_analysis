@@ -161,7 +161,7 @@ body { background: var(--v2-cream); }
 .guide-hero input { border: 1px solid #cbd3ce; border-radius: 4px; }
 .evidence-hero-status { color: #394843; background: #f8f6f2; border-color: #e2ddd4; border-radius: 4px; }
 .evidence-hero-status span { color: #596761; }
-.lab-tool-card, .guide-term, .evidence-counts>div, .evidence-levels article, .evidence-links a { border-color: #dedbd6; border-radius: 5px; box-shadow: none; }
+.lab-tool-card, .guide-term, .evidence-counts>div, .evidence-levels article { border-color: #dedbd6; border-radius: 5px; box-shadow: none; }
 .lab-tool-card:hover { transform: none; border-color: #006a75; }
 .lab-tool-card h2 { font-size: 19px; }
 
